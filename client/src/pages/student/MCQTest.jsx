@@ -22,14 +22,19 @@ const MCQTest = () => {
   const hasAttempted = testData?.hasAttempted || false;
   const previousResult = testData?.previousResult || null;
 
-  const [showStartDialog, setShowStartDialog] = useState(false);
   const [testStarted, setTestStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [showResult, setShowResult] = useState(false);
-  const [testResult, setTestResult] = useState(null);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [localShowResult, setLocalShowResult] = useState(false);
+  const [localTestResult, setLocalTestResult] = useState(null);
+  
+  // Determine what to show based on test data
+  // Show result if user has attempted and has a result
+  const showResult = localShowResult || (hasAttempted && !!previousResult);
+  // Show start dialog only if user hasn't attempted OR failed and wants to retake
+  const showStartDialog = !hasAttempted || (hasAttempted && previousResult && !previousResult.passed && !localShowResult);
+  const testResult = localTestResult || previousResult;
   
   // Safely get score values with NaN protection
   const safeScore = testResult?.score != null && !isNaN(testResult.score) ? testResult.score : 0;
@@ -39,29 +44,7 @@ const MCQTest = () => {
   const safePassed = testResult?.passed || false;
   const safeAttemptNumber = testResult?.attemptNumber != null && !isNaN(testResult.attemptNumber) ? testResult.attemptNumber : 1;
 
-  // Initialize state when data loads
-  useEffect(() => {
-    if (!isLoading && testData && !isInitialized) {
-      if (hasAttempted && previousResult) {
-        if (previousResult.passed) {
-          // User passed - show results only
-          setTestResult(previousResult);
-          setShowResult(true);
-          setShowStartDialog(false);
-        } else {
-          // User failed - allow retaking but can view previous result
-          setTestResult(previousResult);
-          setShowStartDialog(true);
-          setShowResult(false);
-        }
-      } else {
-        // User hasn't attempted - show start dialog
-        setShowStartDialog(true);
-        setShowResult(false);
-      }
-      setIsInitialized(true);
-    }
-  }, [isLoading, testData, hasAttempted, previousResult, isInitialized]);
+  // No initialization needed - states are derived directly from testData
 
   // Handle visibility change (tab switch detection)
   useEffect(() => {
@@ -135,11 +118,10 @@ const MCQTest = () => {
 
   const handleRestartTest = () => {
     setTestStarted(false);
-    setShowStartDialog(true);
     setTimeLeft(0);
     setSelectedAnswers({});
-    setShowResult(false);
-    setTestResult(null);
+    setLocalShowResult(false);
+    setLocalTestResult(null);
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
@@ -170,8 +152,8 @@ const MCQTest = () => {
 
     try {
       const result = await submitTest({ courseId, answers }).unwrap();
-      setTestResult(result.result);
-      setShowResult(true);
+      setLocalTestResult(result.result);
+      setLocalShowResult(true);
       setTestStarted(false);
     } catch (error) {
       toast.error("Failed to submit test. Please try again.");
@@ -187,7 +169,7 @@ const MCQTest = () => {
 
   const allQuestionsAnswered = questions.length > 0 && questions.every((_, index) => selectedAnswers[index] !== undefined);
 
-  if (isLoading || !isInitialized) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
@@ -256,8 +238,8 @@ const MCQTest = () => {
                     </Button>
                     <Button
                       onClick={() => {
-                        setShowResult(false);
-                        setShowStartDialog(true);
+                        setLocalShowResult(false);
+                        setLocalTestResult(null);
                         refetch();
                       }}
                       className="bg-orange-600 hover:bg-orange-700 px-8"
