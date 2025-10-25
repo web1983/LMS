@@ -16,14 +16,14 @@ export const settingsApi = createApi({
   endpoints: (builder) => ({
     getSettings: builder.query({
       query: () => ({
-        url: "/",
+        url: "",
         method: "GET",
       }),
       providesTags: ['Settings']
     }),
     updateSettings: builder.mutation({
       query: (formData) => ({
-        url: "/",
+        url: "",
         method: "PUT",
         body: formData,
       }),
