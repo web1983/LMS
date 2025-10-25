@@ -1,6 +1,6 @@
 
 import './App.css'
-import Login from './pages/login'
+import Login from './pages/Login'
 import HeroSection from './pages/student/HeroSection'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import MainLayout from './layout/MainLayout'
