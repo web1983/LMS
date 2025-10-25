@@ -1,4 +1,4 @@
-import { ChartNoAxesColumn, SquareLibrary, ClipboardList, UserPlus, UserCog, Settings } from 'lucide-react'
+import { ChartNoAxesColumn, SquareLibrary, ClipboardList, UserPlus, UserCog, Settings, Trophy } from 'lucide-react'
 import React from 'react'
 import { Link, Outlet } from 'react-router-dom'
 
@@ -18,6 +18,10 @@ const Slidebar = () => {
         <Link to="test" className='flex items-center gap-2 hover:text-blue-600 transition-colors'>
         <ClipboardList size={22}/>
         <h1>Course Test</h1>
+        </Link>
+        <Link to="marks" className='flex items-center gap-2 hover:text-blue-600 transition-colors'>
+        <Trophy size={22}/>
+        <h1>Marks</h1>
         </Link>
         <Link to="users" className='flex items-center gap-2 hover:text-blue-600 transition-colors'>
         <UserPlus size={22}/>

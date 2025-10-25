@@ -16,6 +16,7 @@ import CourseTable from './pages/admin/course/CourseTable'
 import AddCourse from './pages/admin/course/AddCourse'
 import EditCourse from './pages/admin/course/EditCourse'
 import CourseTest from './pages/admin/test/CourseTest'
+import MarksManagement from './pages/admin/marks/MarksManagement'
 import CreateUser from './pages/admin/user/CreateUser'
 import UserManagement from './pages/admin/user/UserManagement'
 import Settings from './pages/admin/settings/Settings'
@@ -90,6 +91,10 @@ const appRouter = createBrowserRouter([
           {
             path:"test",
             element:<CourseTest/>
+          },
+          {
+            path:"marks",
+            element:<MarksManagement/>
           },
           {
             path:"users",

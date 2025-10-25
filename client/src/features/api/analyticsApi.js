@@ -23,11 +23,19 @@ export const analyticsApi = createApi({
         method: "GET",
       }),
     }),
+    getStudentsMarks: builder.query({
+      query: () => ({
+        url: "/students-marks",
+        method: "GET",
+      }),
+      providesTags: ['Analytics']
+    }),
   }),
 });
 
 export const {
   useGetDashboardStatsQuery,
-  useGetUserGrowthQuery
+  useGetUserGrowthQuery,
+  useGetStudentsMarksQuery
 } = analyticsApi;
 
