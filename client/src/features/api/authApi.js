@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut, setLoading } from "../authSlice";
 
-const USER_API = `${import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1"}/user/`;
+const USER_API = "/api/v1/user/";
 
 export const authApi = createApi({
   reducerPath: "authApi",

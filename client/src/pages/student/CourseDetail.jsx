@@ -40,7 +40,7 @@ const CourseDetail = () => {
           <CardContent className="p-12 text-center">
             <div className="bg-red-100 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
               <AlertTriangle className="h-10 w-10 text-red-600" />
-            </div>
+        </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Course Not Found</h2>
             <p className="text-gray-600 mb-6">The course you're looking for doesn't exist or has been removed.</p>
             <Button onClick={() => navigate('/')} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
@@ -182,8 +182,8 @@ const CourseDetail = () => {
                     <AvatarImage src={user?.photoUrl} alt={user?.name} />
                     <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-600 text-white text-lg font-bold">
                       {user?.name?.charAt(0).toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
+                  </AvatarFallback>
+                </Avatar>
                   <div className="flex-1">
                     <p className="text-sm text-blue-200 font-medium">Your Progress</p>
                     <p className="font-bold text-lg">{user?.name}</p>
@@ -216,8 +216,8 @@ const CourseDetail = () => {
                   )}
                 </div>
               </div>
-            </div>
-          </div>
+                </div>
+              </div>
 
           {/* Action Buttons */}
           <div className="mt-8 flex flex-wrap gap-4">
@@ -252,16 +252,16 @@ const CourseDetail = () => {
                   <Video className="mr-2 h-5 w-5" />
                   Watch Video
                 </Button>
-                <Button 
-                  size="lg" 
+                  <Button 
+                    size="lg" 
                   className="bg-white text-green-700 hover:bg-green-50 font-bold px-8 py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-                  onClick={() => navigate(`/course/${courseId}/test`)}
-                >
-                  <FileText className="mr-2 h-5 w-5" />
+                    onClick={() => navigate(`/course/${courseId}/test`)}
+                  >
+                    <FileText className="mr-2 h-5 w-5" />
                   Take Test Now
-                </Button>
+                  </Button>
               </>
-            )}
+              )}
 
             {isEnrolled && hasFailed && (
               <>
@@ -292,24 +292,24 @@ const CourseDetail = () => {
               >
                 <Play className="mr-2 h-5 w-5" />
                 Start Learning
-              </Button>
-            )}
+                </Button>
+              )}
 
-            {!isEnrolled && (
-              <Button 
-                size="lg" 
+              {!isEnrolled && (
+                <Button 
+                  size="lg" 
                 className="bg-white text-blue-700 hover:bg-blue-50 font-bold px-12 py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-                onClick={handleEnrollClick}
-                disabled={enrolling}
-              >
+                  onClick={handleEnrollClick}
+                  disabled={enrolling}
+                >
                 {enrolling ? 'Enrolling...' : (
                   <>
                     <CheckCircle className="mr-2 h-5 w-5" />
                     Enroll Now - It's Free!
                   </>
                 )}
-              </Button>
-            )}
+                </Button>
+              )}
           </div>
         </div>
       </div>
@@ -425,7 +425,7 @@ const CourseDetail = () => {
             {/* Video Status */}
             {course.videoStatus && (
               <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-600">
-                <CardContent className="p-8">
+              <CardContent className="p-8">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="bg-purple-100 p-2 rounded-lg">
                       <Video className="h-6 w-6 text-purple-600" />
@@ -434,11 +434,11 @@ const CourseDetail = () => {
                   </div>
                   <div className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border-2 border-purple-200">
                     <p className="text-gray-700 whitespace-pre-wrap leading-relaxed font-medium">
-                      {course.videoStatus}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                        {course.videoStatus}
+                      </p>
+                    </div>
+              </CardContent>
+            </Card>
             )}
           </div>
 
@@ -495,7 +495,7 @@ const CourseDetail = () => {
                         <FileText className="mr-2 h-5 w-5" />
                         Take Test
                       </Button>
-                    </div>
+                  </div>
                   )}
 
                   {isEnrolled && hasFailed && (
@@ -559,7 +559,7 @@ const CourseDetail = () => {
                     {course.videoDuration && (
                       <div className="flex items-center gap-3 text-sm text-gray-700 bg-blue-50 p-3 rounded-lg">
                         <div className="bg-blue-100 p-2 rounded-lg">
-                          <Clock className="h-5 w-5 text-blue-600" />
+                        <Clock className="h-5 w-5 text-blue-600" />
                         </div>
                         <span className="font-medium">{course.videoDuration} video content</span>
                       </div>
@@ -587,22 +587,22 @@ const CourseDetail = () => {
               {/* User Progress Card */}
               {isAuthenticated && isEnrolled && (
                 <Card className="bg-gradient-to-br from-purple-50 to-pink-50 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-purple-200">
-                  <CardContent className="p-6">
+                <CardContent className="p-6">
                     <h3 className="font-bold text-gray-900 text-lg mb-5">Your Progress</h3>
                     <div className="flex items-center gap-4 mb-5 p-4 bg-white rounded-xl shadow-sm">
                       <Avatar className="h-20 w-20 ring-4 ring-purple-300 shadow-lg">
                         <AvatarImage src={user?.photoUrl} alt={user?.name} />
                         <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-600 text-white text-2xl font-bold">
                           {user?.name?.charAt(0).toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
                         <p className="font-bold text-xl text-gray-900">
                           {user?.name}
-                        </p>
+                      </p>
                         <p className="text-sm text-purple-600 font-medium">{user?.category}</p>
-                      </div>
                     </div>
+                  </div>
                     
                     <div className="space-y-3">
                       <div className="p-3 bg-white rounded-lg shadow-sm">
@@ -653,8 +653,8 @@ const CourseDetail = () => {
                         </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                </CardContent>
+              </Card>
               )}
             </div>
           </div>

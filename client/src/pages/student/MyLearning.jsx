@@ -149,8 +149,8 @@ const MyLearning = () => {
 
         {/* Courses Section */}
         <div>
-          {isLoading ? (
-            <MyLearningSkeleton />
+        {isLoading ? (
+          <MyLearningSkeleton />
           ) : isError ? (
             <Card className="p-12 text-center bg-white/80 backdrop-blur-sm">
               <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
@@ -279,8 +279,8 @@ const MyLearning = () => {
                   </Card>
                 );
               })}
-            </div>
-          )}
+          </div>
+        )}
         </div>
       </div>
     </div>
