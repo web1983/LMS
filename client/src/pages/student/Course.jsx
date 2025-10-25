@@ -3,9 +3,11 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const Course = ({ course }) => {
   const navigate = useNavigate();
+  const { user } = useSelector(store => store.auth);
 
   // Helper function to strip HTML tags from description
   const stripHtml = (html) => {
@@ -89,18 +91,18 @@ const Course = ({ course }) => {
               )}
             </div>
 
-            {/* Instructor Info */}
+            {/* Student Info */}
             <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
               <Avatar className="h-10 w-10 ring-2 ring-blue-200 ring-offset-2 group-hover:ring-blue-400 transition-all duration-300">
-                <AvatarImage src={course?.creator?.photoUrl || "https://github.com/shadcn.png"} alt="instructor" />
+                <AvatarImage src={user?.photoUrl} alt={user?.name || "Student"} />
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-sm">
-                  {course?.creator?.name?.charAt(0).toUpperCase() || "IN"}
+                  {user?.name?.charAt(0).toUpperCase() || "ST"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Instructor</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Student</p>
                 <p className="font-semibold text-sm text-gray-900 truncate">
-                  {course?.creator?.name || "Instructor"}
+                  {user?.name || "Student"}
                 </p>
               </div>
             </div>
