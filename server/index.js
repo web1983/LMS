@@ -21,9 +21,25 @@ const PORT = process.env.PORT || 3000;
 // default middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// CORS configuration for both development and production
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL || "http://localhost:5173"
+];
+
 app.use(cors({
-    origin:"http://localhost:5173",
-    credentials:true
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
 }));
 
 //apis
@@ -50,6 +66,12 @@ app.use(cookieParser());
 app.post("/api/auth/register", register);
 app.post("/api/auth/login", login);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Export for Vercel serverless
+export default app;
