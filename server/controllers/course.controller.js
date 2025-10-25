@@ -98,8 +98,8 @@ export const editCourse = async (req, res) => {
         }
       }
 
-      // upload new thumbnail
-      const uploaded = await uploadMedia(thumbnail.path);
+      // upload new thumbnail (use buffer for serverless, path for local)
+      const uploaded = await uploadMedia(thumbnail.buffer || thumbnail.path);
       courseThumbnail = uploaded?.secure_url;
     }
 

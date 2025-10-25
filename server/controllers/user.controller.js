@@ -171,8 +171,8 @@ export const updateProfile = async (req, res) => {
         }
       }
 
-      // Upload new photo
-      const cloudResponse = await uploadMedia(profilePhoto.path);
+      // Upload new photo (use buffer for serverless, path for local)
+      const cloudResponse = await uploadMedia(profilePhoto.buffer || profilePhoto.path);
       photoUrl = cloudResponse.secure_url;
     }
 

@@ -66,8 +66,8 @@ export const updateSettings = async (req, res) => {
         }
       }
 
-      // Upload new logo
-      const cloudResponse = await uploadMedia(logoFile.path);
+      // Upload new logo (use buffer for serverless, path for local)
+      const cloudResponse = await uploadMedia(logoFile.buffer || logoFile.path);
       settings.logoUrl = cloudResponse.secure_url;
     }
 

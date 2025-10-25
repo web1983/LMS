@@ -3,19 +3,28 @@ import dotenv from "dotenv";
 dotenv.config({});
 
 cloudinary.config({
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
-    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
 });
 
 export const uploadMedia = async (file) => {
     try {
-        const uploadResponse = await cloudinary.uploader.upload(file, {
-            resource_type:"auto"
+        // Handle both file path (local) and buffer (serverless)
+        let uploadSource = file;
+        
+        // If file is a buffer (from multer memory storage), convert to base64
+        if (Buffer.isBuffer(file)) {
+            uploadSource = `data:application/octet-stream;base64,${file.toString('base64')}`;
+        }
+        
+        const uploadResponse = await cloudinary.uploader.upload(uploadSource, {
+            resource_type: "auto"
         });
         return uploadResponse;
     } catch (error) {
-        console.log(error);
+        console.log("Cloudinary upload error:", error);
+        throw error;
     }
 };
 
