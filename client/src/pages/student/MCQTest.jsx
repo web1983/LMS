@@ -29,20 +29,32 @@ const MCQTest = () => {
   const [localShowResult, setLocalShowResult] = useState(false);
   const [localTestResult, setLocalTestResult] = useState(null);
   const [showStartDialog, setShowStartDialog] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  
+  // Refetch data on component mount to ensure we have the latest test status
+  useEffect(() => {
+    refetch().then(() => setDataLoaded(true));
+  }, [courseId, refetch]);
   
   // Determine what to show based on test data
   // Show result if user has attempted and has a result
   const showResult = localShowResult || (hasAttempted && !!previousResult);
   const testResult = localTestResult || previousResult;
   
-  // Initialize showStartDialog based on test status
+  // Initialize showStartDialog based on test status - only after data is loaded
   useEffect(() => {
-    if (testData) {
+    if (testData && dataLoaded && !testStarted) {
+      // Don't show dialog if we should show result instead
+      if (showResult) {
+        setShowStartDialog(false);
+        return;
+      }
+      
       // Show start dialog if user hasn't attempted OR failed and wants to retake
       const shouldShowDialog = !hasAttempted || (hasAttempted && previousResult && !previousResult.passed && !localShowResult);
       setShowStartDialog(shouldShowDialog);
     }
-  }, [testData, hasAttempted, previousResult, localShowResult]);
+  }, [testData, hasAttempted, previousResult, localShowResult, dataLoaded, showResult, testStarted]);
   
   // Safely get score values with NaN protection
   const safeScore = testResult?.score != null && !isNaN(testResult.score) ? testResult.score : 0;
@@ -177,7 +189,8 @@ const MCQTest = () => {
 
   const allQuestionsAnswered = questions.length > 0 && questions.every((_, index) => selectedAnswers[index] !== undefined);
 
-  if (isLoading) {
+  // Show loading spinner while initial load or waiting for refetch
+  if (isLoading || !dataLoaded) {
     return <LoadingSpinner />;
   }
 
@@ -248,6 +261,7 @@ const MCQTest = () => {
                       onClick={() => {
                         setLocalShowResult(false);
                         setLocalTestResult(null);
+                        setShowStartDialog(true);
                         refetch();
                       }}
                       className="bg-orange-600 hover:bg-orange-700 px-8"
