@@ -5,10 +5,13 @@ export const generateToken = (res, user, message) => {
     expiresIn: "7d",
   });
 
+  // Cookie settings for cross-domain in production
+  const isProduction = process.env.NODE_ENV === "production";
+  
   res.cookie("token", token, {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: isProduction, // true in production (HTTPS)
+    sameSite: isProduction ? "none" : "lax", // "none" for cross-domain in production
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: "/",
   });
