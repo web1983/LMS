@@ -22,13 +22,14 @@ const MCQTest = () => {
   const hasAttempted = testData?.hasAttempted || false;
   const previousResult = testData?.previousResult || null;
 
-  const [showStartDialog, setShowStartDialog] = useState(!hasAttempted);
+  const [showStartDialog, setShowStartDialog] = useState(false);
   const [testStarted, setTestStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [showResult, setShowResult] = useState(hasAttempted && !!previousResult);
-  const [testResult, setTestResult] = useState(previousResult);
+  const [showResult, setShowResult] = useState(false);
+  const [testResult, setTestResult] = useState(null);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // Safely get score values with NaN protection
   const safeScore = testResult?.score != null && !isNaN(testResult.score) ? testResult.score : 0;
@@ -38,23 +39,29 @@ const MCQTest = () => {
   const safePassed = testResult?.passed || false;
   const safeAttemptNumber = testResult?.attemptNumber != null && !isNaN(testResult.attemptNumber) ? testResult.attemptNumber : 1;
 
-  // If user has already attempted and passed the test, show results immediately
-  // If failed (score < 40%), allow retaking
+  // Initialize state when data loads
   useEffect(() => {
-    if (hasAttempted && previousResult) {
-      if (previousResult.passed) {
-        // User passed - show results only
-        setTestResult(previousResult);
-        setShowResult(true);
-        setShowStartDialog(false);
+    if (!isLoading && testData && !isInitialized) {
+      if (hasAttempted && previousResult) {
+        if (previousResult.passed) {
+          // User passed - show results only
+          setTestResult(previousResult);
+          setShowResult(true);
+          setShowStartDialog(false);
+        } else {
+          // User failed - allow retaking but can view previous result
+          setTestResult(previousResult);
+          setShowStartDialog(true);
+          setShowResult(false);
+        }
       } else {
-        // User failed - allow retaking but can view previous result
-        setTestResult(previousResult);
+        // User hasn't attempted - show start dialog
         setShowStartDialog(true);
         setShowResult(false);
       }
+      setIsInitialized(true);
     }
-  }, [hasAttempted, previousResult]);
+  }, [isLoading, testData, hasAttempted, previousResult, isInitialized]);
 
   // Handle visibility change (tab switch detection)
   useEffect(() => {
@@ -180,7 +187,7 @@ const MCQTest = () => {
 
   const allQuestionsAnswered = questions.length > 0 && questions.every((_, index) => selectedAnswers[index] !== undefined);
 
-  if (isLoading) {
+  if (isLoading || !isInitialized) {
     return <LoadingSpinner />;
   }
 
