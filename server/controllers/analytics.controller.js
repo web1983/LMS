@@ -211,3 +211,98 @@ export const getUserGrowthData = async (req, res) => {
   }
 };
 
+// Get All Students Marks
+export const getAllStudentsMarks = async (req, res) => {
+  try {
+    // Fetch all students with their enrollments
+    const students = await User.find({ role: "student" })
+      .select("name email photoUrl school category")
+      .lean();
+
+    // Get all enrollments with course details
+    const enrichedStudents = await Promise.all(
+      students.map(async (student) => {
+        // Get all enrollments for this student
+        const enrollments = await Enrollment.find({ userId: student._id })
+          .populate({
+            path: "courseId",
+            select: "courseTitle category isPublished",
+          })
+          .lean();
+
+        // Filter only published courses and calculate marks
+        const courseMarks = enrollments
+          .filter((enrollment) => enrollment.courseId?.isPublished)
+          .map((enrollment) => {
+            // Get the latest test attempt
+            const latestAttempt =
+              enrollment.testAttempts && enrollment.testAttempts.length > 0
+                ? enrollment.testAttempts[enrollment.testAttempts.length - 1]
+                : null;
+
+            return {
+              courseId: enrollment.courseId._id,
+              courseTitle: enrollment.courseId.courseTitle,
+              courseCategory: enrollment.courseId.category,
+              score: latestAttempt?.score || 0,
+              correctAnswers: latestAttempt?.correctAnswers || 0,
+              totalQuestions: latestAttempt?.totalQuestions || 0,
+              passed: latestAttempt?.passed || false,
+              videoWatched: enrollment.videoWatched || false,
+              testTaken: enrollment.testAttempts?.length > 0,
+              completedAt: latestAttempt?.attemptedAt || null,
+            };
+          });
+
+        // Calculate total marks (average of all course scores)
+        const totalCourses = courseMarks.length;
+        const totalScore =
+          totalCourses > 0
+            ? Math.round(
+                courseMarks.reduce((sum, course) => sum + course.score, 0) /
+                  totalCourses
+              )
+            : 0;
+
+        // Get the most common category
+        const categories = courseMarks.map((c) => c.courseCategory).filter(Boolean);
+        const categoryCount = {};
+        categories.forEach((cat) => {
+          categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+        });
+        const primaryCategory =
+          Object.keys(categoryCount).length > 0
+            ? Object.keys(categoryCount).reduce((a, b) =>
+                categoryCount[a] > categoryCount[b] ? a : b
+              )
+            : student.category || "N/A";
+
+        return {
+          _id: student._id,
+          name: student.name,
+          email: student.email,
+          photoUrl: student.photoUrl,
+          school: student.school || "N/A",
+          category: primaryCategory,
+          totalMarks: totalScore,
+          totalCourses,
+          completedCourses: courseMarks.filter((c) => c.passed).length,
+          courseMarks,
+        };
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      students: enrichedStudents,
+    });
+  } catch (error) {
+    console.error("Error fetching students marks:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch students marks",
+      error: error.message,
+    });
+  }
+};
+

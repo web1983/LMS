@@ -1,6 +1,6 @@
 import express from "express";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
-import { getDashboardStats, getUserGrowthData } from "../controllers/analytics.controller.js";
+import { getDashboardStats, getUserGrowthData, getAllStudentsMarks } from "../controllers/analytics.controller.js";
 
 const router = express.Router();
 
@@ -9,6 +9,9 @@ router.get("/stats", isAuthenticated, getDashboardStats);
 
 // Get user growth data for charts
 router.get("/user-growth", isAuthenticated, getUserGrowthData);
+
+// Get all students marks
+router.get("/students-marks", isAuthenticated, getAllStudentsMarks);
 
 export default router;
 
