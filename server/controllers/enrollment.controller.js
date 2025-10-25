@@ -217,28 +217,52 @@ export const getCertificateStatus = async (req, res) => {
   try {
     const userId = req.id;
 
-    // Get all enrollments for this user
-    const enrollments = await Enrollment.find({ userId }).populate('courseId');
+    // Get ALL published courses in the system
+    const allPublishedCourses = await Course.find({ isPublished: true });
 
-    // Filter out invalid enrollments
-    const validEnrollments = enrollments.filter(e => e.courseId);
-
-    if (validEnrollments.length === 0) {
+    if (allPublishedCourses.length === 0) {
       return res.status(200).json({
         success: true,
         eligible: false,
-        message: "No courses enrolled",
+        message: "No published courses available",
       });
     }
 
-    // Check if all courses are completed (video watched AND test passed with score >= 40)
-    const allCompleted = validEnrollments.every(enrollment => {
+    // Get all user's enrollments
+    const enrollments = await Enrollment.find({ userId }).populate('courseId');
+    const validEnrollments = enrollments.filter(e => e.courseId);
+
+    // Check if user has enrolled in ALL published courses
+    const enrolledCourseIds = validEnrollments.map(e => e.courseId._id.toString());
+    const allCourseIds = allPublishedCourses.map(c => c._id.toString());
+    
+    const hasEnrolledInAll = allCourseIds.every(courseId => 
+      enrolledCourseIds.includes(courseId)
+    );
+
+    if (!hasEnrolledInAll) {
+      return res.status(200).json({
+        success: true,
+        eligible: false,
+        message: "Not enrolled in all courses",
+        progress: {
+          totalCourses: allPublishedCourses.length,
+          enrolledCourses: validEnrollments.length,
+          completedCourses: 0,
+        },
+      });
+    }
+
+    // Check if ALL courses are completed (video watched AND test passed with score >= 40)
+    const completedCourses = validEnrollments.filter(enrollment => {
       const videoWatched = enrollment.videoWatched;
       const testPassed = enrollment.testAttempts && 
                         enrollment.testAttempts.length > 0 && 
                         enrollment.testAttempts.some(attempt => attempt.score >= 40);
       return videoWatched && testPassed;
     });
+
+    const allCompleted = completedCourses.length === allPublishedCourses.length;
 
     if (allCompleted) {
       // Get user details
@@ -250,7 +274,7 @@ export const getCertificateStatus = async (req, res) => {
         certificateData: {
           userName: user.name,
           completionDate: new Date(),
-          totalCourses: validEnrollments.length,
+          totalCourses: allPublishedCourses.length,
         },
       });
     } else {
@@ -259,14 +283,9 @@ export const getCertificateStatus = async (req, res) => {
         eligible: false,
         message: "Not all courses completed",
         progress: {
-          total: validEnrollments.length,
-          completed: validEnrollments.filter(e => {
-            const videoWatched = e.videoWatched;
-            const testPassed = e.testAttempts && 
-                              e.testAttempts.length > 0 && 
-                              e.testAttempts.some(attempt => attempt.score >= 40);
-            return videoWatched && testPassed;
-          }).length,
+          totalCourses: allPublishedCourses.length,
+          enrolledCourses: validEnrollments.length,
+          completedCourses: completedCourses.length,
         },
       });
     }
