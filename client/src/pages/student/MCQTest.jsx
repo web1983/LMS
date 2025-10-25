@@ -28,13 +28,21 @@ const MCQTest = () => {
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [localShowResult, setLocalShowResult] = useState(false);
   const [localTestResult, setLocalTestResult] = useState(null);
+  const [showStartDialog, setShowStartDialog] = useState(false);
   
   // Determine what to show based on test data
   // Show result if user has attempted and has a result
   const showResult = localShowResult || (hasAttempted && !!previousResult);
-  // Show start dialog only if user hasn't attempted OR failed and wants to retake
-  const showStartDialog = !hasAttempted || (hasAttempted && previousResult && !previousResult.passed && !localShowResult);
   const testResult = localTestResult || previousResult;
+  
+  // Initialize showStartDialog based on test status
+  useEffect(() => {
+    if (testData) {
+      // Show start dialog if user hasn't attempted OR failed and wants to retake
+      const shouldShowDialog = !hasAttempted || (hasAttempted && previousResult && !previousResult.passed && !localShowResult);
+      setShowStartDialog(shouldShowDialog);
+    }
+  }, [testData, hasAttempted, previousResult, localShowResult]);
   
   // Safely get score values with NaN protection
   const safeScore = testResult?.score != null && !isNaN(testResult.score) ? testResult.score : 0;
