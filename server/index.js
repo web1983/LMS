@@ -21,8 +21,10 @@ app.use(cookieParser());
 // CORS configuration for both development and production
 const allowedOrigins = [
     "http://localhost:5173",
-    process.env.FRONTEND_URL || "http://localhost:5173"
-];
+    "https://lms.robowunder.in",
+    "https://lms-amber-nine.vercel.app",
+    process.env.FRONTEND_URL
+].filter(Boolean); // Remove undefined values
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -32,6 +34,8 @@ app.use(cors({
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.log('⚠️ CORS blocked origin:', origin);
+            console.log('✅ Allowed origins:', allowedOrigins);
             callback(new Error('Not allowed by CORS'));
         }
     },
