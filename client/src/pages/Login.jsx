@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react"; // import Loader2
 import { useLoginUserMutation, useRegisterUserMutation } from "@/features/api/authApi";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 
 const Login = () => {
@@ -251,7 +251,15 @@ useEffect(() => {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="login-password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="login-password">Password</Label>
+                    <Link 
+                      to="/forgot-password" 
+                      className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
                   <Input
                     onChange={(e) => changeInputHandler(e, "login")}
                     value={loginInput.password}

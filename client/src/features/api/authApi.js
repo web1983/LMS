@@ -119,6 +119,23 @@ export const authApi = createApi({
       invalidatesTags: ['User']
     }),
 
+    // Password Reset
+    forgotPassword: builder.mutation({
+      query: (email) => ({
+        url: "forgot-password",
+        method: "POST",
+        body: email,
+      }),
+    }),
+
+    resetPassword: builder.mutation({
+      query: (resetData) => ({
+        url: "reset-password",
+        method: "POST",
+        body: resetData,
+      }),
+    }),
+
   }),
 });
 
@@ -131,5 +148,7 @@ export const {
   useCreateStudentUserMutation,
   useGetAllStudentsQuery,
   useUpdateStudentByAdminMutation,
-  useDeleteStudentByAdminMutation
+  useDeleteStudentByAdminMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation
 } = authApi;
