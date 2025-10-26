@@ -185,17 +185,28 @@ export const submitTest = async (req, res) => {
     let certificateGenerated = false;
 
     if (passed) {
-      // Get all published courses
-      const allPublishedCourses = await Course.find({ isPublished: true });
+      // Get user to check their category
+      const user = await User.findById(userId);
+      console.log('👤 User category:', user.category);
+
+      // Get all published courses in user's category only
+      const allPublishedCourses = await Course.find({ 
+        isPublished: true,
+        category: user.category 
+      });
       const totalPublishedCourses = allPublishedCourses.length;
       const allPublishedCourseIds = allPublishedCourses.map(c => c._id.toString());
 
-      if (totalPublishedCourses > 0) {
-        // Get all user's enrollments
-        const userEnrollments = await Enrollment.find({ userId }).populate('courseId');
-        const validEnrollments = userEnrollments.filter(e => e.courseId?.isPublished);
+      console.log('📚 Total published courses in category:', totalPublishedCourses);
 
-        // Check if enrolled in ALL published courses
+      if (totalPublishedCourses > 0) {
+        // Get all user's enrollments for courses in their category
+        const userEnrollments = await Enrollment.find({ userId }).populate('courseId');
+        const validEnrollments = userEnrollments.filter(e => 
+          e.courseId?.isPublished && e.courseId?.category === user.category
+        );
+
+        // Check if enrolled in ALL published courses in their category
         const enrolledCourseIds = validEnrollments.map(e => e.courseId._id.toString());
         const hasEnrolledInAll = allPublishedCourseIds.every(courseId =>
           enrolledCourseIds.includes(courseId)
@@ -270,15 +281,29 @@ export const getCertificateStatus = async (req, res) => {
     const userId = req.id;
     console.log('📜 Checking certificate status for user:', userId);
 
-    // Get ALL published courses in the system
-    const allPublishedCourses = await Course.find({ isPublished: true });
-    console.log('📚 Total published courses:', allPublishedCourses.length);
+    // Get user details to check their category
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    console.log('👤 User category:', user.category);
+
+    // Get published courses in the USER'S category only
+    const allPublishedCourses = await Course.find({ 
+      isPublished: true,
+      category: user.category 
+    });
+    console.log('📚 Total published courses in category:', allPublishedCourses.length);
 
     if (allPublishedCourses.length === 0) {
       return res.status(200).json({
         success: true,
         eligible: false,
-        message: "No published courses available",
+        message: "No published courses available in your category",
       });
     }
 
@@ -287,7 +312,7 @@ export const getCertificateStatus = async (req, res) => {
     const validEnrollments = enrollments.filter(e => e.courseId);
     console.log('📝 User enrolled in', validEnrollments.length, 'courses');
 
-    // Check if user has enrolled in ALL published courses
+    // Check if user has enrolled in ALL published courses in their category
     const enrolledCourseIds = validEnrollments.map(e => e.courseId._id.toString());
     const allCourseIds = allPublishedCourses.map(c => c._id.toString());
     
@@ -296,7 +321,7 @@ export const getCertificateStatus = async (req, res) => {
     );
 
     if (!hasEnrolledInAll) {
-      console.log('⚠️ Not enrolled in all courses');
+      console.log('⚠️ Not enrolled in all courses in category');
       return res.status(200).json({
         success: true,
         eligible: false,
@@ -323,8 +348,6 @@ export const getCertificateStatus = async (req, res) => {
     const allCompleted = completedCourses.length === allPublishedCourses.length;
 
     if (allCompleted) {
-      // Get user details
-      const user = await User.findById(userId);
       console.log('🎓 Certificate eligible for:', user.name);
       
       return res.status(200).json({
