@@ -255,7 +255,7 @@ useEffect(() => {
                     <Label htmlFor="login-password">Password</Label>
                     <Link 
                       to="/forgot-password" 
-                      className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                      className="text-sm text-white hover:text-gray-200 hover:underline font-medium"
                     >
                       Forgot Password?
                     </Link>

@@ -14,6 +14,13 @@ const createTransporter = () => {
 // Send OTP email for password reset
 export const sendPasswordResetEmail = async (email, otp, userName) => {
   try {
+    // Check if email credentials are configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      console.error('❌ EMAIL_USER or EMAIL_PASSWORD not configured in environment variables');
+      throw new Error('Email service not configured. Please contact administrator.');
+    }
+
+    console.log('📧 Sending password reset email to:', email);
     const transporter = createTransporter();
 
     const mailOptions = {
