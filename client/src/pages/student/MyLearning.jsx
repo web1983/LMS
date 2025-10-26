@@ -24,7 +24,11 @@ const MyLearning = () => {
     skip: !user || user?.role !== 'student'
   });
   const navigate = useNavigate();
-  const enrollments = data?.enrollments || [];
+  
+  // Filter out enrollments with null/undefined courseId
+  const allEnrollments = data?.enrollments || [];
+  const enrollments = allEnrollments.filter(enrollment => enrollment.courseId);
+  
   const certificateEligible = certificateData?.eligible || false;
   const certificateInfo = certificateData?.certificateData;
 
@@ -172,6 +176,12 @@ const MyLearning = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {enrollments.map((enrollment) => {
                 const course = enrollment.courseId;
+                
+                // Safety check: Skip if course data is missing
+                if (!course || !course._id) {
+                  return null;
+                }
+                
                 const progress = calculateProgress(enrollment);
                 const lastAttempt = enrollment.testAttempts && enrollment.testAttempts.length > 0 
                   ? enrollment.testAttempts[enrollment.testAttempts.length - 1] 
