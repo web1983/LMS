@@ -222,6 +222,19 @@ export const getAllStudentsMarks = async (req, res) => {
     // Get all enrollments with course details
     const enrichedStudents = await Promise.all(
       students.map(async (student) => {
+        // Get all published courses in the student's category
+        const allPublishedCoursesInCategory = await Course.find({
+          isPublished: true,
+          category: student.category,
+        })
+          .select("_id")
+          .lean();
+
+        const totalCoursesInCategory = allPublishedCoursesInCategory.length;
+        const allCourseIdsInCategory = allPublishedCoursesInCategory.map((c) =>
+          c._id.toString()
+        );
+
         // Get all enrollments for this student
         const enrollments = await Enrollment.find({ userId: student._id })
           .populate({
@@ -230,9 +243,13 @@ export const getAllStudentsMarks = async (req, res) => {
           })
           .lean();
 
-        // Filter only published courses and calculate marks
+        // Filter only published courses in student's category and calculate marks
         const courseMarks = enrollments
-          .filter((enrollment) => enrollment.courseId?.isPublished)
+          .filter(
+            (enrollment) =>
+              enrollment.courseId?.isPublished &&
+              enrollment.courseId?.category === student.category
+          )
           .map((enrollment) => {
             // Get the latest test attempt
             const latestAttempt =
@@ -264,18 +281,21 @@ export const getAllStudentsMarks = async (req, res) => {
               )
             : 0;
 
-        // Get the most common category
-        const categories = courseMarks.map((c) => c.courseCategory).filter(Boolean);
-        const categoryCount = {};
-        categories.forEach((cat) => {
-          categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-        });
-        const primaryCategory =
-          Object.keys(categoryCount).length > 0
-            ? Object.keys(categoryCount).reduce((a, b) =>
-                categoryCount[a] > categoryCount[b] ? a : b
-              )
-            : student.category || "N/A";
+        // Check if student completed ALL courses in their category
+        // (enrolled, watched video, and passed test for ALL courses in their category)
+        const enrolledCourseIds = courseMarks.map((c) => c.courseId.toString());
+        const hasEnrolledInAll = allCourseIdsInCategory.every((courseId) =>
+          enrolledCourseIds.includes(courseId)
+        );
+
+        const completedCourses = courseMarks.filter(
+          (c) => c.passed && c.videoWatched
+        ).length;
+
+        const hasCompletedAllCoursesInCategory =
+          hasEnrolledInAll &&
+          completedCourses === totalCoursesInCategory &&
+          totalCoursesInCategory > 0;
 
         return {
           _id: student._id,
@@ -283,18 +303,24 @@ export const getAllStudentsMarks = async (req, res) => {
           email: student.email,
           photoUrl: student.photoUrl,
           school: student.school || "N/A",
-          category: primaryCategory,
+          category: student.category,
           totalMarks: totalScore,
           totalCourses,
-          completedCourses: courseMarks.filter((c) => c.passed).length,
+          completedCourses,
           courseMarks,
+          hasCompletedAllCourses: hasCompletedAllCoursesInCategory,
         };
       })
     );
 
+    // Filter to only show students who completed ALL courses in their category
+    const completedStudents = enrichedStudents.filter(
+      (student) => student.hasCompletedAllCourses
+    );
+
     return res.status(200).json({
       success: true,
-      students: enrichedStudents,
+      students: completedStudents,
     });
   } catch (error) {
     console.error("Error fetching students marks:", error);
