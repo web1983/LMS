@@ -44,7 +44,7 @@ const ForgotPassword = () => {
         <CardHeader className="space-y-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
           <div className="flex items-center gap-2 mb-2">
             <Mail className="h-8 w-8" />
-            <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
+            <CardTitle className="text-2xl font-bold text-white">Forgot Password?</CardTitle>
           </div>
           <CardDescription className="text-blue-100">
             No worries! Enter your email and we'll send you an OTP to reset your password.
