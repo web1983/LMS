@@ -215,6 +215,9 @@ export const submitTest = async (req, res) => {
 
           // If all courses completed, mark ALL enrollments with certificate flag
           if (allCoursesCompleted) {
+            console.log('🎓 ALL COURSES COMPLETED! Generating certificate for user:', userId);
+            console.log('Total courses:', totalPublishedCourses, 'Completed:', completedCourses.length);
+            
             await Enrollment.updateMany(
               { 
                 userId,
@@ -228,6 +231,9 @@ export const submitTest = async (req, res) => {
               }
             );
             certificateGenerated = true;
+            console.log('✅ Certificate generated successfully!');
+          } else {
+            console.log('⏳ Progress:', completedCourses.length, '/', totalPublishedCourses, 'courses completed');
           }
         }
       }
@@ -262,9 +268,11 @@ export const submitTest = async (req, res) => {
 export const getCertificateStatus = async (req, res) => {
   try {
     const userId = req.id;
+    console.log('📜 Checking certificate status for user:', userId);
 
     // Get ALL published courses in the system
     const allPublishedCourses = await Course.find({ isPublished: true });
+    console.log('📚 Total published courses:', allPublishedCourses.length);
 
     if (allPublishedCourses.length === 0) {
       return res.status(200).json({
@@ -277,6 +285,7 @@ export const getCertificateStatus = async (req, res) => {
     // Get all user's enrollments
     const enrollments = await Enrollment.find({ userId }).populate('courseId');
     const validEnrollments = enrollments.filter(e => e.courseId);
+    console.log('📝 User enrolled in', validEnrollments.length, 'courses');
 
     // Check if user has enrolled in ALL published courses
     const enrolledCourseIds = validEnrollments.map(e => e.courseId._id.toString());
@@ -287,6 +296,7 @@ export const getCertificateStatus = async (req, res) => {
     );
 
     if (!hasEnrolledInAll) {
+      console.log('⚠️ Not enrolled in all courses');
       return res.status(200).json({
         success: true,
         eligible: false,
@@ -308,11 +318,14 @@ export const getCertificateStatus = async (req, res) => {
       return videoWatched && testPassed;
     });
 
+    console.log('✅ Completed courses:', completedCourses.length, '/', allPublishedCourses.length);
+
     const allCompleted = completedCourses.length === allPublishedCourses.length;
 
     if (allCompleted) {
       // Get user details
       const user = await User.findById(userId);
+      console.log('🎓 Certificate eligible for:', user.name);
       
       return res.status(200).json({
         success: true,
@@ -324,6 +337,7 @@ export const getCertificateStatus = async (req, res) => {
         },
       });
     } else {
+      console.log('⏳ Certificate not yet eligible');
       return res.status(200).json({
         success: true,
         eligible: false,
