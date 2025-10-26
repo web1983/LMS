@@ -79,7 +79,7 @@ const ResetPassword = () => {
         <CardHeader className="space-y-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
           <div className="flex items-center gap-2 mb-2">
             <KeyRound className="h-8 w-8" />
-            <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
+            <CardTitle className="text-2xl font-bold text-white">Reset Password</CardTitle>
           </div>
           <CardDescription className="text-blue-100">
             Enter the OTP sent to your email and create a new password
