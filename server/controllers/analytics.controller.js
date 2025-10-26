@@ -214,10 +214,14 @@ export const getUserGrowthData = async (req, res) => {
 // Get All Students Marks
 export const getAllStudentsMarks = async (req, res) => {
   try {
+    console.log('📊 Fetching students marks...');
+    
     // Fetch all students with their enrollments
     const students = await User.find({ role: "student" })
       .select("name email photoUrl school category")
       .lean();
+
+    console.log('👥 Total students found:', students.length);
 
     // Get all enrollments with course details
     const enrichedStudents = await Promise.all(
@@ -227,13 +231,16 @@ export const getAllStudentsMarks = async (req, res) => {
           isPublished: true,
           category: student.category,
         })
-          .select("_id")
+          .select("_id courseTitle")
           .lean();
 
         const totalCoursesInCategory = allPublishedCoursesInCategory.length;
         const allCourseIdsInCategory = allPublishedCoursesInCategory.map((c) =>
           c._id.toString()
         );
+
+        console.log(`\n👤 Student: ${student.name}, Category: ${student.category}`);
+        console.log(`📚 Total published courses in category: ${totalCoursesInCategory}`);
 
         // Get all enrollments for this student
         const enrollments = await Enrollment.find({ userId: student._id })
@@ -242,6 +249,8 @@ export const getAllStudentsMarks = async (req, res) => {
             select: "courseTitle category isPublished",
           })
           .lean();
+
+        console.log(`📝 Total enrollments: ${enrollments.length}`);
 
         // Filter only published courses in student's category and calculate marks
         const courseMarks = enrollments
@@ -257,6 +266,10 @@ export const getAllStudentsMarks = async (req, res) => {
                 ? enrollment.testAttempts[enrollment.testAttempts.length - 1]
                 : null;
 
+            const isPassed = latestAttempt?.score >= 40;
+            const isVideoWatched = enrollment.videoWatched || false;
+            const isCompleted = isPassed && isVideoWatched;
+
             return {
               courseId: enrollment.courseId._id,
               courseTitle: enrollment.courseId.courseTitle,
@@ -264,12 +277,15 @@ export const getAllStudentsMarks = async (req, res) => {
               score: latestAttempt?.score || 0,
               correctAnswers: latestAttempt?.correctAnswers || 0,
               totalQuestions: latestAttempt?.totalQuestions || 0,
-              passed: latestAttempt?.passed || false,
-              videoWatched: enrollment.videoWatched || false,
+              passed: isPassed,
+              videoWatched: isVideoWatched,
               testTaken: enrollment.testAttempts?.length > 0,
               completedAt: latestAttempt?.attemptedAt || null,
+              isCompleted,
             };
           });
+
+        console.log(`📖 Courses in category: ${courseMarks.length}`);
 
         // Calculate total marks (average of all course scores)
         const totalCourses = courseMarks.length;
@@ -281,21 +297,17 @@ export const getAllStudentsMarks = async (req, res) => {
               )
             : 0;
 
+        // Count completed courses (video watched AND test passed >= 40%)
+        const completedCourses = courseMarks.filter((c) => c.isCompleted).length;
+
+        console.log(`✅ Completed courses: ${completedCourses} / ${totalCoursesInCategory}`);
+
         // Check if student completed ALL courses in their category
-        // (enrolled, watched video, and passed test for ALL courses in their category)
-        const enrolledCourseIds = courseMarks.map((c) => c.courseId.toString());
-        const hasEnrolledInAll = allCourseIdsInCategory.every((courseId) =>
-          enrolledCourseIds.includes(courseId)
-        );
-
-        const completedCourses = courseMarks.filter(
-          (c) => c.passed && c.videoWatched
-        ).length;
-
         const hasCompletedAllCoursesInCategory =
-          hasEnrolledInAll &&
-          completedCourses === totalCoursesInCategory &&
-          totalCoursesInCategory > 0;
+          totalCoursesInCategory > 0 &&
+          completedCourses === totalCoursesInCategory;
+
+        console.log(`🎓 Completed all? ${hasCompletedAllCoursesInCategory}`);
 
         return {
           _id: student._id,
@@ -317,6 +329,8 @@ export const getAllStudentsMarks = async (req, res) => {
     const completedStudents = enrichedStudents.filter(
       (student) => student.hasCompletedAllCourses
     );
+
+    console.log(`\n🎯 Students who completed all courses: ${completedStudents.length}`);
 
     return res.status(200).json({
       success: true,
