@@ -19,6 +19,7 @@ import CourseTest from './pages/admin/test/CourseTest'
 import MarksManagement from './pages/admin/marks/MarksManagement'
 import CreateUser from './pages/admin/user/CreateUser'
 import UserManagement from './pages/admin/user/UserManagement'
+import InstructorTab from './pages/admin/InstructorTab'
 import Settings from './pages/admin/settings/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
@@ -103,6 +104,10 @@ const appRouter = createBrowserRouter([
           {
             path:"manage-users",
             element:<UserManagement/>
+          },
+          {
+            path:"instructors",
+            element:<InstructorTab/>
           },
           {
             path:"settings",

@@ -363,11 +363,11 @@ export const deleteUser = async (req, res) => {
       });
     }
 
-    // Prevent deleting instructor accounts (only students can be deleted)
+    // Prevent deleting instructor accounts from manage users (only students can be deleted)
     if (user.role === "instructor") {
       return res.status(403).json({
         success: false,
-        message: "Cannot delete instructor accounts",
+        message: "Cannot delete instructor accounts from here. Use instructor management.",
       });
     }
 
@@ -393,6 +393,191 @@ export const deleteUser = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to delete user",
+      error: error.message,
+    });
+  }
+};
+
+// ================= INSTRUCTOR MANAGEMENT =================
+
+// Get all instructors
+export const getAllInstructors = async (req, res) => {
+  try {
+    const instructors = await User.find({ role: "instructor" })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      instructors,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch instructors",
+      error: error.message,
+    });
+  }
+};
+
+// Create new instructor
+export const createInstructor = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists with this email",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create instructor
+    const instructor = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "instructor",
+      isActive: true,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Instructor created successfully",
+      instructor: {
+        _id: instructor._id,
+        name: instructor.name,
+        email: instructor.email,
+        role: instructor.role,
+        createdAt: instructor.createdAt,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create instructor",
+      error: error.message,
+    });
+  }
+};
+
+// Update instructor password
+export const updateInstructorPassword = async (req, res) => {
+  try {
+    const { instructorId } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password is required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
+    }
+
+    const instructor = await User.findById(instructorId);
+    if (!instructor) {
+      return res.status(404).json({
+        success: false,
+        message: "Instructor not found",
+      });
+    }
+
+    if (instructor.role !== "instructor") {
+      return res.status(400).json({
+        success: false,
+        message: "User is not an instructor",
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    instructor.password = hashedPassword;
+    await instructor.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update password",
+      error: error.message,
+    });
+  }
+};
+
+// Delete instructor
+export const deleteInstructor = async (req, res) => {
+  try {
+    const { instructorId } = req.params;
+
+    // Prevent admin from deleting themselves
+    if (req.id === instructorId) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot delete your own account",
+      });
+    }
+
+    const instructor = await User.findById(instructorId);
+    if (!instructor) {
+      return res.status(404).json({
+        success: false,
+        message: "Instructor not found",
+      });
+    }
+
+    if (instructor.role !== "instructor") {
+      return res.status(400).json({
+        success: false,
+        message: "User is not an instructor",
+      });
+    }
+
+    // Delete instructor's profile photo if exists
+    if (instructor.photoUrl) {
+      try {
+        const publicId = extractPublicId(instructor.photoUrl);
+        await deleteMediaFromCloudinary(publicId);
+      } catch (error) {
+        console.log("Error deleting profile photo:", error);
+      }
+    }
+
+    await User.findByIdAndDelete(instructorId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Instructor deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete instructor",
       error: error.message,
     });
   }
