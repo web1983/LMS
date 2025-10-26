@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const INSTRUCTOR_API = `${import.meta.env.VITE_API_URL}/user`;
+const INSTRUCTOR_API = "/api/v1/user/";
 
 export const instructorApi = createApi({
   reducerPath: "instructorApi",
@@ -13,7 +13,7 @@ export const instructorApi = createApi({
     // Get all instructors
     getAllInstructors: builder.query({
       query: () => ({
-        url: "/all-instructors",
+        url: "all-instructors",
         method: "GET",
       }),
       providesTags: ["Instructors"],
@@ -22,7 +22,7 @@ export const instructorApi = createApi({
     // Create new instructor
     createInstructor: builder.mutation({
       query: (instructorData) => ({
-        url: "/create-instructor",
+        url: "create-instructor",
         method: "POST",
         body: instructorData,
       }),
@@ -32,7 +32,7 @@ export const instructorApi = createApi({
     // Update instructor password
     updateInstructorPassword: builder.mutation({
       query: ({ instructorId, newPassword }) => ({
-        url: `/instructor/${instructorId}/password`,
+        url: `instructor/${instructorId}/password`,
         method: "PUT",
         body: { newPassword },
       }),
@@ -42,7 +42,7 @@ export const instructorApi = createApi({
     // Delete instructor
     deleteInstructor: builder.mutation({
       query: (instructorId) => ({
-        url: `/instructor/${instructorId}`,
+        url: `instructor/${instructorId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Instructors"],
