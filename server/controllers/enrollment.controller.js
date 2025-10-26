@@ -178,15 +178,60 @@ export const submitTest = async (req, res) => {
       enrollment.bestScore = score;
     }
 
-    // Generate certificate if passed and not already generated
-    if (passed && !enrollment.certificateGenerated) {
-      enrollment.certificateGenerated = true;
-      enrollment.completedAt = new Date();
-      // Certificate URL will be generated on frontend
-      enrollment.certificateUrl = `certificate_${userId}_${courseId}`;
-    }
-
     await enrollment.save();
+
+    // Check if ALL published courses are now completed
+    let allCoursesCompleted = false;
+    let certificateGenerated = false;
+
+    if (passed) {
+      // Get all published courses
+      const allPublishedCourses = await Course.find({ isPublished: true });
+      const totalPublishedCourses = allPublishedCourses.length;
+      const allPublishedCourseIds = allPublishedCourses.map(c => c._id.toString());
+
+      if (totalPublishedCourses > 0) {
+        // Get all user's enrollments
+        const userEnrollments = await Enrollment.find({ userId }).populate('courseId');
+        const validEnrollments = userEnrollments.filter(e => e.courseId?.isPublished);
+
+        // Check if enrolled in ALL published courses
+        const enrolledCourseIds = validEnrollments.map(e => e.courseId._id.toString());
+        const hasEnrolledInAll = allPublishedCourseIds.every(courseId =>
+          enrolledCourseIds.includes(courseId)
+        );
+
+        if (hasEnrolledInAll) {
+          // Check if ALL courses are completed (video watched AND test passed >= 40%)
+          const completedCourses = validEnrollments.filter(e => {
+            const videoWatched = e.videoWatched;
+            const testPassed = e.testAttempts && 
+                              e.testAttempts.length > 0 && 
+                              e.testAttempts.some(attempt => attempt.score >= 40);
+            return videoWatched && testPassed;
+          });
+
+          allCoursesCompleted = completedCourses.length === totalPublishedCourses;
+
+          // If all courses completed, mark ALL enrollments with certificate flag
+          if (allCoursesCompleted) {
+            await Enrollment.updateMany(
+              { 
+                userId,
+                courseId: { $in: allPublishedCourseIds }
+              },
+              {
+                $set: {
+                  certificateGenerated: true,
+                  completedAt: new Date()
+                }
+              }
+            );
+            certificateGenerated = true;
+          }
+        }
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -198,7 +243,8 @@ export const submitTest = async (req, res) => {
         totalQuestions,
         passed,
         attemptNumber,
-        certificateGenerated: enrollment.certificateGenerated,
+        certificateGenerated,
+        allCoursesCompleted,
       },
       enrollment,
     });

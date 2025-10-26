@@ -175,6 +175,13 @@ const MCQTest = () => {
       setLocalTestResult(result.result);
       setLocalShowResult(true);
       setTestStarted(false);
+      
+      // Show special message if certificate was generated
+      if (result.result.certificateGenerated && result.result.allCoursesCompleted) {
+        toast.success("🎉 Congratulations! You've completed ALL courses and earned your certificate!", {
+          duration: 8000,
+        });
+      }
     } catch (error) {
       toast.error("Failed to submit test. Please try again.");
       console.error(error);
@@ -239,6 +246,16 @@ const MCQTest = () => {
                   <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
                   <p className="text-green-900 font-semibold text-xl mb-2">Course Completed!</p>
                   <p className="text-green-800 text-sm">Congratulations on completing the course successfully!</p>
+                  
+                  {testResult?.allCoursesCompleted && testResult?.certificateGenerated && (
+                    <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-lg">
+                      <Award className="h-10 w-10 text-yellow-600 mx-auto mb-2" />
+                      <p className="text-yellow-900 font-bold text-lg">🎓 Certificate Earned!</p>
+                      <p className="text-yellow-800 text-sm mt-1">
+                        You've completed ALL courses! Check your profile to download your certificate.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
