@@ -9,14 +9,6 @@ const Course = ({ course }) => {
   const navigate = useNavigate();
   const { user } = useSelector(store => store.auth);
 
-  // Helper function to strip HTML tags from description
-  const stripHtml = (html) => {
-    if (!html) return "";
-    const tmp = document.createElement("DIV");
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || "";
-  };
-
   const getCategoryLabel = (category) => {
     const categoryMap = {
       'grade_3_5_basic': 'Grade 3-5 (Basic)',
@@ -72,7 +64,7 @@ const Course = ({ course }) => {
         </div>
 
         <CardContent className="relative p-6 space-y-4 bg-white">
-            {/* Title & Description */}
+            {/* Title & Subtitle */}
             <div className="space-y-3">
               <h2 className="font-bold text-gray-900 text-xl leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
                 {course?.courseTitle || "Course Title"}
@@ -81,12 +73,6 @@ const Course = ({ course }) => {
               {course?.subTitle && (
                 <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
                   {course.subTitle}
-                </p>
-              )}
-              
-              {course?.description && (
-                <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                  {stripHtml(course.description)}
                 </p>
               )}
             </div>
