@@ -36,11 +36,12 @@ const {data, isLoading} = useGetCreatorCourseQuery();
     return categoryMap[category] || category;
   };
 
-  // Filter courses based on search query and category
+  // Filter and sort courses based on search query and category
   const filteredCourses = useMemo(() => {
     if (!data?.courses) return [];
     
-    return data.courses.filter((course) => {
+    // First filter the courses
+    const filtered = data.courses.filter((course) => {
       // Filter by search query
       const matchesSearch = course.courseTitle.toLowerCase().includes(searchQuery.toLowerCase());
       
@@ -48,6 +49,13 @@ const {data, isLoading} = useGetCreatorCourseQuery();
       const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
       
       return matchesSearch && matchesCategory;
+    });
+
+    // Then sort by creation date (newest first)
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+      return dateB - dateA; // Descending order (newest first)
     });
   }, [data?.courses, searchQuery, categoryFilter]);
 
