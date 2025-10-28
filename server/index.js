@@ -22,6 +22,7 @@ app.use(cookieParser());
 const allowedOrigins = [
     "http://localhost:5173",
     "https://lms.robowunder.in",
+    "https://lms.robowunder.com",
     "https://lms-amber-nine.vercel.app",
     process.env.FRONTEND_URL
 ].filter(Boolean); // Remove undefined values
