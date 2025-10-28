@@ -33,17 +33,23 @@ const CourseTab = () => {
     const params = useParams(); 
     const courseId = params.courseId; 
 
-    const { data: courseData, isLoading: courseLoading, refetch } = useGetCourseByIdQuery(courseId);
+    const { data: courseData, isLoading: courseLoading, refetch } = useGetCourseByIdQuery(courseId, {
+        refetchOnMountOrArgChange: true // Always fetch fresh data
+    });
     const [editCourse, { data, isLoading, isSuccess, error }] = useEditCourseMutation();
     const [deleteCourse, { data: deleteData, isLoading: deleteLoading, isSuccess: deleteSuccess }] = useDeleteCourseMutation();
     const [togglePublish, { data: publishData, isLoading: publishLoading, isSuccess: publishSuccess }] = useTogglePublishCourseMutation();
 
-
+    // Refetch course data on component mount to ensure fresh data
+    useEffect(() => {
+        refetch();
+    }, []);
 
     // Populate form when course data loads
     useEffect(() => {
         if (courseData?.course) {
             const course = courseData.course;
+            console.log("📚 Loading course data:", course); // Debug log
             setInput({
                 courseTitle: course.courseTitle || "",
                 subTitle: course.subTitle || "",
