@@ -52,17 +52,6 @@ const CourseTab = () => {
     useEffect(() => {
         if (courseData?.course) {
             const course = courseData.course;
-            console.log("📚 Full course object:", JSON.stringify(course, null, 2)); // Debug log
-            console.log("📝 Raw course values:", {
-                courseTitle: course.courseTitle,
-                subTitle: course.subTitle,
-                category: course.category,
-                courseLevel: course.courseLevel,
-                videoDuration: course.videoDuration,
-                projectName: course.projectName,
-                kit: course.kit,
-                videoStatus: course.videoStatus
-            });
             
             // Set all form fields with actual values from database
             const newInput = {
@@ -79,10 +68,6 @@ const CourseTab = () => {
                 videoUrl: course.videoUrl || "",
             };
             
-            console.log("📝 Setting form input state:", JSON.stringify(newInput, null, 2));
-            console.log("✅ Category value:", newInput.category);
-            console.log("✅ CourseLevel value:", newInput.courseLevel);
-            console.log("✅ Kit value:", newInput.kit);
             setInput(newInput);
             
             if (course.courseThumbnail) {
@@ -221,12 +206,6 @@ const CourseTab = () => {
             <Loader2 className="h-8 w-8 animate-spin" />
         </div>
     }
-
-    // Debug: Log current input state when rendering
-    console.log("🔍 RENDER - Current input state:", JSON.stringify(input, null, 2));
-    console.log("🔍 RENDER - Category:", input.category, "Type:", typeof input.category);
-    console.log("🔍 RENDER - CourseLevel:", input.courseLevel, "Type:", typeof input.courseLevel);
-    console.log("🔍 RENDER - Kit:", input.kit, "Type:", typeof input.kit);
 
     const isPublished = courseData?.course?.isPublished;
   return (
