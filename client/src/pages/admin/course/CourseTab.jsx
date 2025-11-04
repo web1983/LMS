@@ -41,23 +41,36 @@ const CourseTab = () => {
     const [deleteCourse, { data: deleteData, isLoading: deleteLoading, isSuccess: deleteSuccess }] = useDeleteCourseMutation();
     const [togglePublish, { data: publishData, isLoading: publishLoading, isSuccess: publishSuccess }] = useTogglePublishCourseMutation();
 
+    // Force refetch when courseId changes
+    useEffect(() => {
+        if (courseId) {
+            refetch();
+        }
+    }, [courseId, refetch]);
+
+    // Debug: Log input state changes
+    useEffect(() => {
+        console.log("🔄 Input state changed:", input);
+    }, [input]);
+
     // Populate form when course data loads
     useEffect(() => {
         if (courseData?.course) {
             const course = courseData.course;
             console.log("📚 Loading course data:", course); // Debug log
-            console.log("📝 Setting form values:", {
+            console.log("📝 Raw course values:", {
                 courseTitle: course.courseTitle,
                 subTitle: course.subTitle,
                 category: course.category,
                 courseLevel: course.courseLevel,
                 videoDuration: course.videoDuration,
                 projectName: course.projectName,
-                kit: course.kit
+                kit: course.kit,
+                videoStatus: course.videoStatus
             });
             
-            // Set all form fields with actual values from database - use direct state update
-            setInput({
+            // Set all form fields with actual values from database
+            const newInput = {
                 courseTitle: course.courseTitle || "",
                 subTitle: course.subTitle || "",
                 description: course.description || "",
@@ -69,18 +82,21 @@ const CourseTab = () => {
                 kit: course.kit || "",
                 videoStatus: course.videoStatus || "",
                 videoUrl: course.videoUrl || "",
-            });
+            };
+            
+            console.log("📝 Setting form input state:", newInput);
+            setInput(newInput);
             
             if (course.courseThumbnail) {
                 setPreviewThumbnail(course.courseThumbnail);
             }
             if (course.learningOutcomes && course.learningOutcomes.length > 0) {
-                setLearningOutcomes(course.learningOutcomes);
+                setLearningOutcomes([...course.learningOutcomes]);
             } else {
                 setLearningOutcomes([""]);
             }
             if (course.testQuestions && course.testQuestions.length > 0) {
-                setTestQuestions(course.testQuestions);
+                setTestQuestions([...course.testQuestions]);
             }
             if (course.testTimeLimit) {
                 setTestTimeLimit(course.testTimeLimit);
@@ -303,7 +319,11 @@ const CourseTab = () => {
                     <div className='flex items-center gap-5'>
                         <div className='space-y-1'>
                     <Label>Category</Label>
-                     <Select onValueChange={selectCategory} value={input.category || ""} key={`cat-${input.category || 'empty'}`}>
+                     <Select 
+                                onValueChange={selectCategory} 
+                                value={input.category ? input.category : undefined}
+                                key={`cat-${courseId}-${input.category || 'empty'}`}
+                            >
                                 <SelectTrigger className="w-[180px]">
                                   <SelectValue placeholder="Select a Category" />
                                 </SelectTrigger>
@@ -325,7 +345,11 @@ const CourseTab = () => {
                         </div>
                         <div className='space-y-1'>
                             <Label>Course Level</Label>
-                             <Select onValueChange={selectCourseLevel} value={input.courseLevel || ""} key={`level-${input.courseLevel || 'empty'}`}>
+                             <Select 
+                                        onValueChange={selectCourseLevel} 
+                                        value={input.courseLevel ? input.courseLevel : undefined}
+                                        key={`level-${courseId}-${input.courseLevel || 'empty'}`}
+                                    >
                                         <SelectTrigger className="w-[180px]">
                                           <SelectValue placeholder="Select a Level" />
                                         </SelectTrigger>
@@ -341,7 +365,11 @@ const CourseTab = () => {
                         </div>
                         <div className='space-y-1'>
                             <Label>Kit Type</Label>
-                             <Select onValueChange={selectKit} value={input.kit || ""} key={`kit-${input.kit || 'empty'}`}>
+                             <Select 
+                                        onValueChange={selectKit} 
+                                        value={input.kit ? input.kit : undefined}
+                                        key={`kit-${courseId}-${input.kit || 'empty'}`}
+                                    >
                                         <SelectTrigger className="w-[180px]">
                                           <SelectValue placeholder="Select a Kit" />
                                         </SelectTrigger>
