@@ -34,7 +34,8 @@ const CourseTab = () => {
     const courseId = params.courseId; 
 
     const { data: courseData, isLoading: courseLoading, refetch } = useGetCourseByIdQuery(courseId, {
-        refetchOnMountOrArgChange: true // Always fetch fresh data
+        refetchOnMountOrArgChange: true, // Always fetch fresh data
+        skip: !courseId // Skip if courseId is not available
     });
     const [editCourse, { data, isLoading, isSuccess, error }] = useEditCourseMutation();
     const [deleteCourse, { data: deleteData, isLoading: deleteLoading, isSuccess: deleteSuccess }] = useDeleteCourseMutation();
@@ -42,14 +43,25 @@ const CourseTab = () => {
 
     // Refetch course data on component mount to ensure fresh data
     useEffect(() => {
-        refetch();
-    }, []);
+        if (courseId) {
+            refetch();
+        }
+    }, [courseId, refetch]);
 
     // Populate form when course data loads
     useEffect(() => {
         if (courseData?.course) {
             const course = courseData.course;
             console.log("📚 Loading course data:", course); // Debug log
+            console.log("📝 Setting form values:", {
+                courseTitle: course.courseTitle,
+                subTitle: course.subTitle,
+                category: course.category,
+                courseLevel: course.courseLevel,
+                videoDuration: course.videoDuration,
+                projectName: course.projectName,
+                kit: course.kit
+            });
             setInput({
                 courseTitle: course.courseTitle || "",
                 subTitle: course.subTitle || "",
@@ -68,6 +80,8 @@ const CourseTab = () => {
             }
             if (course.learningOutcomes && course.learningOutcomes.length > 0) {
                 setLearningOutcomes(course.learningOutcomes);
+            } else {
+                setLearningOutcomes([""]);
             }
             if (course.testQuestions && course.testQuestions.length > 0) {
                 setTestQuestions(course.testQuestions);
@@ -192,7 +206,7 @@ const CourseTab = () => {
         }
     }, [publishSuccess, navigate]);
 
-    if (courseLoading) {
+    if (courseLoading || !courseData?.course) {
         return <div className="flex justify-center items-center h-screen">
             <Loader2 className="h-8 w-8 animate-spin" />
         </div>
@@ -289,7 +303,7 @@ const CourseTab = () => {
                     <div className='flex items-center gap-5'>
                         <div className='space-y-1'>
                     <Label>Category</Label>
-                     <Select onValueChange={selectCategory} value={input.category}>
+                     <Select key={`category-${input.category}`} onValueChange={selectCategory} value={input.category || undefined}>
                                 <SelectTrigger className="w-[180px]">
                                   <SelectValue placeholder="Select a Category" />
                                 </SelectTrigger>
@@ -311,7 +325,7 @@ const CourseTab = () => {
                         </div>
                         <div className='space-y-1'>
                             <Label>Course Level</Label>
-                             <Select onValueChange={selectCourseLevel} value={input.courseLevel}>
+                             <Select key={`courseLevel-${input.courseLevel}`} onValueChange={selectCourseLevel} value={input.courseLevel || undefined}>
                                         <SelectTrigger className="w-[180px]">
                                           <SelectValue placeholder="Select a Level" />
                                         </SelectTrigger>
@@ -327,7 +341,7 @@ const CourseTab = () => {
                         </div>
                         <div className='space-y-1'>
                             <Label>Kit Type</Label>
-                             <Select onValueChange={selectKit} value={input.kit}>
+                             <Select key={`kit-${input.kit}`} onValueChange={selectKit} value={input.kit || undefined}>
                                         <SelectTrigger className="w-[180px]">
                                           <SelectValue placeholder="Select a Kit" />
                                         </SelectTrigger>
