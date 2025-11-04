@@ -48,16 +48,11 @@ const CourseTab = () => {
         }
     }, [courseId, refetch]);
 
-    // Debug: Log input state changes
-    useEffect(() => {
-        console.log("🔄 Input state changed:", input);
-    }, [input]);
-
     // Populate form when course data loads
     useEffect(() => {
         if (courseData?.course) {
             const course = courseData.course;
-            console.log("📚 Loading course data:", course); // Debug log
+            console.log("📚 Full course object:", JSON.stringify(course, null, 2)); // Debug log
             console.log("📝 Raw course values:", {
                 courseTitle: course.courseTitle,
                 subTitle: course.subTitle,
@@ -84,7 +79,10 @@ const CourseTab = () => {
                 videoUrl: course.videoUrl || "",
             };
             
-            console.log("📝 Setting form input state:", newInput);
+            console.log("📝 Setting form input state:", JSON.stringify(newInput, null, 2));
+            console.log("✅ Category value:", newInput.category);
+            console.log("✅ CourseLevel value:", newInput.courseLevel);
+            console.log("✅ Kit value:", newInput.kit);
             setInput(newInput);
             
             if (course.courseThumbnail) {
@@ -224,9 +222,11 @@ const CourseTab = () => {
         </div>
     }
 
-    // Debug: Log current input state
-    console.log("🔍 Current input state:", input);
-    console.log("🔍 Course data from API:", courseData?.course);
+    // Debug: Log current input state when rendering
+    console.log("🔍 RENDER - Current input state:", JSON.stringify(input, null, 2));
+    console.log("🔍 RENDER - Category:", input.category, "Type:", typeof input.category);
+    console.log("🔍 RENDER - CourseLevel:", input.courseLevel, "Type:", typeof input.courseLevel);
+    console.log("🔍 RENDER - Kit:", input.kit, "Type:", typeof input.kit);
 
     const isPublished = courseData?.course?.isPublished;
   return (
@@ -321,7 +321,7 @@ const CourseTab = () => {
                     <Label>Category</Label>
                      <Select 
                                 onValueChange={selectCategory} 
-                                value={input.category ? input.category : undefined}
+                                value={input.category || ""}
                                 key={`cat-${courseId}-${input.category || 'empty'}`}
                             >
                                 <SelectTrigger className="w-[180px]">
@@ -347,7 +347,7 @@ const CourseTab = () => {
                             <Label>Course Level</Label>
                              <Select 
                                         onValueChange={selectCourseLevel} 
-                                        value={input.courseLevel ? input.courseLevel : undefined}
+                                        value={input.courseLevel || ""}
                                         key={`level-${courseId}-${input.courseLevel || 'empty'}`}
                                     >
                                         <SelectTrigger className="w-[180px]">
@@ -367,7 +367,7 @@ const CourseTab = () => {
                             <Label>Kit Type</Label>
                              <Select 
                                         onValueChange={selectKit} 
-                                        value={input.kit ? input.kit : undefined}
+                                        value={input.kit || ""}
                                         key={`kit-${courseId}-${input.kit || 'empty'}`}
                                     >
                                         <SelectTrigger className="w-[180px]">
