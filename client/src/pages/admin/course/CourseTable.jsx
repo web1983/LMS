@@ -60,7 +60,6 @@ const {data, isLoading} = useGetCreatorCourseQuery();
   }, [data?.courses, searchQuery, categoryFilter]);
 
   if(isLoading) return <h1>Loading...</h1>
-  console.log("data -> ", data); 
 
   return (
     <div className="space-y-4">
