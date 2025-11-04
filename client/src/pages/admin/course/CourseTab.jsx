@@ -41,13 +41,6 @@ const CourseTab = () => {
     const [deleteCourse, { data: deleteData, isLoading: deleteLoading, isSuccess: deleteSuccess }] = useDeleteCourseMutation();
     const [togglePublish, { data: publishData, isLoading: publishLoading, isSuccess: publishSuccess }] = useTogglePublishCourseMutation();
 
-    // Refetch course data on component mount to ensure fresh data
-    useEffect(() => {
-        if (courseId) {
-            refetch();
-        }
-    }, [courseId, refetch]);
-
     // Populate form when course data loads
     useEffect(() => {
         if (courseData?.course) {
@@ -62,6 +55,8 @@ const CourseTab = () => {
                 projectName: course.projectName,
                 kit: course.kit
             });
+            
+            // Set all form fields with actual values from database - use direct state update
             setInput({
                 courseTitle: course.courseTitle || "",
                 subTitle: course.subTitle || "",
@@ -75,6 +70,7 @@ const CourseTab = () => {
                 videoStatus: course.videoStatus || "",
                 videoUrl: course.videoUrl || "",
             });
+            
             if (course.courseThumbnail) {
                 setPreviewThumbnail(course.courseThumbnail);
             }
@@ -212,6 +208,10 @@ const CourseTab = () => {
         </div>
     }
 
+    // Debug: Log current input state
+    console.log("🔍 Current input state:", input);
+    console.log("🔍 Course data from API:", courseData?.course);
+
     const isPublished = courseData?.course?.isPublished;
   return (
     <Card>
@@ -303,7 +303,7 @@ const CourseTab = () => {
                     <div className='flex items-center gap-5'>
                         <div className='space-y-1'>
                     <Label>Category</Label>
-                     <Select key={`category-${input.category}`} onValueChange={selectCategory} value={input.category || undefined}>
+                     <Select onValueChange={selectCategory} value={input.category || ""} key={`cat-${input.category || 'empty'}`}>
                                 <SelectTrigger className="w-[180px]">
                                   <SelectValue placeholder="Select a Category" />
                                 </SelectTrigger>
@@ -325,7 +325,7 @@ const CourseTab = () => {
                         </div>
                         <div className='space-y-1'>
                             <Label>Course Level</Label>
-                             <Select key={`courseLevel-${input.courseLevel}`} onValueChange={selectCourseLevel} value={input.courseLevel || undefined}>
+                             <Select onValueChange={selectCourseLevel} value={input.courseLevel || ""} key={`level-${input.courseLevel || 'empty'}`}>
                                         <SelectTrigger className="w-[180px]">
                                           <SelectValue placeholder="Select a Level" />
                                         </SelectTrigger>
@@ -341,7 +341,7 @@ const CourseTab = () => {
                         </div>
                         <div className='space-y-1'>
                             <Label>Kit Type</Label>
-                             <Select key={`kit-${input.kit}`} onValueChange={selectKit} value={input.kit || undefined}>
+                             <Select onValueChange={selectKit} value={input.kit || ""} key={`kit-${input.kit || 'empty'}`}>
                                         <SelectTrigger className="w-[180px]">
                                           <SelectValue placeholder="Select a Kit" />
                                         </SelectTrigger>
