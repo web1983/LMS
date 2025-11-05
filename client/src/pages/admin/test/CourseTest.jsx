@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Loader2, Plus, Trash2, Video, HelpCircle } from 'lucide-react';
+import { Loader2, Plus, Trash2, Video, HelpCircle, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
@@ -13,6 +13,7 @@ const CourseTest = () => {
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [testTimeLimit, setTestTimeLimit] = useState(20);
+  const [courseSearchQuery, setCourseSearchQuery] = useState("");
   const [questions, setQuestions] = useState([
     {
       question: "",
@@ -25,6 +26,12 @@ const CourseTest = () => {
   const [editCourse, { isLoading: updating, isSuccess, error }] = useEditCourseMutation();
 
   const publishedCourses = coursesData?.courses?.filter(course => course.isPublished) || [];
+  
+  // Filter courses based on search query
+  const filteredCourses = publishedCourses.filter(course =>
+    course.courseTitle?.toLowerCase().includes(courseSearchQuery.toLowerCase())
+  );
+  
   const selectedCourse = publishedCourses.find(c => c._id === selectedCourseId);
 
   // Load existing data when course is selected
@@ -48,6 +55,7 @@ const CourseTest = () => {
 
   const handleCourseSelect = (courseId) => {
     setSelectedCourseId(courseId);
+    setCourseSearchQuery(""); // Reset search when course is selected
   };
 
   const handleQuestionChange = (index, field, value) => {
@@ -169,21 +177,37 @@ const CourseTest = () => {
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a published course" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectGroup>
-                      <SelectLabel>Your Published Courses</SelectLabel>
-                      {publishedCourses.length > 0 ? (
-                        publishedCourses.map((course) => (
-                          <SelectItem key={course._id} value={course._id}>
-                            {course.courseTitle}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <div className="p-4 text-center text-gray-500">
-                          No published courses available
-                        </div>
-                      )}
-                    </SelectGroup>
+                  <SelectContent className="bg-white max-h-[400px]">
+                    <div className="p-2 border-b sticky top-0 bg-white z-10">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          type="text"
+                          placeholder="Search courses..."
+                          value={courseSearchQuery}
+                          onChange={(e) => setCourseSearchQuery(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          className="pl-8 h-9"
+                        />
+                      </div>
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto">
+                      <SelectGroup>
+                        <SelectLabel>Your Published Courses ({filteredCourses.length})</SelectLabel>
+                        {filteredCourses.length > 0 ? (
+                          filteredCourses.map((course) => (
+                            <SelectItem key={course._id} value={course._id}>
+                              {course.courseTitle}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="p-4 text-center text-gray-500">
+                            {courseSearchQuery ? "No courses found matching your search" : "No published courses available"}
+                          </div>
+                        )}
+                      </SelectGroup>
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
