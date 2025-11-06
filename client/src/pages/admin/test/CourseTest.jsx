@@ -27,10 +27,25 @@ const CourseTest = () => {
 
   const publishedCourses = coursesData?.courses?.filter(course => course.isPublished) || [];
   
-  // Filter courses based on search query
-  const filteredCourses = publishedCourses.filter(course =>
-    course.courseTitle?.toLowerCase().includes(courseSearchQuery.toLowerCase())
-  );
+  // Helper function to format category label
+  const getCategoryLabel = (category) => {
+    const categoryMap = {
+      'grade_3_5_basic': 'Grade 3-5 (Basic)',
+      'grade_6_8_basic': 'Grade 6-8 (Basic)',
+      'grade_9_12_basic': 'Grade 9-12 (Basic)',
+      'grade_3_5_advance': 'Grade 3-5 (Advance)',
+      'grade_6_8_advance': 'Grade 6-8 (Advance)',
+      'grade_9_12_advance': 'Grade 9-12 (Advance)'
+    };
+    return categoryMap[category] || category;
+  };
+  
+  // Filter courses based on search query (search in both title and category)
+  const filteredCourses = publishedCourses.filter(course => {
+    const titleMatch = course.courseTitle?.toLowerCase().includes(courseSearchQuery.toLowerCase());
+    const categoryMatch = getCategoryLabel(course.category)?.toLowerCase().includes(courseSearchQuery.toLowerCase());
+    return titleMatch || categoryMatch;
+  });
   
   const selectedCourse = publishedCourses.find(c => c._id === selectedCourseId);
 
@@ -198,7 +213,10 @@ const CourseTest = () => {
                         {filteredCourses.length > 0 ? (
                           filteredCourses.map((course) => (
                             <SelectItem key={course._id} value={course._id}>
-                              {course.courseTitle}
+                              <div className="flex items-center justify-between w-full">
+                                <span className="font-medium">{course.courseTitle}</span>
+                                <span className="text-xs text-gray-500 ml-2">({getCategoryLabel(course.category)})</span>
+                              </div>
                             </SelectItem>
                           ))
                         ) : (
@@ -217,7 +235,7 @@ const CourseTest = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-semibold text-gray-900">{selectedCourse.courseTitle}</h3>
-                      <p className="text-sm text-gray-600">{selectedCourse.category}</p>
+                      <p className="text-sm text-gray-600">{getCategoryLabel(selectedCourse.category)}</p>
                     </div>
                     <Badge className="bg-green-600">Published</Badge>
                   </div>
