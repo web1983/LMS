@@ -22,7 +22,7 @@ const CourseTest = () => {
     }
   ]);
 
-  const { data: coursesData, isLoading: coursesLoading } = useGetCreatorCourseQuery();
+  const { data: coursesData, isLoading: coursesLoading, refetch: refetchCourses } = useGetCreatorCourseQuery();
   const [editCourse, { isLoading: updating, isSuccess, error }] = useEditCourseMutation();
 
   const publishedCourses = coursesData?.courses?.filter(course => course.isPublished) || [];
@@ -55,7 +55,21 @@ const CourseTest = () => {
       setVideoUrl(selectedCourse.videoUrl || "");
       setTestTimeLimit(selectedCourse.testTimeLimit || 20);
       if (selectedCourse.testQuestions && selectedCourse.testQuestions.length > 0) {
-        setQuestions(selectedCourse.testQuestions);
+        // Create deep copies of questions to avoid immutability issues
+        const copiedQuestions = selectedCourse.testQuestions.map(q => {
+          const originalOptions = q.options || [];
+          // Create a copy and ensure options array always has 4 elements
+          const options = [...originalOptions];
+          while (options.length < 4) {
+            options.push("");
+          }
+          return {
+            question: q.question || "",
+            options: options,
+            correctAnswer: q.correctAnswer !== undefined ? q.correctAnswer : 0
+          };
+        });
+        setQuestions(copiedQuestions);
       } else {
         setQuestions([
           {
@@ -74,20 +88,34 @@ const CourseTest = () => {
   };
 
   const handleQuestionChange = (index, field, value) => {
-    const newQuestions = [...questions];
-    newQuestions[index][field] = value;
+    const newQuestions = questions.map((q, i) => {
+      if (i === index) {
+        return { ...q, [field]: value };
+      }
+      return q;
+    });
     setQuestions(newQuestions);
   };
 
   const handleOptionChange = (questionIndex, optionIndex, value) => {
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].options[optionIndex] = value;
+    const newQuestions = questions.map((q, i) => {
+      if (i === questionIndex) {
+        const newOptions = [...q.options];
+        newOptions[optionIndex] = value;
+        return { ...q, options: newOptions };
+      }
+      return q;
+    });
     setQuestions(newQuestions);
   };
 
   const handleCorrectAnswerChange = (questionIndex, optionIndex) => {
-    const newQuestions = [...questions];
-    newQuestions[questionIndex].correctAnswer = optionIndex;
+    const newQuestions = questions.map((q, i) => {
+      if (i === questionIndex) {
+        return { ...q, correctAnswer: optionIndex };
+      }
+      return q;
+    });
     setQuestions(newQuestions);
   };
 
@@ -147,11 +175,13 @@ const CourseTest = () => {
   useEffect(() => {
     if (isSuccess) {
       toast.success("Course test updated successfully!");
+      // Refetch courses to get the updated data
+      refetchCourses();
     }
     if (error) {
       toast.error(error?.data?.message || "Failed to update course test");
     }
-  }, [isSuccess, error]);
+  }, [isSuccess, error, refetchCourses]);
 
   const extractYouTubeId = (url) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
