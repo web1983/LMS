@@ -31,9 +31,21 @@ export const courseApi = createApi({
         method: "GET"
       })
     }),
+    getLiveCourses: builder.query({
+      query: () => ({
+        url: "/live",
+        method: "GET"
+      })
+    }),
     getPublishedCoursesByCategory: builder.query({
       query: () => ({
         url: "/published/filtered",
+        method: "GET"
+      })
+    }),
+    getLiveCoursesByCategory: builder.query({
+      query: () => ({
+        url: "/live/filtered",
         method: "GET"
       })
     }),
@@ -65,6 +77,13 @@ export const courseApi = createApi({
       }),
       invalidatesTags:['Refetch_Creator_Course']
     }),
+    toggleLiveCourse: builder.mutation({
+      query: ({ courseId, live }) => ({
+        url: `/${courseId}/live?live=${live}`,
+        method: "PATCH"
+      }),
+      invalidatesTags:['Refetch_Creator_Course']
+    }),
   }),
 });
 
@@ -72,9 +91,12 @@ export const {
   useCreateCourseMutation, 
   useGetCreatorCourseQuery, 
   useGetPublishedCoursesQuery, 
+  useGetLiveCoursesQuery,
   useGetPublishedCoursesByCategoryQuery,
+  useGetLiveCoursesByCategoryQuery,
   useGetCourseByIdQuery,
   useEditCourseMutation,
   useDeleteCourseMutation,
-  useTogglePublishCourseMutation
+  useTogglePublishCourseMutation,
+  useToggleLiveCourseMutation
 } = courseApi;

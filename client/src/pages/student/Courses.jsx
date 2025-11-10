@@ -1,7 +1,7 @@
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Course from "./Course";
-import { useGetPublishedCoursesQuery, useGetPublishedCoursesByCategoryQuery } from "@/features/api/CourseApi";
+import { useGetLiveCoursesQuery, useGetLiveCoursesByCategoryQuery } from "@/features/api/CourseApi";
 import { useSelector } from "react-redux";
 
 const Courses = () => {
@@ -10,11 +10,11 @@ const Courses = () => {
   // Use filtered API for authenticated students, otherwise show all published courses
   const shouldUseFilteredAPI = isAuthenticated && user?.role === 'student';
   
-  const { data: allCoursesData, isLoading: allCoursesLoading, isError: allCoursesError } = useGetPublishedCoursesQuery(undefined, {
+  const { data: allCoursesData, isLoading: allCoursesLoading, isError: allCoursesError } = useGetLiveCoursesQuery(undefined, {
     skip: shouldUseFilteredAPI
   });
   
-  const { data: filteredCoursesData, isLoading: filteredCoursesLoading, isError: filteredCoursesError } = useGetPublishedCoursesByCategoryQuery(undefined, {
+  const { data: filteredCoursesData, isLoading: filteredCoursesLoading, isError: filteredCoursesError } = useGetLiveCoursesByCategoryQuery(undefined, {
     skip: !shouldUseFilteredAPI
   });
 
@@ -62,7 +62,7 @@ const Courses = () => {
               ) : (
                 <div className="col-span-full text-center py-16">
                   <div className="inline-block p-8 bg-white rounded-xl shadow-sm">
-                    <p className="text-gray-500 text-lg mb-2">No published courses available yet</p>
+                    <p className="text-gray-500 text-lg mb-2">No live courses available yet</p>
                     <p className="text-gray-400 text-sm">Check back soon for new courses!</p>
                   </div>
                 </div>

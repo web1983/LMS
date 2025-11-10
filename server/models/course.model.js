@@ -66,6 +66,10 @@ const courseSchema = new mongoose.Schema({
     isPublished:{
         type:Boolean,
         default:false
+    },
+    isLive:{
+        type:Boolean,
+        default:false
     }
 }, {timestamps:true});
 

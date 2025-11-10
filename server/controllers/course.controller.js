@@ -204,6 +204,28 @@ export const getPublishedCourses = async (req, res) => {
   }
 }
 
+// 🟢 GET LIVE COURSES (subset of published)
+export const getLiveCourses = async (req, res) => {
+  try {
+    const courses = await Course.find({ isPublished: true, isLive: true }).populate({path:"creator", select:"name photoUrl"});
+    if (!courses) {
+      return res.status(404).json({
+        message: "No live courses found.",
+        courses:[]
+      });
+    }
+    return res.status(200).json({
+      courses
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to get live courses.",
+      error: error.message,
+    });
+  }
+}
+
 // 🟢 GET PUBLISHED COURSES FILTERED BY USER CATEGORY
 export const getPublishedCoursesByCategory = async (req, res) => {
   try {
@@ -235,6 +257,37 @@ export const getPublishedCoursesByCategory = async (req, res) => {
   }
 }
 
+// 🟢 GET LIVE COURSES FILTERED BY USER CATEGORY
+export const getLiveCoursesByCategory = async (req, res) => {
+  try {
+    const userId = req.id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+        courses:[]
+      });
+    }
+
+    const courses = await Course.find({
+      isPublished: true,
+      isLive: true,
+      category: user.category
+    }).populate({path:"creator", select:"name photoUrl"});
+
+    return res.status(200).json({
+      courses
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to get live courses.",
+      error: error.message,
+    });
+  }
+}
+
 // 🟢 PUBLISH/UNPUBLISH COURSE
 export const togglePublishCourse = async (req, res) => {
   try {
@@ -261,6 +314,43 @@ export const togglePublishCourse = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       message: "Failed to update course status.",
+      error: error.message,
+    });
+  }
+}
+
+// 🟢 MAKE COURSE LIVE / NOT LIVE
+export const toggleLiveCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { live } = req.query;
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({
+        message: "Course not found!",
+      });
+    }
+
+    // Only allow live courses that are published
+    if (live === "true" && !course.isPublished) {
+      return res.status(400).json({
+        message: "Publish the course before making it live.",
+      });
+    }
+
+    course.isLive = live === "true";
+    await course.save();
+
+    const statusMessage = course.isLive ? "Live" : "Removed from live";
+    return res.status(200).json({
+      message: `Course marked as ${statusMessage}.`,
+      course,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to update live course status.",
       error: error.message,
     });
   }
