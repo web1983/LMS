@@ -309,7 +309,7 @@ const CourseDetail = () => {
                 {enrolling ? 'Enrolling...' : (
                   <>
                     <CheckCircle className="mr-2 h-5 w-5" />
-                    Enroll Now - It's Free!
+                    Start Now 
                   </>
                 )}
                 </Button>
@@ -547,12 +547,12 @@ const CourseDetail = () => {
                       {enrolling ? (
                         <>
                           <div className="animate-spin mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                          Enrolling...
+                          Starting...
                         </>
                       ) : (
                         <>
                           <CheckCircle className="mr-2 h-5 w-5" />
-                          Enroll Now
+                          Start Now
                         </>
                       )}
                     </Button>
