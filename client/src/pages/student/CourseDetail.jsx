@@ -22,6 +22,10 @@ const CourseDetail = () => {
   });
   const [enrollCourse, { isLoading: enrolling }] = useEnrollCourseMutation();
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [courseId]);
+
   // Refetch enrollment status when component mounts or when user returns from test page
   useEffect(() => {
     if (isAuthenticated && user?.role !== 'instructor') {
