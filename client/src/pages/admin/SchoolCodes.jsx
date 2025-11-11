@@ -26,6 +26,7 @@ import {
   Trash2,
   CheckCircle2,
   Ban,
+  Pencil,
 } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import {
@@ -34,6 +35,14 @@ import {
   useUpdateSchoolCodeMutation,
   useDeleteSchoolCodeMutation,
 } from "@/features/api/schoolCodeApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const SchoolCodes = () => {
   const { data, isLoading, isFetching, refetch } = useGetSchoolCodesQuery();
@@ -50,6 +59,12 @@ const SchoolCodes = () => {
     customCode: "",
   });
   const [actionId, setActionId] = useState(null);
+  const [limitDialog, setLimitDialog] = useState({
+    open: false,
+    code: null,
+    limit: "",
+  });
+  const [isLimitUpdating, setIsLimitUpdating] = useState(false);
 
   const schoolCodes = useMemo(
     () => data?.schoolCodes || [],
@@ -132,6 +147,71 @@ const SchoolCodes = () => {
       );
     } finally {
       setActionId(null);
+    }
+  };
+
+  const handleOpenLimitDialog = (code) => {
+    setLimitDialog({
+      open: true,
+      code,
+      limit: String(code.limit ?? ""),
+    });
+  };
+
+  const handleLimitInputChange = (event) => {
+    const { value } = event.target;
+    setLimitDialog((previous) => ({
+      ...previous,
+      limit: value,
+    }));
+  };
+
+  const handleLimitSubmit = async (event) => {
+    event.preventDefault();
+    if (!limitDialog.code) return;
+
+    const parsedLimit = Number(limitDialog.limit);
+
+    if (Number.isNaN(parsedLimit) || parsedLimit <= 0) {
+      toast.error("Please enter a valid positive number for the limit.");
+      return;
+    }
+
+    if (parsedLimit < limitDialog.code.usedCount) {
+      toast.error(
+        `Limit cannot be less than the number of students already registered (${limitDialog.code.usedCount}).`
+      );
+      return;
+    }
+
+    if (parsedLimit <= limitDialog.code.limit) {
+      toast.error("New limit must be greater than the current limit.");
+      return;
+    }
+
+    try {
+      setIsLimitUpdating(true);
+      await updateSchoolCode({
+        id: limitDialog.code._id,
+        limit: parsedLimit,
+      }).unwrap();
+      toast.success("Student limit updated successfully.");
+      setLimitDialog({ open: false, code: null, limit: "" });
+    } catch (error) {
+      toast.error(
+        error?.data?.message ||
+          "Failed to update student limit. Please try again."
+      );
+    } finally {
+      setIsLimitUpdating(false);
+    }
+  };
+
+  const handleCloseDialog = (open) => {
+    if (!open) {
+      setLimitDialog({ open: false, code: null, limit: "" });
+    } else {
+      setLimitDialog((previous) => ({ ...previous, open }));
     }
   };
 
@@ -327,7 +407,27 @@ const SchoolCodes = () => {
                         </TableCell>
                         <TableCell>{formatDate(code.createdAt)}</TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenLimitDialog(code)}
+                              disabled={
+                                isLimitUpdating &&
+                                limitDialog.code?._id === code._id
+                              }
+                            >
+                              {isLimitUpdating &&
+                              limitDialog.code?._id === code._id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Pencil className="h-4 w-4 mr-1" />
+                                  Increase Limit
+                                </>
+                              )}
+                            </Button>
                             <Button
                               type="button"
                               variant="outline"
@@ -382,6 +482,68 @@ const SchoolCodes = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={limitDialog.open} onOpenChange={handleCloseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Increase Student Limit</DialogTitle>
+            <DialogDescription>
+              Current limit:{" "}
+              <span className="font-semibold">
+                {limitDialog.code?.limit ?? "-"}
+              </span>{" "}
+              | Registered:{" "}
+              <span className="font-semibold">
+                {limitDialog.code?.usedCount ?? 0}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleLimitSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newLimit">New Student Limit</Label>
+              <Input
+                id="newLimit"
+                type="number"
+                min={(limitDialog.code?.usedCount ?? 0) + 1}
+                value={limitDialog.limit}
+                onChange={handleLimitInputChange}
+                disabled={isLimitUpdating}
+                required
+              />
+              <p className="text-xs text-gray-500">
+                Enter a number greater than the current limit and registered
+                students.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  setLimitDialog({ open: false, code: null, limit: "" })
+                }
+                disabled={isLimitUpdating}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={isLimitUpdating}
+              >
+                {isLimitUpdating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Limit"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
