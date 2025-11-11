@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    schoolCode: {
+      type: String,
+      default: "",
+      trim: true,
+      uppercase: true,
+    },
     enrolledCourses: [
       {
         type: mongoose.Schema.Types.ObjectId,

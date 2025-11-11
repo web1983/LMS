@@ -8,6 +8,7 @@ import courseRoute from "./routes/course.route.js"
 import enrollmentRoute from "./routes/enrollment.route.js"
 import analyticsRoute from "./routes/analytics.route.js"
 import settingsRoute from "./routes/settings.route.js"
+import schoolCodeRoute from "./routes/schoolCode.route.js"
 
 dotenv.config();
 
@@ -78,6 +79,7 @@ app.use("/api/v1/course", courseRoute);
 app.use("/api/v1/enrollment", enrollmentRoute);
 app.use("/api/v1/analytics", analyticsRoute);
 app.use("/api/v1/settings", settingsRoute);
+app.use("/api/v1/school-code", schoolCodeRoute);
 
 // For local development
 if (process.env.NODE_ENV !== 'production') {

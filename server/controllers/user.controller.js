@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import SchoolCode from "../models/schoolCode.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
 import { deleteMediaFromCloudinary, uploadMedia, extractPublicId } from "../utils/cloudinary.js";
@@ -7,7 +8,7 @@ import { sendPasswordResetEmail } from "../utils/emailService.js";
 // ================= REGISTER =================
 export const register = async (req, res) => {
   try {
-    const { name, email, password, school, category } = req.body;
+    const { name, email, password, schoolCode, category } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -24,29 +25,68 @@ export const register = async (req, res) => {
       });
     }
 
+    if (!schoolCode) {
+      return res.status(400).json({
+        success: false,
+        message: "School code is required.",
+      });
+    }
+
+    const normalizedCode = schoolCode.trim().toUpperCase();
+
+    let reservedSchoolCode = null;
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      category: category || "grade_3_5_basic", // Use provided category or default
-      school: school || "",
-    });
+    try {
+      reservedSchoolCode = await SchoolCode.findOneAndUpdate(
+        {
+          code: normalizedCode,
+          isActive: true,
+          $expr: { $lt: ["$usedCount", "$limit"] },
+        },
+        { $inc: { usedCount: 1 } },
+        { new: true }
+      );
 
-    return res.status(201).json({
-      success: true,
-      message: "Account created successfully.",
-      user: {
-        _id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        photoUrl: newUser.photoUrl,
-        enrolledCourses: newUser.enrolledCourses,
-        category: newUser.category,
-      },
-    });
+      if (!reservedSchoolCode) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid school code or maximum registrations reached for this code.",
+        });
+      }
+
+      const newUser = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        category: category || "grade_3_5_basic",
+        school: reservedSchoolCode.schoolName,
+        schoolCode: reservedSchoolCode.code,
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Account created successfully.",
+        user: {
+          _id: newUser._id,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          photoUrl: newUser.photoUrl,
+          enrolledCourses: newUser.enrolledCourses,
+          category: newUser.category,
+        },
+      });
+    } catch (error) {
+      if (reservedSchoolCode?._id) {
+        await SchoolCode.findByIdAndUpdate(reservedSchoolCode._id, {
+          $inc: { usedCount: -1 },
+        });
+      }
+      throw error;
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -198,7 +238,7 @@ export const updateProfile = async (req, res) => {
 // Create student user by admin
 export const createStudentUser = async (req, res) => {
   try {
-    const { name, email, password, category, school } = req.body;
+    const { name, email, password, category, school, schoolCode } = req.body;
 
     if (!name || !email || !password || !category) {
       return res.status(400).json({
@@ -219,32 +259,66 @@ export const createStudentUser = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new student user
-    const newUser = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      role: "student",
-      category: category,
-      school: school || "",
-    });
+    let reservedSchoolCode = null;
 
-    // Return user credentials (for QR code generation)
-    return res.status(201).json({
-      success: true,
-      message: "Student user created successfully",
-      user: {
-        _id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        createdAt: newUser.createdAt,
-      },
-      credentials: {
-        email: email,
-        password: password, // Return plain password only for QR code generation
-      },
-    });
+    if (schoolCode) {
+      const normalizedCode = schoolCode.trim().toUpperCase();
+      reservedSchoolCode = await SchoolCode.findOneAndUpdate(
+        {
+          code: normalizedCode,
+          isActive: true,
+          $expr: { $lt: ["$usedCount", "$limit"] },
+        },
+        { $inc: { usedCount: 1 } },
+        { new: true }
+      );
+
+      if (!reservedSchoolCode) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid school code or maximum registrations reached for this code.",
+        });
+      }
+    }
+
+    // Create new student user
+    try {
+      const newUser = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        role: "student",
+        category: category,
+        school:
+          reservedSchoolCode?.schoolName || school || "",
+        schoolCode: reservedSchoolCode?.code || "",
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Student user created successfully",
+        user: {
+          _id: newUser._id,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          createdAt: newUser.createdAt,
+        },
+        credentials: {
+          email: email,
+          password: password,
+        },
+      });
+    } catch (error) {
+      if (reservedSchoolCode?._id) {
+        await SchoolCode.findByIdAndUpdate(reservedSchoolCode._id, {
+          $inc: { usedCount: -1 },
+        });
+      }
+      throw error;
+    }
+
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -380,6 +454,20 @@ export const deleteUser = async (req, res) => {
       } catch (error) {
         console.log("Error deleting profile photo:", error);
         // Continue with user deletion even if photo deletion fails
+      }
+    }
+
+    if (user.schoolCode) {
+      try {
+        const schoolCodeDoc = await SchoolCode.findOne({
+          code: user.schoolCode,
+        });
+        if (schoolCodeDoc && schoolCodeDoc.usedCount > 0) {
+          schoolCodeDoc.usedCount -= 1;
+          await schoolCodeDoc.save();
+        }
+      } catch (error) {
+        console.log("Failed to decrement school code usage:", error);
       }
     }
 

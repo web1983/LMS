@@ -6,6 +6,7 @@ import { enrollmentApi } from "@/features/api/enrollmentApi";
 import { analyticsApi } from "@/features/api/analyticsApi";
 import { settingsApi } from "@/features/api/settingsApi";
 import { instructorApi } from "@/features/api/instructorApi";
+import { schoolCodeApi } from "@/features/api/schoolCodeApi";
 
 export const appStore = configureStore({
   reducer: rootReducer,
@@ -16,7 +17,8 @@ export const appStore = configureStore({
       enrollmentApi.middleware,
       analyticsApi.middleware,
       settingsApi.middleware,
-      instructorApi.middleware
+      instructorApi.middleware,
+      schoolCodeApi.middleware
     ),
 });
 

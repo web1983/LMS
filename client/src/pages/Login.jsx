@@ -23,7 +23,7 @@ const Login = () => {
     name: "", 
     email: "", 
     password: "", 
-    school: "",
+    schoolCode: "",
     studentClass: "",
     level: ""
   });
@@ -54,6 +54,11 @@ const Login = () => {
         toast.error("Please select your grade and level");
         return;
       }
+
+      if (!signupInput.schoolCode || signupInput.schoolCode.trim() === "") {
+        toast.error("Please enter your school code");
+        return;
+      }
       
       const categoryMap = {
         "3-5_basic": "grade_3_5_basic",
@@ -71,7 +76,7 @@ const Login = () => {
         name: signupInput.name,
         email: signupInput.email,
         password: signupInput.password,
-        school: signupInput.school,
+        schoolCode: signupInput.schoolCode.trim().toUpperCase(),
         category: category
       };
     }
@@ -154,13 +159,14 @@ useEffect(() => {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="signup-school">School Name</Label>
+                  <Label htmlFor="signup-school-code">School Code</Label>
                   <Input
+                    id="signup-school-code"
                     onChange={(e) => changeInputHandler(e, "signup")}
-                    value={signupInput.school}
-                    name="school"
+                    value={signupInput.schoolCode}
+                    name="schoolCode"
                     type="text"
-                    placeholder="eg. ABC High School"
+                    placeholder="eg. RW1234"
                   />
                 </div>
 
