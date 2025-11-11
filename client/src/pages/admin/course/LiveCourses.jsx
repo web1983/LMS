@@ -14,7 +14,7 @@ import {
   useToggleLiveCourseMutation,
 } from "@/features/api/CourseApi";
 import { toast } from "sonner";
-import { Loader2, Power, PowerOff, Filter } from "lucide-react";
+import { Loader2, Power, PowerOff, Filter, Search } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   Select,
@@ -23,24 +23,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 const LiveCourses = () => {
   const { data, isLoading, refetch, isFetching } = useGetCreatorCourseQuery();
   const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [toggleLiveCourse, { isLoading: isToggling }] =
     useToggleLiveCourseMutation();
 
   const courses = data?.courses || [];
 
   const filteredCourses = useMemo(() => {
-    if (statusFilter === "live") {
-      return courses.filter((course) => course.isLive);
-    }
-    if (statusFilter === "not_live") {
-      return courses.filter((course) => !course.isLive);
-    }
-    return courses;
-  }, [courses, statusFilter]);
+    return courses.filter((course) => {
+      const matchesStatus =
+        statusFilter === "all"
+          ? true
+          : statusFilter === "live"
+          ? course.isLive
+          : !course.isLive;
+
+      const matchesCategory =
+        categoryFilter === "all" ? true : course.category === categoryFilter;
+
+      const title = course.courseTitle?.toLowerCase() || "";
+      const matchesSearch = title.includes(searchQuery.toLowerCase());
+
+      return matchesStatus && matchesCategory && matchesSearch;
+    });
+  }, [courses, statusFilter, categoryFilter, searchQuery]);
+
+  const categoryOptions = useMemo(() => {
+    const uniqueCategories = new Set(courses.map((course) => course.category));
+    return Array.from(uniqueCategories).sort();
+  }, [courses]);
 
   const handleToggleLive = async (course) => {
     if (!course.isPublished && !course.isLive) {
@@ -77,21 +94,43 @@ const LiveCourses = () => {
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-center">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search course by name..."
+            className="pl-9"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-gray-500" />
-          <span className="text-sm text-gray-600">Filter by status:</span>
-          <Select
-            value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
+          <span className="text-sm text-gray-600">Status:</span>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Courses</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="live">Live Only</SelectItem>
               <SelectItem value="not_live">Not Live</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">Category:</span>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categoryOptions.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {formatCategory(category)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
