@@ -439,7 +439,7 @@ const CourseTest = () => {
                 {/* Info Box */}
                 <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-800">
-                    <strong>Note:</strong> Students will have {testTimeLimit} minute{testTimeLimit !== 1 ? 's' : ''} to complete the test. Passing score is 40%. Add as many questions as you need.
+                    <strong>Note:</strong> Students will have {testTimeLimit} minute{testTimeLimit !== 1 ? 's' : ''} to complete the test. Passing score is 60%. Add as many questions as you need.
                   </p>
                 </div>
               </CardContent>

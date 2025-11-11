@@ -266,7 +266,7 @@ export const getAllStudentsMarks = async (req, res) => {
                 ? enrollment.testAttempts[enrollment.testAttempts.length - 1]
                 : null;
 
-            const isPassed = latestAttempt?.score >= 40;
+            const isPassed = latestAttempt?.score >= 60;
             const isVideoWatched = enrollment.videoWatched || false;
             const isCompleted = isPassed && isVideoWatched;
 
@@ -297,7 +297,7 @@ export const getAllStudentsMarks = async (req, res) => {
               )
             : 0;
 
-        // Count completed courses (video watched AND test passed >= 40%)
+        // Count completed courses (video watched AND test passed >= 60%)
         const completedCourses = courseMarks.filter((c) => c.isCompleted).length;
 
         console.log(`✅ Completed courses: ${completedCourses} / ${totalCoursesInCategory}`);

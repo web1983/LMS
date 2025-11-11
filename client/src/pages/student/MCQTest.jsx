@@ -220,7 +220,7 @@ const MCQTest = () => {
                   {passed ? '🎉 Congratulations!' : '😔 Test Failed'}
                 </h2>
                 <p className="text-gray-600 text-lg">
-                  {passed ? 'You have passed the test!' : 'You scored below 40%. Review the video and retake the test.'}
+                  {passed ? 'You have passed the test!' : 'You scored below 60%. Review the video and retake the test.'}
                 </p>
               </div>
 
@@ -292,7 +292,7 @@ const MCQTest = () => {
               {!passed && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-red-800 text-sm text-center font-semibold">
-                    ❌ Test Failed - Score below 40%
+                    ❌ Test Failed - Score below 60%
                   </p>
                   <p className="text-red-700 text-xs text-center mt-1">
                     You cannot view this result anymore as you need to retake the test.
@@ -342,7 +342,7 @@ const MCQTest = () => {
                     Previous Attempt: {previousResult.score}%
                   </p>
                   <p className="text-orange-800 text-xs">
-                    You need 40% or higher to pass. Let's try again!
+                    You need 60% or higher to pass. Let's try again!
                   </p>
                 </div>
               )}
@@ -352,7 +352,7 @@ const MCQTest = () => {
                 <ul className="space-y-1 text-blue-800 text-sm">
                   <li>• {questions.length} Questions</li>
                   <li>• {timeLimit} Minutes</li>
-                  <li>• Passing Score: 40%</li>
+                  <li>• Passing Score: 60%</li>
                   <li>• Multiple Choice</li>
                 </ul>
               </div>
@@ -372,7 +372,7 @@ const MCQTest = () => {
               <p className="text-sm text-gray-600">
                 {previousResult && !previousResult.passed 
                   ? 'Good luck on your retake! You can retake until you pass.' 
-                  : 'Good luck! You need 40% to pass.'}
+                  : 'Good luck! You need 60% to pass.'}
               </p>
             </DialogDescription>
           </DialogHeader>

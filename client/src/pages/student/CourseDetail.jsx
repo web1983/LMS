@@ -69,13 +69,13 @@ const CourseDetail = () => {
   // Ensure score is a valid number (not NaN)
   const displayScore = typeof latestTestScore === 'number' && !isNaN(latestTestScore) ? latestTestScore : 0;
   
-  // Check if course is completed (passed test with score >= 40%)
+  // Check if course is completed (passed test with score >= 60%)
   const isCourseCompleted = enrollment?.certificateGenerated || 
     (enrollment?.testAttempts && enrollment.testAttempts.length > 0 && 
-     latestTestScore >= 40);
+     latestTestScore >= 60);
 
-  // Check if user has attempted but failed (score < 40%)
-  const hasFailed = enrollment?.testAttempts && enrollment.testAttempts.length > 0 && latestTestScore < 40;
+  // Check if user has attempted but failed (score < 60%)
+  const hasFailed = enrollment?.testAttempts && enrollment.testAttempts.length > 0 && latestTestScore < 60;
 
   const getCategoryLabel = (category) => {
     const categoryMap = {
@@ -627,7 +627,7 @@ const CourseDetail = () => {
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-sm text-gray-600">Test Score</span>
                           {enrollment?.testAttempts && enrollment.testAttempts.length > 0 ? (
-                            displayScore >= 40 ? (
+                            displayScore >= 60 ? (
                               <CheckCircle className="h-5 w-5 text-green-500" />
                             ) : (
                               <XCircle className="h-5 w-5 text-red-500" />
@@ -725,7 +725,7 @@ const CourseDetail = () => {
                 <p className="text-orange-800 text-xl font-medium mb-2">
                   You scored{' '}
                   <span className="font-bold text-3xl text-orange-600">{displayScore}%</span>
-                  {' '}on the test. You need 40% to pass.
+                  {' '}on the test. You need 60% to pass.
                 </p>
                 <p className="text-orange-700 text-base bg-orange-100 inline-block px-6 py-3 rounded-xl font-medium">
                   💡 Watch the video again to improve your understanding, then retake the test!

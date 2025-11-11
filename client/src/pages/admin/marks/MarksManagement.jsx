@@ -74,17 +74,17 @@ const MarksManagement = () => {
       if (marksFilter !== 'all') {
         const marks = student.totalMarks;
         switch (marksFilter) {
-          case 'excellent': // 80-100
-            if (marks < 80) return false;
+          case 'excellent': // 85-100
+            if (marks < 85) return false;
             break;
-          case 'good': // 60-79
-            if (marks < 60 || marks >= 80) return false;
+          case 'good': // 70-84
+            if (marks < 70 || marks >= 85) return false;
             break;
-          case 'average': // 40-59
-            if (marks < 40 || marks >= 60) return false;
+          case 'average': // 60-69
+            if (marks < 60 || marks >= 70) return false;
             break;
-          case 'below': // 0-39
-            if (marks >= 40) return false;
+          case 'below': // 0-59
+            if (marks >= 60) return false;
             break;
           default:
             break;
@@ -101,19 +101,19 @@ const MarksManagement = () => {
   };
 
   const getMarksColor = (marks) => {
-    if (marks >= 80) return 'text-green-600 bg-green-50';
-    if (marks >= 60) return 'text-blue-600 bg-blue-50';
-    if (marks >= 40) return 'text-yellow-600 bg-yellow-50';
+    if (marks >= 85) return 'text-green-600 bg-green-50';
+    if (marks >= 70) return 'text-blue-600 bg-blue-50';
+    if (marks >= 60) return 'text-yellow-600 bg-yellow-50';
     return 'text-red-600 bg-red-50';
   };
 
   const getMarksGrade = (marks) => {
     if (marks >= 90) return 'A+';
-    if (marks >= 80) return 'A';
-    if (marks >= 70) return 'B+';
+    if (marks >= 85) return 'A';
+    if (marks >= 75) return 'B+';
     if (marks >= 60) return 'B';
-    if (marks >= 50) return 'C+';
-    if (marks >= 40) return 'C';
+    if (marks >= 55) return 'C+';
+    if (marks >= 50) return 'C';
     return 'F';
   };
 
@@ -167,7 +167,7 @@ const MarksManagement = () => {
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-1">Top Performers</p>
               <p className="text-2xl font-bold text-green-600">
-                {data.students.filter(s => s.totalMarks >= 80).length}
+                {data.students.filter(s => s.totalMarks >= 85).length}
               </p>
             </div>
           </CardContent>
@@ -177,7 +177,7 @@ const MarksManagement = () => {
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-1">Need Attention</p>
               <p className="text-2xl font-bold text-red-600">
-                {data.students.filter(s => s.totalMarks < 40).length}
+                {data.students.filter(s => s.totalMarks < 60).length}
               </p>
             </div>
           </CardContent>
@@ -241,8 +241,8 @@ const MarksManagement = () => {
                 <SelectItem value="all">All Marks</SelectItem>
                 <SelectItem value="excellent">Excellent (80-100%)</SelectItem>
                 <SelectItem value="good">Good (60-79%)</SelectItem>
-                <SelectItem value="average">Average (40-59%)</SelectItem>
-                <SelectItem value="below">Below Average (&lt;40%)</SelectItem>
+                <SelectItem value="average">Average (60-69%)</SelectItem>
+                <SelectItem value="below">Below Average (&lt;60%)</SelectItem>
               </SelectContent>
             </Select>
           </div>

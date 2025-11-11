@@ -158,7 +158,7 @@ export const submitTest = async (req, res) => {
 
     const score = Math.round((correctAnswers / totalQuestions) * 100);
     const wrongAnswers = totalQuestions - correctAnswers;
-    const passed = score >= 40;
+    const passed = score >= 60;
 
     // Add test attempt
     const attemptNumber = enrollment.testAttempts.length + 1;
@@ -213,12 +213,12 @@ export const submitTest = async (req, res) => {
         );
 
         if (hasEnrolledInAll) {
-          // Check if ALL courses are completed (video watched AND test passed >= 40%)
+          // Check if ALL courses are completed (video watched AND test passed >= 60%)
           const completedCourses = validEnrollments.filter(e => {
             const videoWatched = e.videoWatched;
             const testPassed = e.testAttempts && 
                               e.testAttempts.length > 0 && 
-                              e.testAttempts.some(attempt => attempt.score >= 40);
+                              e.testAttempts.some(attempt => attempt.score >= 60);
             return videoWatched && testPassed;
           });
 
@@ -334,12 +334,12 @@ export const getCertificateStatus = async (req, res) => {
       });
     }
 
-    // Check if ALL courses are completed (video watched AND test passed with score >= 40)
+    // Check if ALL courses are completed (video watched AND test passed with score >= 60)
     const completedCourses = validEnrollments.filter(enrollment => {
       const videoWatched = enrollment.videoWatched;
       const testPassed = enrollment.testAttempts && 
                         enrollment.testAttempts.length > 0 && 
-                        enrollment.testAttempts.some(attempt => attempt.score >= 40);
+                        enrollment.testAttempts.some(attempt => attempt.score >= 60);
       return videoWatched && testPassed;
     });
 
@@ -457,10 +457,10 @@ export const getTestQuestions = async (req, res) => {
       if (correctAnswers === undefined && lastAttempt.answers) {
         correctAnswers = lastAttempt.answers.filter(a => a.isCorrect).length;
         wrongAnswers = lastAttempt.answers.length - correctAnswers;
-        passed = lastAttempt.score >= 40;
+        passed = lastAttempt.score >= 60;
       }
       
-      // If passed (score >= 40%), show result only
+      // If passed (score >= 60%), show result only
       if (passed) {
         return res.status(200).json({
           success: true,
@@ -479,7 +479,7 @@ export const getTestQuestions = async (req, res) => {
         });
       }
       
-      // If failed (score < 40%), allow retake but also show previous result
+      // If failed (score < 60%), allow retake but also show previous result
       // Fall through to return questions
     }
 

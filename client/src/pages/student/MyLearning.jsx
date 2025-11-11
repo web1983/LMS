@@ -93,7 +93,7 @@ const MyLearning = () => {
                       const lastAttempt = e.testAttempts && e.testAttempts.length > 0 
                         ? e.testAttempts[e.testAttempts.length - 1] 
                         : null;
-                      return e.videoWatched && lastAttempt && lastAttempt.score >= 40;
+                      return e.videoWatched && lastAttempt && lastAttempt.score >= 60;
                     }).length}
                   </p>
                 </div>
@@ -112,7 +112,7 @@ const MyLearning = () => {
                       const lastAttempt = e.testAttempts && e.testAttempts.length > 0 
                         ? e.testAttempts[e.testAttempts.length - 1] 
                         : null;
-                      return !e.videoWatched || !lastAttempt || lastAttempt.score < 40;
+                      return !e.videoWatched || !lastAttempt || lastAttempt.score < 60;
                     }).length}
                   </p>
                 </div>
@@ -231,7 +231,7 @@ const MyLearning = () => {
                           <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 font-semibold">
                             {getCategoryLabel(course.category)}
                           </Badge>
-                          {(enrollment.videoWatched && lastAttempt && lastAttempt.score >= 40) && (
+                          {(enrollment.videoWatched && lastAttempt && lastAttempt.score >= 60) && (
                             <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 font-semibold">
                               <Award className="h-3 w-3 mr-1" />
                               Completed
@@ -264,12 +264,12 @@ const MyLearning = () => {
 
                           {lastAttempt && (
                             <div className="flex items-center gap-2 text-sm">
-                              {lastAttempt.score >= 40 ? (
+                              {lastAttempt.score >= 60 ? (
                                 <CheckCircle className="h-4 w-4 text-green-500" />
                               ) : (
                                 <XCircle className="h-4 w-4 text-red-500" />
                               )}
-                              <span className={lastAttempt.score >= 40 ? "text-green-700 font-medium" : "text-red-700 font-medium"}>
+                              <span className={lastAttempt.score >= 60 ? "text-green-700 font-medium" : "text-red-700 font-medium"}>
                                 Test Score: {lastAttempt.score}%
                               </span>
                             </div>
@@ -282,7 +282,7 @@ const MyLearning = () => {
                           className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group"
                         >
                           <Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                          {(enrollment.videoWatched && lastAttempt && lastAttempt.score >= 40) ? "Review Course" : "Continue Learning"}
+                          {(enrollment.videoWatched && lastAttempt && lastAttempt.score >= 60) ? "Review Course" : "Continue Learning"}
                         </Button>
                       </div>
                     </div>

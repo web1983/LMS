@@ -184,7 +184,7 @@ const VideoPlayer = () => {
                 <ul className="space-y-1 text-blue-800">
                   <li>• {course.testQuestions?.length || 0} Questions</li>
                   <li>• {course.testTimeLimit || 20} Minutes Time Limit</li>
-                  <li>• Passing Score: 40%</li>
+                  <li>• Passing Score: 60%</li>
                   <li>• You can retake until you pass</li>
                 </ul>
               </div>
