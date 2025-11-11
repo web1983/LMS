@@ -12,7 +12,7 @@ const generateCode = (length = 8) => {
 
 export const createSchoolCode = async (req, res) => {
   try {
-    const { schoolName, limit } = req.body;
+    const { schoolName, limit, customCode } = req.body;
 
     if (!schoolName || !limit) {
       return res.status(400).json({
@@ -28,11 +28,38 @@ export const createSchoolCode = async (req, res) => {
       });
     }
 
-    let code = generateCode();
-    let existingCode = await SchoolCode.findOne({ code });
-    while (existingCode) {
+    let code;
+
+    if (customCode && customCode.trim() !== "") {
+      const formattedCustomCode = customCode.trim().toUpperCase();
+
+      const isValidFormat = /^[A-Z0-9\-]{4,16}$/.test(formattedCustomCode);
+      if (!isValidFormat) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Custom code must be 4-16 characters and include only letters, numbers, or hyphen.",
+        });
+      }
+
+      const existingCustom = await SchoolCode.findOne({
+        code: formattedCustomCode,
+      });
+      if (existingCustom) {
+        return res.status(400).json({
+          success: false,
+          message: "This custom code already exists. Please choose another.",
+        });
+      }
+
+      code = formattedCustomCode;
+    } else {
       code = generateCode();
-      existingCode = await SchoolCode.findOne({ code });
+      let existingCode = await SchoolCode.findOne({ code });
+      while (existingCode) {
+        code = generateCode();
+        existingCode = await SchoolCode.findOne({ code });
+      }
     }
 
     const schoolCode = await SchoolCode.create({

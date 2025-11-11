@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const SCHOOL_CODE_API = "/api/v1/school-code/";
+const SCHOOL_CODE_API = "/api/v1/school-code";
 
 export const schoolCodeApi = createApi({
   reducerPath: "schoolCodeApi",
@@ -27,7 +27,7 @@ export const schoolCodeApi = createApi({
     }),
     updateSchoolCode: builder.mutation({
       query: ({ id, ...patch }) => ({
-        url: `${id}`,
+        url: `/${id}`,
         method: "PATCH",
         body: patch,
       }),
@@ -35,7 +35,7 @@ export const schoolCodeApi = createApi({
     }),
     deleteSchoolCode: builder.mutation({
       query: (id) => ({
-        url: `${id}`,
+        url: `/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["SchoolCodes"],

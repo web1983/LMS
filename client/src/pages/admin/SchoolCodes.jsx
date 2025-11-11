@@ -44,7 +44,11 @@ const SchoolCodes = () => {
   const [deleteSchoolCode, { isLoading: isDeleting }] =
     useDeleteSchoolCodeMutation();
 
-  const [formData, setFormData] = useState({ schoolName: "", limit: "" });
+  const [formData, setFormData] = useState({
+    schoolName: "",
+    limit: "",
+    customCode: "",
+  });
   const [actionId, setActionId] = useState(null);
 
   const schoolCodes = useMemo(
@@ -81,9 +85,10 @@ const SchoolCodes = () => {
       await createSchoolCode({
         schoolName: formData.schoolName.trim(),
         limit: Number(formData.limit),
+        customCode: formData.customCode.trim() || undefined,
       }).unwrap();
       toast.success("School code generated successfully.");
-      setFormData({ schoolName: "", limit: "" });
+      setFormData({ schoolName: "", limit: "", customCode: "" });
     } catch (error) {
       toast.error(
         error?.data?.message || "Failed to create school code. Please try again."
@@ -180,6 +185,22 @@ const SchoolCodes = () => {
                   value={formData.schoolName}
                   onChange={handleInputChange}
                   placeholder="eg. Robowunder Academy"
+                  disabled={isCreating}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="customCode">Custom Code (optional)</Label>
+                  <span className="text-xs text-gray-500">
+                    Letters, numbers, hyphen. 4-16 chars.
+                  </span>
+                </div>
+                <Input
+                  id="customCode"
+                  name="customCode"
+                  value={formData.customCode}
+                  onChange={handleInputChange}
+                  placeholder="eg. RW-2025"
                   disabled={isCreating}
                 />
               </div>
