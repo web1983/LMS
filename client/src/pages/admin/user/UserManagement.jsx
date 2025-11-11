@@ -15,6 +15,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [schoolFilter, setSchoolFilter] = useState('all');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -60,26 +61,47 @@ const UserManagement = () => {
   };
 
   // Filter and search logic
+  const schoolOptions = useMemo(() => {
+    const uniqueSchools = new Set(
+      students
+        .map((student) => student.school?.trim())
+        .filter((school) => !!school)
+    );
+    return Array.from(uniqueSchools).sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" })
+    );
+  }, [students]);
+
   const filteredStudents = useMemo(() => {
     let filtered = students;
 
-    // Apply category filter
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(student => student.category === categoryFilter);
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter(
+        (student) => student.category === categoryFilter
+      );
     }
 
-    // Apply search filter
-    if (searchQuery.trim() !== '') {
+    if (schoolFilter !== "all") {
+      filtered = filtered.filter(
+        (student) =>
+          student.school &&
+          student.school.trim().toLowerCase() ===
+            schoolFilter.trim().toLowerCase()
+      );
+    }
+
+    if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(student => 
-        student.name.toLowerCase().includes(query) ||
-        student.email.toLowerCase().includes(query) ||
-        (student.school && student.school.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        (student) =>
+          student.name.toLowerCase().includes(query) ||
+          student.email.toLowerCase().includes(query) ||
+          (student.school && student.school.toLowerCase().includes(query))
       );
     }
 
     return filtered;
-  }, [students, categoryFilter, searchQuery]);
+  }, [students, categoryFilter, schoolFilter, searchQuery]);
 
   const handleEditClick = (user) => {
     setSelectedUser(user);
@@ -206,51 +228,88 @@ const UserManagement = () => {
               <Users className="h-5 w-5 text-blue-600" />
               <CardTitle>All Students</CardTitle>
             </div>
-            <Badge variant="outline">{filteredStudents.length} of {students.length} students</Badge>
+            <Badge variant="outline">
+              {filteredStudents.length} of {students.length} students
+            </Badge>
           </div>
           <CardDescription>Search, filter, and edit student information</CardDescription>
         </CardHeader>
         
         <CardContent>
           {/* Search and Filter Bar */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex flex-col lg:flex-row gap-4 mb-6">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by name or email..."
+                  placeholder="Search by name, email, or school..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
             </div>
-            
-            <div className="w-full md:w-[200px]">
-              <Select onValueChange={setCategoryFilter} value={categoryFilter}>
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectGroup>
-                    <SelectLabel>Filter by Category</SelectLabel>
-                    <SelectItem value="all">All Categories</SelectItem>
-                  </SelectGroup>
-                  <SelectGroup>
-                    <SelectLabel>Basic Level</SelectLabel>
-                    <SelectItem value="grade_3_5_basic">Grade 3-5 (Basic)</SelectItem>
-                    <SelectItem value="grade_6_8_basic">Grade 6-8 (Basic)</SelectItem>
-                    <SelectItem value="grade_9_12_basic">Grade 9-12 (Basic)</SelectItem>
-                  </SelectGroup>
-                  <SelectGroup>
-                    <SelectLabel>Advance Level</SelectLabel>
-                    <SelectItem value="grade_3_5_advance">Grade 3-5 (Advance)</SelectItem>
-                    <SelectItem value="grade_6_8_advance">Grade 6-8 (Advance)</SelectItem>
-                    <SelectItem value="grade_9_12_advance">Grade 9-12 (Advance)</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+            <div className="flex flex-col md:flex-row gap-3 w-full lg:w-auto">
+              <div className="w-full md:w-[200px]">
+                <Select onValueChange={setCategoryFilter} value={categoryFilter}>
+                  <SelectTrigger>
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Filter by category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectGroup>
+                      <SelectLabel>Filter by Category</SelectLabel>
+                      <SelectItem value="all">All Categories</SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Basic Level</SelectLabel>
+                      <SelectItem value="grade_3_5_basic">
+                        Grade 3-5 (Basic)
+                      </SelectItem>
+                      <SelectItem value="grade_6_8_basic">
+                        Grade 6-8 (Basic)
+                      </SelectItem>
+                      <SelectItem value="grade_9_12_basic">
+                        Grade 9-12 (Basic)
+                      </SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Advance Level</SelectLabel>
+                      <SelectItem value="grade_3_5_advance">
+                        Grade 3-5 (Advance)
+                      </SelectItem>
+                      <SelectItem value="grade_6_8_advance">
+                        Grade 6-8 (Advance)
+                      </SelectItem>
+                      <SelectItem value="grade_9_12_advance">
+                        Grade 9-12 (Advance)
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-full md:w-[220px]">
+                <Select
+                  onValueChange={setSchoolFilter}
+                  value={schoolFilter}
+                >
+                  <SelectTrigger>
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Filter by school" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectGroup>
+                      <SelectLabel>Filter by School</SelectLabel>
+                      <SelectItem value="all">All Schools</SelectItem>
+                      {schoolOptions.map((school) => (
+                        <SelectItem key={school} value={school}>
+                          {school}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -337,6 +396,7 @@ const UserManagement = () => {
                   onClick={() => {
                     setSearchQuery('');
                     setCategoryFilter('all');
+                    setSchoolFilter('all');
                   }}
                 >
                   Clear Filters
