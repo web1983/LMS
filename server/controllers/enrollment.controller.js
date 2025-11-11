@@ -2,6 +2,41 @@ import { Enrollment } from "../models/enrollment.model.js";
 import { Course } from "../models/course.model.js";
 import User from "../models/user.model.js";
 
+const buildReviewData = (questions = [], answersSource = []) => {
+  return questions.map((question, index) => {
+    let selectedAnswer = -1;
+
+    if (Array.isArray(answersSource) && answersSource.length > 0) {
+      const firstItem = answersSource[0];
+      if (typeof firstItem === "object" && firstItem !== null) {
+        const match = answersSource.find(
+          (answer) => answer?.questionIndex === index
+        );
+        if (match && typeof match.selectedAnswer === "number") {
+          selectedAnswer = match.selectedAnswer;
+        }
+      } else if (typeof answersSource[index] === "number") {
+        selectedAnswer = answersSource[index];
+      }
+    }
+
+    const correctAnswer =
+      typeof question?.correctAnswer === "number"
+        ? question.correctAnswer
+        : -1;
+
+    return {
+      questionNumber: index + 1,
+      question: question?.question || "",
+      options: Array.isArray(question?.options) ? question.options : [],
+      correctAnswer,
+      selectedAnswer,
+      isCorrect: selectedAnswer === correctAnswer && correctAnswer !== -1,
+      explanation: question?.explanation || "",
+    };
+  });
+};
+
 // 🟢 ENROLL IN COURSE
 export const enrollCourse = async (req, res) => {
   try {
@@ -144,7 +179,16 @@ export const submitTest = async (req, res) => {
     let correctAnswers = 0;
     const detailedAnswers = [];
 
-    answers.forEach((selectedAnswer, index) => {
+    const normalizedAnswers = [];
+    for (let i = 0; i < totalQuestions; i += 1) {
+      const value =
+        Array.isArray(answers) && typeof answers[i] === "number"
+          ? answers[i]
+          : -1;
+      normalizedAnswers.push(value);
+    }
+
+    normalizedAnswers.forEach((selectedAnswer, index) => {
       const question = course.testQuestions[index];
       const isCorrect = selectedAnswer === question.correctAnswer;
       if (isCorrect) correctAnswers++;
@@ -250,6 +294,11 @@ export const submitTest = async (req, res) => {
       }
     }
 
+    const review = buildReviewData(
+      course.testQuestions,
+      normalizedAnswers
+    );
+
     return res.status(200).json({
       success: true,
       message: "Test submitted successfully",
@@ -262,6 +311,7 @@ export const submitTest = async (req, res) => {
         attemptNumber,
         certificateGenerated,
         allCoursesCompleted,
+        review,
       },
       enrollment,
     });
@@ -443,23 +493,31 @@ export const getTestQuestions = async (req, res) => {
     }
 
     // Check if user has already attempted the test
-    const hasAttempted = enrollment.testAttempts && enrollment.testAttempts.length > 0;
-    
+    const hasAttempted =
+      enrollment.testAttempts && enrollment.testAttempts.length > 0;
+    let review = [];
+
     // If already attempted, check if passed
     if (hasAttempted) {
-      const lastAttempt = enrollment.testAttempts[enrollment.testAttempts.length - 1];
-      
+      const lastAttempt =
+        enrollment.testAttempts[enrollment.testAttempts.length - 1];
+
       // Calculate correctAnswers if not stored (for old attempts)
       let correctAnswers = lastAttempt.correctAnswers;
       let wrongAnswers = lastAttempt.wrongAnswers;
       let passed = lastAttempt.passed;
-      
+
       if (correctAnswers === undefined && lastAttempt.answers) {
-        correctAnswers = lastAttempt.answers.filter(a => a.isCorrect).length;
+        correctAnswers = lastAttempt.answers.filter((a) => a.isCorrect).length;
         wrongAnswers = lastAttempt.answers.length - correctAnswers;
         passed = lastAttempt.score >= 60;
       }
-      
+
+      review = buildReviewData(
+        course.testQuestions,
+        lastAttempt.answers || []
+      );
+
       // If passed (score >= 60%), show result only
       if (passed) {
         return res.status(200).json({
@@ -473,12 +531,13 @@ export const getTestQuestions = async (req, res) => {
             passed: passed !== undefined ? passed : false,
             attemptNumber: enrollment.testAttempts.length,
             certificateGenerated: enrollment.certificateGenerated,
+            review,
           },
           questions: [],
           timeLimit: course.testTimeLimit || 20,
         });
       }
-      
+
       // If failed (score < 60%), allow retake but also show previous result
       // Fall through to return questions
     }
@@ -493,15 +552,16 @@ export const getTestQuestions = async (req, res) => {
     // Include previous result if this is a retake
     let previousResult = null;
     if (hasAttempted) {
-      const lastAttempt = enrollment.testAttempts[enrollment.testAttempts.length - 1];
+      const lastAttempt =
+        enrollment.testAttempts[enrollment.testAttempts.length - 1];
       let correctAnswers = lastAttempt.correctAnswers;
       let wrongAnswers = lastAttempt.wrongAnswers;
-      
+
       if (correctAnswers === undefined && lastAttempt.answers) {
-        correctAnswers = lastAttempt.answers.filter(a => a.isCorrect).length;
+        correctAnswers = lastAttempt.answers.filter((a) => a.isCorrect).length;
         wrongAnswers = lastAttempt.answers.length - correctAnswers;
       }
-      
+
       previousResult = {
         score: lastAttempt.score,
         correctAnswers: correctAnswers || 0,
@@ -509,6 +569,7 @@ export const getTestQuestions = async (req, res) => {
         totalQuestions: course.testQuestions.length,
         passed: false,
         attemptNumber: enrollment.testAttempts.length,
+        review,
       };
     }
 

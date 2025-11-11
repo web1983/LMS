@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetTestQuestionsQuery, useSubmitTestMutation } from '@/features/api/enrollmentApi';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Clock, CheckCircle, XCircle, Award, Loader2 } from 'lucide-react';
@@ -30,6 +30,7 @@ const MCQTest = () => {
   const [localTestResult, setLocalTestResult] = useState(null);
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   
   // Refetch data on component mount to ensure we have the latest test status
   useEffect(() => {
@@ -142,6 +143,7 @@ const MCQTest = () => {
     setSelectedAnswers({});
     setLocalShowResult(false);
     setLocalTestResult(null);
+    setReviewDialogOpen(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
@@ -175,6 +177,7 @@ const MCQTest = () => {
       setLocalTestResult(result.result);
       setLocalShowResult(true);
       setTestStarted(false);
+      setReviewDialogOpen(false);
       
       // Show special message if certificate was generated
       if (result.result.certificateGenerated && result.result.allCoursesCompleted) {
@@ -204,6 +207,10 @@ const MCQTest = () => {
   // Result Screen - Check this FIRST before checking for questions
   if (showResult && testResult) {
     const passed = safePassed;
+    const reviewData = Array.isArray(testResult?.review)
+      ? testResult.review
+      : [];
+    const hasReview = reviewData.length > 0;
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
         <div className="max-w-3xl mx-auto px-6">
@@ -266,6 +273,15 @@ const MCQTest = () => {
                 >
                   Back to Course
                 </Button>
+                {hasReview && (
+                  <Button
+                    variant="outline"
+                    className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8"
+                    onClick={() => setReviewDialogOpen(true)}
+                  >
+                    Review Answers
+                  </Button>
+                )}
                 {!passed && (
                   <>
                     <Button
@@ -305,6 +321,136 @@ const MCQTest = () => {
               </p>
             </CardContent>
           </Card>
+          <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+            <DialogContent className="bg-white max-w-3xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-gray-900">
+                  Test Review
+                </DialogTitle>
+                <DialogDescription className="text-gray-600">
+                  Review your answers to understand where you can improve.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-5">
+                {hasReview ? (
+                  reviewData.map((item) => {
+                    const questionKey = `question-${item.questionNumber}`;
+                    const correctOptionText =
+                      Array.isArray(item.options) && item.correctAnswer >= 0
+                        ? item.options[item.correctAnswer]
+                        : null;
+
+                    return (
+                      <div
+                        key={questionKey}
+                        className="border border-gray-200 rounded-lg p-5 text-left shadow-sm bg-white"
+                      >
+                        <p className="text-sm font-semibold text-gray-500 mb-1">
+                          Question {item.questionNumber}
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900">
+                          {item.question || "Untitled question"}
+                        </p>
+                        <div className="mt-4 space-y-3">
+                          {Array.isArray(item.options) && item.options.length > 0 ? (
+                            item.options.map((option, index) => {
+                              const isCorrect = index === item.correctAnswer;
+                              const isSelected = index === item.selectedAnswer;
+
+                              let optionClasses =
+                                "border rounded-lg p-3 text-sm transition-colors";
+                              if (isCorrect) {
+                                optionClasses +=
+                                  " border-green-500 bg-green-50 text-green-900";
+                              } else if (isSelected) {
+                                optionClasses +=
+                                  " border-red-500 bg-red-50 text-red-900";
+                              } else {
+                                optionClasses +=
+                                  " border-gray-200 bg-white text-gray-700";
+                              }
+
+                              return (
+                                <div key={`${questionKey}-option-${index}`} className={optionClasses}>
+                                  <p className="font-medium">
+                                    {option || `Option ${index + 1}`}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2 mt-2 text-xs font-semibold">
+                                    {isCorrect && (
+                                      <span className="px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                        Correct Answer
+                                      </span>
+                                    )}
+                                    {isSelected && (
+                                      <span
+                                        className={`px-2 py-1 rounded-full ${
+                                          isCorrect
+                                            ? "bg-green-200 text-green-800"
+                                            : "bg-red-100 text-red-600"
+                                        }`}
+                                      >
+                                        Your Choice
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              Options not available.
+                            </p>
+                          )}
+                        </div>
+
+                        {item.selectedAnswer === -1 && (
+                          <p className="mt-4 text-sm text-orange-600 font-medium">
+                            You did not answer this question.
+                          </p>
+                        )}
+
+                        {item.selectedAnswer !== -1 && !item.isCorrect && (
+                          <p className="mt-4 text-sm text-red-600 font-medium">
+                            Your answer was incorrect. Correct answer:{" "}
+                            <span className="font-semibold text-red-700">
+                              {correctOptionText ?? "Not available"}
+                            </span>
+                          </p>
+                        )}
+
+                        {item.isCorrect && (
+                          <p className="mt-4 text-sm text-green-600 font-medium">
+                            Great job! You answered this correctly.
+                          </p>
+                        )}
+
+                        {item.explanation && (
+                          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                            <strong className="block text-blue-900 mb-1">
+                              Explanation
+                            </strong>
+                            {item.explanation}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Review data is not available for this attempt.
+                  </p>
+                )}
+              </div>
+              <DialogFooter className="pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setReviewDialogOpen(false)}
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     );
