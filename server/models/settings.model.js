@@ -9,6 +9,19 @@ const settingsSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  // Website settings for SEO and social media
+  siteTitle: {
+    type: String,
+    default: "",
+  },
+  siteDescription: {
+    type: String,
+    default: "",
+  },
+  siteThumbnail: {
+    type: String,
+    default: "",
+  },
   // Singleton pattern - only one settings document
   settingsId: {
     type: String,

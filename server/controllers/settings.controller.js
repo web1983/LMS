@@ -12,6 +12,9 @@ export const getSettings = async (req, res) => {
         settingsId: "app-settings",
         companyName: "",
         logoUrl: "",
+        siteTitle: "",
+        siteDescription: "",
+        siteThumbnail: "",
       });
     }
 
@@ -32,8 +35,9 @@ export const getSettings = async (req, res) => {
 // Update app settings (admin only)
 export const updateSettings = async (req, res) => {
   try {
-    const { companyName } = req.body;
-    const logoFile = req.file;
+    const { companyName, siteTitle, siteDescription } = req.body;
+    const logoFile = req.files?.logo?.[0];
+    const thumbnailFile = req.files?.thumbnail?.[0];
 
     let settings = await Settings.findOne({ settingsId: "app-settings" });
     
@@ -43,12 +47,25 @@ export const updateSettings = async (req, res) => {
         settingsId: "app-settings",
         companyName: companyName || "",
         logoUrl: "",
+        siteTitle: siteTitle || "",
+        siteDescription: siteDescription || "",
+        siteThumbnail: "",
       });
     }
 
     // Update company name (can be empty)
     if (companyName !== undefined) {
       settings.companyName = companyName;
+    }
+
+    // Update site title
+    if (siteTitle !== undefined) {
+      settings.siteTitle = siteTitle;
+    }
+
+    // Update site description
+    if (siteDescription !== undefined) {
+      settings.siteDescription = siteDescription;
     }
 
     // Update logo if provided
@@ -69,6 +86,26 @@ export const updateSettings = async (req, res) => {
       // Upload new logo (use buffer for serverless, path for local)
       const cloudResponse = await uploadMedia(logoFile.buffer || logoFile.path);
       settings.logoUrl = cloudResponse.secure_url;
+    }
+
+    // Update site thumbnail if provided
+    if (thumbnailFile) {
+      // Delete old thumbnail from cloudinary if it exists
+      if (settings.siteThumbnail) {
+        try {
+          const publicId = extractPublicId(settings.siteThumbnail);
+          if (publicId) {
+            await deleteMediaFromCloudinary(publicId);
+            console.log("Old site thumbnail deleted:", publicId);
+          }
+        } catch (err) {
+          console.warn("Failed to delete old site thumbnail:", err.message);
+        }
+      }
+
+      // Upload new thumbnail (use buffer for serverless, path for local)
+      const cloudResponse = await uploadMedia(thumbnailFile.buffer || thumbnailFile.path);
+      settings.siteThumbnail = cloudResponse.secure_url;
     }
 
     await settings.save();

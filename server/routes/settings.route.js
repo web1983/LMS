@@ -8,8 +8,11 @@ const router = express.Router();
 // Get settings (public - no auth required)
 router.get("/", getSettings);
 
-// Update settings (admin only)
-router.put("/", isAuthenticated, upload.single("logo"), updateSettings);
+// Update settings (admin only) - supports multiple file uploads (logo and thumbnail)
+router.put("/", isAuthenticated, upload.fields([
+  { name: "logo", maxCount: 1 },
+  { name: "thumbnail", maxCount: 1 }
+]), updateSettings);
 
 export default router;
 
