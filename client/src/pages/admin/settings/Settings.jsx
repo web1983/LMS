@@ -364,11 +364,34 @@ const Settings = () => {
             </div>
 
             {/* Info Box */}
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
               <p className="text-sm text-blue-900">
                 <strong>Note:</strong> These settings control how your site appears in search engines and social media. 
                 The thumbnail, title, and description will be used for Open Graph meta tags and SEO.
               </p>
+              {!previewThumbnail && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded mt-2">
+                  <p className="text-sm text-yellow-900">
+                    <strong>⚠️ Important:</strong> Upload a site thumbnail image (1200x630px recommended) for WhatsApp and social media previews to show correctly.
+                  </p>
+                </div>
+              )}
+              {previewThumbnail && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded mt-2">
+                  <p className="text-sm text-green-900">
+                    <strong>💡 After saving:</strong> If WhatsApp still shows the old preview, clear the cache using{' '}
+                    <a 
+                      href="https://developers.facebook.com/tools/debug/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="underline font-semibold"
+                    >
+                      Facebook Sharing Debugger
+                    </a>
+                    {' '}and click "Scrape Again" to refresh WhatsApp's preview.
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
