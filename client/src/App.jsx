@@ -28,6 +28,7 @@ import Settings from './pages/admin/settings/Settings'
 import GenerateCertificate from './pages/admin/certificate/GenerateCertificate'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
+import SEOHead from './components/SEOHead'
 
 const appRouter = createBrowserRouter([
   {
@@ -153,12 +154,11 @@ const appRouter = createBrowserRouter([
 ]);
 
 function App() {
-
-
   return (
     <main>
-     <RouterProvider router={appRouter} />
-     {/* <Navbar />
+      <SEOHead />
+      <RouterProvider router={appRouter} />
+      {/* <Navbar />
       <HeroSection />
       <Login /> */}
     </main>
