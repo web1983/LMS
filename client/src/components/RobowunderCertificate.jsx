@@ -25,26 +25,73 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
     try {
       toast.loading('Generating certificate...');
       
-      // Create canvas from the certificate
+      // Wait for images to load
+      if (logoUrl) {
+        await new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = resolve;
+          img.onerror = resolve; // Continue even if image fails
+          img.src = logoUrl;
+        });
+      }
+
+      // Wait a bit for all styles to render
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Get the element's computed style dimensions
+      const rect = certificateRef.current.getBoundingClientRect();
+      const elementWidth = rect.width;
+      const elementHeight = rect.height;
+      
+      // Create canvas from the certificate with higher quality settings
       const canvas = await html2canvas(certificateRef.current, {
-        scale: 2,
+        scale: 4, // Higher scale for better quality (4x for crisp text and borders)
         useCORS: true,
-        backgroundColor: '#ffffff',
+        allowTaint: false,
+        backgroundColor: '#fffbeb', // Match certificate background
         logging: false,
+        width: elementWidth,
+        height: elementHeight,
+        windowWidth: elementWidth,
+        windowHeight: elementHeight,
+        removeContainer: false,
+        imageTimeout: 15000,
       });
 
-      // A4 dimensions in mm
-      const imgWidth = 297; // A4 width in mm (landscape)
-      const imgHeight = 210; // A4 height in mm (landscape)
+      // A4 portrait dimensions in mm (210mm x 297mm)
+      const pdfWidth = 210; // A4 width in mm (portrait)
+      const pdfHeight = 297; // A4 height in mm (portrait)
 
-      const imgData = canvas.toDataURL('image/png');
+      // Calculate the scale to fit canvas to A4
+      const canvasAspectRatio = canvas.width / canvas.height;
+      const pdfAspectRatio = pdfWidth / pdfHeight;
+
+      let imgWidth = pdfWidth;
+      let imgHeight = pdfHeight;
+      let xPos = 0;
+      let yPos = 0;
+
+      if (canvasAspectRatio > pdfAspectRatio) {
+        // Canvas is wider than A4, fit to width
+        imgHeight = pdfWidth / canvasAspectRatio;
+        yPos = (pdfHeight - imgHeight) / 2;
+      } else {
+        // Canvas is taller than A4, fit to height
+        imgWidth = pdfHeight * canvasAspectRatio;
+        xPos = (pdfWidth - imgWidth) / 2;
+      }
+
+      const imgData = canvas.toDataURL('image/png', 1.0); // Highest quality
       const pdf = new jsPDF({
-        orientation: 'landscape',
+        orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
+        compress: true,
       });
 
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Add certificate image centered on A4 page
+      pdf.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight, undefined, 'FAST');
       pdf.save(`${userName.replace(/\s+/g, '_')}_Robowunder_Certificate_${year}.pdf`);
       
       toast.dismiss();
@@ -57,28 +104,75 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4" style={{ width: '100%' }}>
       {/* Certificate Preview */}
       <div 
         ref={certificateRef}
-        className="w-full shadow-2xl border-8 border-double"
+        className="shadow-2xl"
         style={{ 
-          aspectRatio: '297/210',
-          borderColor: '#d97706', // amber-600
-          backgroundColor: '#ffffff'
+          width: '210mm',
+          height: '297mm',
+          maxWidth: 'calc(100vw - 2rem)',
+          maxHeight: '90vh',
+          aspectRatio: '210/297',
+          margin: '0 auto',
+          border: '8px double #d97706', // amber-600 double border
+          backgroundColor: '#fffbeb', // light beige background
+          boxSizing: 'border-box',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
         <div 
           className="relative h-full p-8 md:p-12"
           style={{
-            background: 'linear-gradient(to bottom right, #fffbeb, #ffffff, #eff6ff)'
+            width: '100%',
+            height: '100%',
+            background: '#fffbeb', // Solid background for better PDF rendering
+            boxSizing: 'border-box',
           }}
         >
-          {/* Decorative Corners */}
-          <div className="absolute top-4 left-4 w-16 h-16" style={{ borderTop: '4px solid #d97706', borderLeft: '4px solid #d97706' }}></div>
-          <div className="absolute top-4 right-4 w-16 h-16" style={{ borderTop: '4px solid #d97706', borderRight: '4px solid #d97706' }}></div>
-          <div className="absolute bottom-4 left-4 w-16 h-16" style={{ borderBottom: '4px solid #d97706', borderLeft: '4px solid #d97706' }}></div>
-          <div className="absolute bottom-4 right-4 w-16 h-16" style={{ borderBottom: '4px solid #d97706', borderRight: '4px solid #d97706' }}></div>
+          {/* Decorative L-shaped Corners */}
+          <div 
+            className="absolute top-4 left-4" 
+            style={{ 
+              width: '64px', 
+              height: '64px', 
+              borderTop: '4px solid #d97706', 
+              borderLeft: '4px solid #d97706',
+              boxSizing: 'border-box'
+            }}
+          ></div>
+          <div 
+            className="absolute top-4 right-4" 
+            style={{ 
+              width: '64px', 
+              height: '64px', 
+              borderTop: '4px solid #d97706', 
+              borderRight: '4px solid #d97706',
+              boxSizing: 'border-box'
+            }}
+          ></div>
+          <div 
+            className="absolute bottom-4 left-4" 
+            style={{ 
+              width: '64px', 
+              height: '64px', 
+              borderBottom: '4px solid #d97706', 
+              borderLeft: '4px solid #d97706',
+              boxSizing: 'border-box'
+            }}
+          ></div>
+          <div 
+            className="absolute bottom-4 right-4" 
+            style={{ 
+              width: '64px', 
+              height: '64px', 
+              borderBottom: '4px solid #d97706', 
+              borderRight: '4px solid #d97706',
+              boxSizing: 'border-box'
+            }}
+          ></div>
 
           {/* Content Container */}
           <div className="relative h-full flex flex-col items-center justify-between">
@@ -86,17 +180,30 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
             <div className="text-center space-y-4">
               {/* Logo */}
               {logoUrl ? (
-                <div className="flex justify-center mb-4">
+                <div className="flex justify-center mb-4" style={{ minHeight: '80px', display: 'flex', alignItems: 'center' }}>
                   <img 
                     src={logoUrl} 
                     alt="Robowunder Logo" 
-                    className="h-16 w-16 md:h-20 md:w-20 object-contain"
+                    style={{
+                      height: '80px',
+                      width: '80px',
+                      objectFit: 'contain',
+                      display: 'block'
+                    }}
                     crossOrigin="anonymous"
+                    onError={(e) => {
+                      // Fallback to Award icon if image fails to load
+                      e.target.style.display = 'none';
+                      e.target.nextElementSibling.style.display = 'flex';
+                    }}
                   />
+                  <div className="flex justify-center" style={{ display: 'none' }}>
+                    <Award className="h-20 w-20" style={{ color: '#d97706' }} />
+                  </div>
                 </div>
               ) : (
-                <div className="flex justify-center mb-4">
-                  <Award className="h-16 w-16 md:h-20 md:w-20" style={{ color: '#d97706' }} />
+                <div className="flex justify-center mb-4" style={{ minHeight: '80px', display: 'flex', alignItems: 'center' }}>
+                  <Award className="h-20 w-20" style={{ color: '#d97706', display: 'block' }} />
                 </div>
               )}
 
@@ -106,12 +213,37 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
               </h1>
               
               {/* Certificate Title */}
-              <div className="space-y-2">
-                <div className="w-32 h-1 mx-auto" style={{ background: 'linear-gradient(to right, transparent, #d97706, transparent)' }}></div>
-                <h2 className="text-xl md:text-2xl font-serif italic" style={{ color: '#b45309' }}>
+              <div className="space-y-2" style={{ marginTop: '16px' }}>
+                <div 
+                  className="mx-auto" 
+                  style={{ 
+                    width: '128px', 
+                    height: '2px', 
+                    background: '#d97706',
+                    opacity: 0.5
+                  }}
+                ></div>
+                <h2 
+                  className="text-2xl font-serif italic" 
+                  style={{ 
+                    color: '#b45309',
+                    fontSize: '24px',
+                    fontWeight: 'normal',
+                    fontStyle: 'italic',
+                    margin: '8px 0'
+                  }}
+                >
                   Certificate of Participation
                 </h2>
-                <div className="w-32 h-1 mx-auto" style={{ background: 'linear-gradient(to right, transparent, #d97706, transparent)' }}></div>
+                <div 
+                  className="mx-auto" 
+                  style={{ 
+                    width: '128px', 
+                    height: '2px', 
+                    background: '#d97706',
+                    opacity: 0.5
+                  }}
+                ></div>
               </div>
             </div>
 
@@ -122,11 +254,27 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
               </p>
 
               {/* Student Name */}
-              <div className="my-4">
-                <h3 className="text-3xl md:text-4xl font-bold mb-2 font-serif" style={{ color: '#1e3a8a' }}>
+              <div className="my-6" style={{ margin: '24px 0' }}>
+                <h3 
+                  className="font-bold mb-2 font-serif" 
+                  style={{ 
+                    color: '#1e3a8a',
+                    fontSize: '36px',
+                    fontWeight: 'bold',
+                    marginBottom: '8px'
+                  }}
+                >
                   {userName}
                 </h3>
-                <div className="w-64 h-0.5 mx-auto" style={{ backgroundColor: '#1f2937' }}></div>
+                <div 
+                  className="mx-auto" 
+                  style={{ 
+                    width: '256px', 
+                    height: '1px', 
+                    backgroundColor: '#1f2937',
+                    margin: '0 auto'
+                  }}
+                ></div>
               </div>
 
               {/* Description */}
@@ -157,8 +305,16 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
               </div>
 
               {/* Award Icon */}
-              <div className="hidden md:block">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(to bottom right, #fbbf24, #d97706)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div 
+                  className="rounded-full flex items-center justify-center" 
+                  style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    background: '#d97706',
+                    borderRadius: '50%'
+                  }}
+                >
                   <Award className="h-10 w-10" style={{ color: '#ffffff' }} />
                 </div>
               </div>
