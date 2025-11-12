@@ -25,6 +25,7 @@ import InstructorTab from './pages/admin/InstructorTab'
 import LiveCourses from './pages/admin/course/LiveCourses'
 import SchoolCodes from './pages/admin/SchoolCodes'
 import Settings from './pages/admin/settings/Settings'
+import GenerateCertificate from './pages/admin/certificate/GenerateCertificate'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
 
@@ -128,6 +129,10 @@ const appRouter = createBrowserRouter([
           {
             path:"school-codes",
             element:<SchoolCodes/>
+          },
+          {
+            path:"generate-certificate",
+            element:<GenerateCertificate/>
           },
           {
             path:"settings",
