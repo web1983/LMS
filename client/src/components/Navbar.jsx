@@ -101,13 +101,14 @@ const Navbar = () => {
       <div className="px-4 sm:px-6 md:px-[6.125rem] mx-auto hidden md:grid grid-cols-3 items-center gap-4">
         {/* Left Navigation - HOME, MY LEARNING, PROFILE */}
         <div className="flex items-center gap-6 md:gap-8 justify-start pt-4 md:pt-6">
-          {/* Before login: All links go to login page | After login: Links go to actual pages */}
+          {/* HOME always goes to home page */}
           <Link 
-            to={user ? "/" : "/login"}
+            to="/"
             className="text-white hover:text-orange-500 transition-colors duration-200 font-semibold text-[14px] whitespace-nowrap"
           >
             HOME
           </Link>
+          {/* Before login: MY LEARNING and PROFILE go to login page | After login: Links go to actual pages */}
           <Link 
             to={user ? "/my-learning" : "/login"}
             className="text-white hover:text-orange-500 transition-colors duration-200 font-semibold text-[14px] whitespace-nowrap"
