@@ -135,11 +135,16 @@ const HeroSection = () => {
                       className="w-auto h-auto max-w-[60%] sm:max-w-[50%] md:max-w-full object-contain"
                     />
                     {/* Play Button - Positioned on right of VR image - Desktop: original position */}
-                    <img 
-                      src="https://res.cloudinary.com/dmlk8egiw/image/upload/v1762949099/Play_Button_vutznp.png"
-                      alt="Play"
-                      className="w-auto h-auto cursor-pointer hover:scale-110 transition-transform duration-300 -ml-10 sm:-ml-6 md:-ml-[58px] max-w-[20%] sm:max-w-[18%] md:max-w-full"
-                    />
+                    <button
+                      onClick={handlePlayButtonClick}
+                      className="relative cursor-pointer hover:scale-110 transition-transform duration-300 -ml-10 sm:-ml-6 md:-ml-[58px] focus:outline-none bg-transparent border-0 p-0"
+                    >
+                      <img 
+                        src="https://res.cloudinary.com/dmlk8egiw/image/upload/v1762949099/Play_Button_vutznp.png"
+                        alt="Play"
+                        className="w-auto h-auto max-w-[20%] sm:max-w-[18%] md:max-w-full object-contain"
+                      />
+                    </button>
                   </div>
                   
                   {/* Text after VR Glasses */}
