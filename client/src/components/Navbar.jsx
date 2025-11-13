@@ -1,4 +1,4 @@
-import { Menu, School, LogOut } from 'lucide-react'
+import { Menu, LogOut, ChevronDown } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Button } from './ui/button';
@@ -44,6 +44,12 @@ const Navbar = () => {
   const companyName = settings?.companyName || '';
   const logoUrl = settings?.logoUrl || '';
 
+  // Bot icon URL from Figma
+  const botIconUrl = "https://res.cloudinary.com/dmlk8egiw/image/upload/v1762943081/Mask_group_umuqm2.png";
+  
+  // Logo image URL
+  const logoButtonUrl = "https://res.cloudinary.com/dmlk8egiw/image/upload/v1762944292/Group_3645_vhtdrw.png";
+
   // Cache settings to localStorage when received
   useEffect(() => {
     if (settingsData?.settings) {
@@ -56,16 +62,16 @@ const Navbar = () => {
     }
   }, [settingsData]);
 
-  // Preload logo image
+  // Preload logo button image
   useEffect(() => {
-    if (logoUrl) {
+    const img = new Image();
+    img.src = logoButtonUrl;
+    img.onload = () => setLogoImageLoaded(true);
+    img.onerror = () => {
       setLogoImageLoaded(false);
-      const img = new Image();
-      img.src = logoUrl;
-      img.onload = () => setLogoImageLoaded(true);
-      img.onerror = () => setLogoImageLoaded(false);
-    }
-  }, [logoUrl]);
+      console.error('Failed to load Robowunder logo button');
+    };
+  }, [logoButtonUrl]);
 
   // Preload profile image
   useEffect(() => {
@@ -90,131 +96,144 @@ const Navbar = () => {
   }, [isSuccess]);
 
   return (
-    <div className='h-20 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-lg shadow-gray-200/50 fixed top-0 left-0 right-0 duration-300 z-50'>
-      {/* Desktop */}
-      <div className="max-w-7xl md:flex mx-auto hidden justify-between items-center gap-10 h-full px-6">
-        {/* Logo Section */}
-        <div className='flex items-center gap-3 group cursor-pointer' onClick={() => navigate("/")}>
-          <div className="relative h-12 w-12 flex items-center justify-center rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-            {logoUrl && logoImageLoaded ? (
-              <img 
-                src={logoUrl} 
-                alt={companyName || 'Logo'} 
-                className="h-10 w-10 object-contain p-1"
-              />
-            ) : (
-              <School size={"28"} className="text-white" />
-            )}
-            <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </div>
-          {companyName && (
-            <div className="flex flex-col">
-              <h1 className='hidden md:block font-bold text-xl  text-black transition-all duration-300'>
-                {companyName}
-              </h1>
-              <p className="hidden lg:block text-xs text-gray-500 font-medium">Robotics Championship 2026</p>
-            </div>
-          )}
+    <div className='h-16 md:h-20 bg-transparent absolute z-50 top-0 left-0 right-0'>
+      {/* Desktop - Keep original design unchanged, responsive only for mobile/tablet */}
+      <div className="px-4 sm:px-6 md:px-[6.125rem] mx-auto hidden md:grid grid-cols-3 items-center gap-4">
+        {/* Left Navigation - HOME, MY LEARNING, PROFILE */}
+        <div className="flex items-center gap-6 md:gap-8 justify-start pt-4 md:pt-6">
+          {/* Before login: All links go to login page | After login: Links go to actual pages */}
+          <Link 
+            to={user ? "/" : "/login"}
+            className="text-white hover:text-orange-500 transition-colors duration-200 font-semibold text-[14px] whitespace-nowrap"
+          >
+            HOME
+          </Link>
+          <Link 
+            to={user ? "/my-learning" : "/login"}
+            className="text-white hover:text-orange-500 transition-colors duration-200 font-semibold text-[14px] whitespace-nowrap"
+          >
+            MY LEARNING
+          </Link>
+          <Link 
+            to={user ? "/profile" : "/login"}
+            className="text-white hover:text-orange-500 transition-colors duration-200 font-semibold text-[14px] whitespace-nowrap"
+          >
+            PROFILE
+          </Link>
         </div>
 
-        {/* User Section */}
-        <div className="flex items-center gap-4">
-          {
-            user ? (
-              <>
-                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <div className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-gray-50 transition-all duration-300">
-                      <Avatar className="h-10 w-10 ring-2 ring-blue-100 group-hover:ring-blue-300 transition-all duration-300">
-                        <AvatarImage 
-                          src={user?.photoUrl || "https://github.com/shadcn.png"} 
-                          alt={user?.name || "User"}
-                        />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-sm">
-                          {user?.name?.charAt(0).toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="hidden lg:flex flex-col items-start">
-                        <span className="text-sm font-semibold text-gray-900">{user?.name}</span>
-                        <span className="text-xs text-gray-500">{user?.email}</span>
-                      </div>
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 mt-2 p-2 bg-white/95 backdrop-blur-md border border-gray-200/50 shadow-xl" align="end">
-                    <DropdownMenuLabel className="text-gray-900 font-semibold">My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-gray-200" />
-                    <DropdownMenuGroup className="space-y-1">
-                      <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-200" onClick={() => setDropdownOpen(false)}>
-                        <Link to="my-learning" className="flex items-center w-full gap-2 font-medium">
-                          📚 My Learning
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-200" onClick={() => setDropdownOpen(false)}>
-                        <Link to="profile" className="flex items-center w-full gap-2 font-medium">
-                          ✏️ Edit Profile
-                        </Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    {
-                      user.role === "instructor" && (
-                        <>
-                          <DropdownMenuSeparator className="bg-gray-200 my-2" />
-                          <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-indigo-50 focus:bg-indigo-50 transition-colors duration-200" onClick={() => setDropdownOpen(false)}>
-                            <Link to="admin/dashboard" className="flex items-center w-full gap-2 font-medium text-indigo-600">
-                              🎯 Dashboard
-                            </Link>
-                          </DropdownMenuItem>
-                        </>
-                      )
-                    }
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button 
-                  onClick={logoutHandler} 
-                  variant="outline" 
-                  className="flex items-center gap-2 border-2  text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate("/login")}
-                  className="bg-white border-2 border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 font-semibold px-6 py-2.5 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
-                >
-                  Login
-                </Button>
-                <Button 
-                  onClick={() => navigate("/login")}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  Join Now
-                </Button>
-              </div>
-            )}
+        {/* Center - Robowunder Logo Button */}
+        <div className="flex items-center justify-center align-items-flex-start">
+          <button
+            onClick={() => navigate("/")}
+            className="relative transition-all duration-300 hover:scale-105 group cursor-pointer"
+          >
+            {/* Logo Image from Cloudinary - Desktop: original size */}
+            <img 
+              src="https://res.cloudinary.com/dmlk8egiw/image/upload/v1762944292/Group_3645_vhtdrw.png"
+              alt="Robowunder Logo"
+              className="h-12 md:h-14 w-auto object-contain lg:h-16 xl:h-14 max-w-[280px]"
+            />
+          </button>
+        </div>
+
+        {/* Right Section - SIGNUP/LOGIN (before login) | LOGOUT + Bot Dropdown (after login) */}
+        <div className="flex items-center gap-3 md:gap-4 justify-end pt-4 md:pt-6">
+          {/* Before Login: Show SIGNUP and LOGIN buttons */}
+          {!user && (
+            <>
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate("/login")}
+                className="text-white hover:text-orange-500 hover:bg-transparent font-semibold px-3 md:px-4 py-2 rounded-lg transition-all duration-300 text-[14px] whitespace-nowrap"
+              >
+                SIGNUP
+              </Button>
+
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate("/login")}
+                className="text-white hover:text-orange-500 hover:bg-transparent font-semibold px-3 md:px-4 py-2 rounded-lg transition-all duration-300 text-[14px] whitespace-nowrap"
+              >
+                LOGIN
+              </Button>
+            </>
+          )}
+
+          {/* After Login: Show LOGOUT button and Bot Dropdown */}
+          {user && (
+            <>
+              {/* Logout Button */}
+              <Button 
+                variant="ghost" 
+                onClick={logoutHandler}
+                className="text-white hover:text-orange-500 hover:bg-transparent font-semibold px-3 md:px-4 py-2 rounded-lg transition-all duration-300 text-[14px] whitespace-nowrap"
+              >
+                LOGOUT
+              </Button>
+
+              {/* Bot Icon Dropdown - Shows My Learning and Edit Profile - Desktop: original size */}
+              <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <div className="flex items-center cursor-pointer group px-2 py-1 rounded-lg hover:bg-white/10 transition-all duration-300">
+                    <img 
+                      src={botIconUrl} 
+                      alt="Bot" 
+                      className="h-7 md:h-8 w-7 md:w-8 object-contain hover:opacity-80 transition-opacity duration-200"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 mt-2 p-2 bg-gray-800 border-gray-700 text-white shadow-xl" align="end">
+                  <DropdownMenuLabel className="text-white font-semibold">My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-gray-700" />
+                  <DropdownMenuGroup className="space-y-1">
+                    <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-gray-700 focus:bg-gray-700 transition-colors duration-200 text-white" onClick={() => setDropdownOpen(false)}>
+                      <Link to="/my-learning" className="flex items-center w-full gap-2 font-medium">
+                        📚 My Learning
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-gray-700 focus:bg-gray-700 transition-colors duration-200 text-white" onClick={() => setDropdownOpen(false)}>
+                      <Link to="/profile" className="flex items-center w-full gap-2 font-medium">
+                        ✏️ Edit Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  {
+                    user.role === "instructor" && (
+                      <>
+                        <DropdownMenuSeparator className="bg-gray-700 my-2" />
+                        <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-gray-700 focus:bg-gray-700 transition-colors duration-200 text-white" onClick={() => setDropdownOpen(false)}>
+                          <Link to="/admin/dashboard" className="flex items-center w-full gap-2 font-medium text-orange-400">
+                            🎯 Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )
+                  }
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
         </div>
       </div>
 
       {/* Mobile Navbar */}
-      <div className="flex md:hidden items-center justify-between px-4 h-full">
+      <div className="flex md:hidden items-center justify-between px-3 sm:px-4 h-full bg-transparent">
         <div className='flex items-center gap-2' onClick={() => navigate("/")}>
-          <div className="relative h-10 w-10 flex items-center justify-center rounded-lg  shadow-md">
-            {logoUrl && logoImageLoaded ? (
-              <img 
-                src={logoUrl} 
-                alt={companyName || 'Logo'} 
-                className="h-8 w-8 object-contain p-1"
-              />
-            ) : (
-              <School size={"24"} className="text-white" />
-            )}
-          </div>
-          {companyName && (
-            <h1 className="font-bold text-lg text-black">{companyName}</h1>
-          )}
+          <button
+            onClick={() => navigate("/")}
+            className="relative transition-all duration-300 hover:scale-105 cursor-pointer"
+          >
+            {/* Logo Image from Cloudinary */}
+            <img 
+              src="https://res.cloudinary.com/dmlk8egiw/image/upload/v1762944292/Group_3645_vhtdrw.png"
+              alt="Robowunder Logo"
+              className="h-10 sm:h-12 w-auto object-contain max-w-[160px] sm:max-w-[200px]"
+            />
+          </button>
         </div>
         <MobileNavbar />
       </div>
@@ -250,15 +269,15 @@ const MobileNavbar = () => {
       <SheetTrigger asChild>
         <Button 
           size="icon" 
-          className="focus:ring-0 focus:outline-none border-0 rounded-xl text-black shadow-md hover:shadow-lg transition-all duration-300" 
+          className="focus:ring-0 focus:outline-none border-0 rounded-xl text-white shadow-md hover:shadow-lg transition-all duration-300 bg-white/10 hover:bg-white/20" 
           variant="outline"
         >
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="flex flex-col bg-gradient-to-br from-white to-gray-50 border-l border-gray-200">
-        <SheetHeader className="flex flex-row items-center justify-between mt-2 pb-4 border-b border-gray-200">
-          <SheetTitle className="text-xl font-bold text-black">
+      <SheetContent className="flex flex-col bg-gray-900 border-l border-gray-800">
+        <SheetHeader className="flex flex-row items-center justify-between mt-2 pb-4 border-b border-gray-800">
+          <SheetTitle className="text-xl font-bold text-white">
             {companyName || 'Menu'}
           </SheetTitle>
           <SheetDescription className="sr-only">
@@ -269,19 +288,19 @@ const MobileNavbar = () => {
         {user ? (
           <>
             {/* User Info Section */}
-            <div className="flex items-center gap-3 mt-6 p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-              <Avatar className="h-12 w-12 ring-2 ring-blue-200">
+            <div className="flex items-center gap-3 mt-6 p-4 bg-gray-800 rounded-xl shadow-sm border border-gray-700">
+              <Avatar className="h-12 w-12 ring-2 ring-orange-500/50">
                 <AvatarImage 
                   src={user?.photoUrl || "https://github.com/shadcn.png"} 
                   alt={user?.name || "User"}
                 />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold">
+                <AvatarFallback className="bg-orange-500 text-white font-bold">
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="text-sm font-bold text-gray-900 truncate">{user?.name}</span>
-                <span className="text-xs text-gray-500 truncate">{user?.email}</span>
+                <span className="text-sm font-bold text-white truncate">{user?.name}</span>
+                <span className="text-xs text-gray-400 truncate">{user?.email}</span>
               </div>
             </div>
             
@@ -289,16 +308,24 @@ const MobileNavbar = () => {
             <nav className="flex flex-col space-y-2 mt-6">
               <SheetClose asChild>
                 <Link 
-                  to="my-learning" 
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-medium transition-all duration-200"
+                  to="/"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-orange-500 hover:bg-gray-800 rounded-xl font-medium transition-all duration-200"
+                >
+                  🏠 <span>Home</span>
+                </Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link 
+                  to="/my-learning" 
+                  className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-orange-500 hover:bg-gray-800 rounded-xl font-medium transition-all duration-200"
                 >
                   📚 <span>My Learning</span>
                 </Link>
               </SheetClose>
               <SheetClose asChild>
                 <Link 
-                  to="profile" 
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-medium transition-all duration-200"
+                  to="/profile" 
+                  className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-orange-500 hover:bg-gray-800 rounded-xl font-medium transition-all duration-200"
                 >
                   ✏️ <span>Edit Profile</span>
                 </Link>
@@ -306,8 +333,8 @@ const MobileNavbar = () => {
               {user.role === "instructor" && (
                 <SheetClose asChild>
                   <Link 
-                    to="admin/dashboard" 
-                    className="flex items-center gap-3 px-4 py-3 text-indigo-600 hover:bg-indigo-50 rounded-xl font-medium transition-all duration-200"
+                    to="/admin/dashboard" 
+                    className="flex items-center gap-3 px-4 py-3 text-orange-400 hover:bg-gray-800 rounded-xl font-medium transition-all duration-200"
                   >
                     🎯 <span>Dashboard</span>
                   </Link>
@@ -319,7 +346,7 @@ const MobileNavbar = () => {
             <Button 
               onClick={logoutHandler} 
               variant="outline" 
-              className="flex items-center justify-center gap-2 mt-auto border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold py-3 rounded-xl transition-all duration-300 shadow-sm"
+              className="flex items-center justify-center gap-2 mt-auto border-2 border-red-600/50 text-red-400 hover:bg-red-600/20 hover:border-red-600 font-semibold py-3 rounded-xl transition-all duration-300 shadow-sm"
             >
               <LogOut className="h-4 w-4" />
               Logout
@@ -331,7 +358,7 @@ const MobileNavbar = () => {
               <Button 
                 onClick={() => navigate("/login")} 
                 variant="outline"
-                className="bg-white border-2 border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 font-semibold py-3 rounded-xl transition-all duration-300"
+                className="bg-gray-800 border-2 border-gray-700 text-white hover:bg-gray-700 hover:border-gray-600 font-semibold py-3 rounded-xl transition-all duration-300"
               >
                 Login
               </Button>
@@ -339,7 +366,7 @@ const MobileNavbar = () => {
             <SheetClose asChild>
               <Button 
                 onClick={() => navigate("/login")}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-300"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl shadow-lg transition-all duration-300"
               >
                 Join Now
               </Button>
