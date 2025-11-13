@@ -107,9 +107,9 @@ useEffect(() => {
 }, [registerIsSuccess, registerError, registerData, loginIsSuccess, loginError, loginData]);
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat px-4 py-12">
-      <div className="relative z-10 w-full max-w-md">
-        <Tabs defaultValue="login" className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden pt-4 px-3">
+    <div className="relative flex items-start justify-center min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat px-4 pt-24 pb-12">
+      <div className="relative z-10 w-full max-w-md mt-4">
+        <Tabs defaultValue="login" className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden pt-4 px-3 max-h-[calc(100vh-8rem)] flex flex-col">
           <TabsList className="flex justify-center bg-white/5 p-1 rounded-t-xl border-b border-white/10">
             <TabsTrigger
               value="signup"
@@ -126,7 +126,7 @@ useEffect(() => {
           </TabsList>
 
           {/* Signup Tab */}
-          <TabsContent value="signup" className="p-6">
+          <TabsContent value="signup" className="p-6 overflow-y-auto flex-1 min-h-0">
             <Card className="shadow-none border-0 bg-transparent">
               <CardHeader className="mb-4 text-center">
                 <CardTitle className="text-2xl font-semibold text-white">Signup</CardTitle>
@@ -179,13 +179,13 @@ useEffect(() => {
                     value={signupInput.studentClass} 
                     onValueChange={(value) => setSignupInput({ ...signupInput, studentClass: value })}
                   >
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white focus:border-[#F58120] focus:ring-[#F58120]">
-                      <SelectValue placeholder="Select your grade" className="text-white" />
+                    <SelectTrigger className="!bg-white/10 !border-white/20 !text-white focus:!border-[#F58120] focus:!ring-[#F58120] data-[placeholder]:!text-white/50 [&>span]:!text-white [&>svg]:!text-white">
+                      <SelectValue placeholder="Select your grade" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-white/20 text-white">
-                      <SelectItem value="3-5" className="hover:bg-gray-700">Grade 3 to 5</SelectItem>
-                      <SelectItem value="6-8" className="hover:bg-gray-700">Grade 6 to 8</SelectItem>
-                      <SelectItem value="9-12" className="hover:bg-gray-700">Grade 9 to 12</SelectItem>
+                    <SelectContent className="!bg-gray-800 !border-white/20 !text-white">
+                      <SelectItem value="3-5" className="!text-white hover:!bg-gray-700 focus:!bg-gray-700 focus:!text-white [&>span]:!text-white">Grade 3 to 5</SelectItem>
+                      <SelectItem value="6-8" className="!text-white hover:!bg-gray-700 focus:!bg-gray-700 focus:!text-white [&>span]:!text-white">Grade 6 to 8</SelectItem>
+                      <SelectItem value="9-12" className="!text-white hover:!bg-gray-700 focus:!bg-gray-700 focus:!text-white [&>span]:!text-white">Grade 9 to 12</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -196,12 +196,12 @@ useEffect(() => {
                     value={signupInput.level} 
                     onValueChange={(value) => setSignupInput({ ...signupInput, level: value })}
                   >
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white focus:border-[#F58120] focus:ring-[#F58120]">
-                      <SelectValue placeholder="Select level" className="text-white" />
+                    <SelectTrigger className="!bg-white/10 !border-white/20 !text-white focus:!border-[#F58120] focus:!ring-[#F58120] data-[placeholder]:!text-white/50 [&>span]:!text-white [&>svg]:!text-white">
+                      <SelectValue placeholder="Select level" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-white/20 text-white">
-                      <SelectItem value="Basic" className="hover:bg-gray-700">Basic</SelectItem>
-                      <SelectItem value="Advance" className="hover:bg-gray-700">Advance</SelectItem>
+                    <SelectContent className="!bg-gray-800 !border-white/20 !text-white">
+                      <SelectItem value="Basic" className="!text-white hover:!bg-gray-700 focus:!bg-gray-700 focus:!text-white [&>span]:!text-white">Basic</SelectItem>
+                      <SelectItem value="Advance" className="!text-white hover:!bg-gray-700 focus:!bg-gray-700 focus:!text-white [&>span]:!text-white">Advance</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
