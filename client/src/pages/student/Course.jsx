@@ -55,10 +55,10 @@ const Course = ({ course }) => {
 
           {/* Category Badge - Bottom */}
           {course?.category && (
-            <div className="absolute bottom-4 left-4 z-10">
-              <Badge className="bg-white/20 backdrop-blur-sm text-white px-3 py-1.5 text-xs font-semibold shadow-lg border border-white/30">
+            <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
+              <div className="bg-white/20 backdrop-blur-sm text-white px-3 py-1.5 text-xs font-semibold shadow-lg border border-white/30 rounded-md">
                 {getCategoryLabel(course.category)}
-              </Badge>
+              </div>
             </div>
           )}
         </div>
