@@ -4,8 +4,8 @@ import React from 'react'
 const LoadingSpinner = () => {
     return (
         <div className="relative overflow-hidden w-full min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1763026348/Robowunder_Banner_1_qxdhb7.jpg')] bg-cover bg-center md:bg-top bg-no-repeat">
-            {/* Simple Header - Static logo without routing */}
-            <div className='h-16 md:h-20 bg-transparent absolute z-50 top-0 left-0 right-0'>
+            {/* Simple Header - Static logo without routing - Hidden on mobile, shown on desktop */}
+            <div className='hidden md:block h-16 md:h-20 bg-transparent absolute z-50 top-0 left-0 right-0'>
                 <div className="px-4 sm:px-6 md:px-[6.125rem] mx-auto flex items-center justify-center h-full">
                     <div className="flex items-center justify-center">
                         <img 
@@ -17,8 +17,8 @@ const LoadingSpinner = () => {
                 </div>
             </div>
             
-            {/* Loading Content */}
-            <div className="relative flex items-center justify-center min-h-screen pt-24">
+            {/* Loading Content - Less padding on mobile (no header), full padding on desktop (with header) */}
+            <div className="relative flex items-center justify-center min-h-screen pt-4 md:pt-24">
                 <div className="relative z-10 flex flex-col items-center justify-center">
                     {/* Glassmorphism Loading Card */}
                     <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl p-12 flex flex-col items-center justify-center">
