@@ -212,8 +212,8 @@ const MCQTest = () => {
       : [];
     const hasReview = reviewData.length > 0;
     return (
-      <div className="min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat py-12 pt-24">
-        <div className="relative z-10 max-w-3xl mx-auto px-6">
+      <div className="relative overflow-hidden w-full min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-contain md:bg-top bg-no-repeat">
+        <div className="relative z-10 max-w-3xl mx-auto px-6 py-12 pt-24">
           <Card className={`bg-white/5 backdrop-blur-sm border-2 shadow-2xl ${passed ? 'border-green-500/50' : 'border-orange-500/50'}`}>
             <CardContent className="pt-8 text-center space-y-6">
               {passed ? (
@@ -468,20 +468,22 @@ const MCQTest = () => {
   // Check for no questions AFTER checking for results
   if (!questions || questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat pt-24">
-        <div className="relative z-10 max-w-md mx-4">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl p-12 text-center">
-            <div className="bg-yellow-500/20 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center border border-yellow-500/50">
-              <AlertTriangle className="h-10 w-10 text-yellow-400" />
+      <div className="relative overflow-hidden w-full min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-contain md:bg-top bg-no-repeat pt-24">
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="max-w-md mx-4">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl p-12 text-center">
+              <div className="bg-yellow-500/20 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center border border-yellow-500/50">
+                <AlertTriangle className="h-10 w-10 text-yellow-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-3">Test Not Available</h2>
+              <p className="text-white/70 mb-6">Please watch the video first to unlock the test.</p>
+              <Button 
+                onClick={() => navigate(`/course/${courseId}/video`)}
+                className="bg-[#F58120] hover:bg-[#F58120]/90 text-white"
+              >
+                Watch Video
+              </Button>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-3">Test Not Available</h2>
-            <p className="text-white/70 mb-6">Please watch the video first to unlock the test.</p>
-            <Button 
-              onClick={() => navigate(`/course/${courseId}/video`)}
-              className="bg-[#F58120] hover:bg-[#F58120]/90 text-white"
-            >
-              Watch Video
-            </Button>
           </div>
         </div>
       </div>
@@ -489,7 +491,7 @@ const MCQTest = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat py-12 pt-24">
+    <div className="relative overflow-hidden w-full min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-contain md:bg-top bg-no-repeat">
       {/* Start Dialog - Show for new attempts and retakes */}
       <Dialog open={showStartDialog} onOpenChange={setShowStartDialog}>
             <DialogContent className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl max-w-md text-white [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-100 hover:[&>button]:opacity-100 [&>button]:hover:bg-white/10 [&>button]:rounded-full [&>button]:p-1">
@@ -551,7 +553,7 @@ const MCQTest = () => {
 
       {/* Test Interface */}
       {testStarted && (
-        <div className="relative z-10 max-w-4xl mx-auto py-8 px-6">
+        <div className="relative z-10 max-w-4xl mx-auto py-8 px-6 pt-24">
           {/* Header with Timer */}
           <div className="sticky top-24 z-10 bg-white/5 backdrop-blur-sm border border-white/10 shadow-md rounded-lg p-4 mb-6">
             <div className="flex justify-between items-center">
