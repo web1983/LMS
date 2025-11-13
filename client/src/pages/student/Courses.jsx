@@ -35,7 +35,7 @@ const Courses = () => {
   }
 
   return (
-    <div id="courses-section" className="bg-black py-20">
+    <div id="courses-section" className="bg-transparent py-20">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -75,22 +75,22 @@ const Courses = () => {
 
 export default Courses;
 
-// ✅ Updated Skeleton to match premium design
+// ✅ Updated Skeleton to match new card design
 const CourseSkeleton = () => {
   return (
-    <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 shadow-md rounded-2xl overflow-hidden animate-pulse">
-      <div className="h-52 w-full rounded-none bg-white/20"></div>
-      <div className="p-6 space-y-4">
+    <div className="bg-white/5 backdrop-blur-sm border-2 border-white/10 shadow-md rounded-2xl overflow-hidden animate-pulse">
+      <div className="h-52 w-full rounded-none bg-white/10"></div>
+      <div className="p-6 space-y-4 bg-transparent">
         <div className="space-y-3">
-          <div className="h-6 w-full bg-white/20 rounded"></div>
-          <div className="h-4 w-4/5 bg-white/20 rounded"></div>
-          <div className="h-3 w-full bg-white/20 rounded"></div>
+          <div className="h-6 w-full bg-white/10 rounded"></div>
+          <div className="h-4 w-4/5 bg-white/10 rounded"></div>
+          <div className="h-3 w-full bg-white/10 rounded"></div>
         </div>
-        <div className="flex items-center gap-3 pt-4 border-t border-white/20">
-          <div className="h-10 w-10 rounded-full bg-white/20"></div>
+        <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+          <div className="h-10 w-10 rounded-full bg-white/10"></div>
           <div className="flex-1 space-y-2">
-            <div className="h-3 w-20 bg-white/20 rounded"></div>
-            <div className="h-4 w-28 bg-white/20 rounded"></div>
+            <div className="h-3 w-20 bg-white/10 rounded"></div>
+            <div className="h-4 w-28 bg-white/10 rounded"></div>
           </div>
         </div>
       </div>
