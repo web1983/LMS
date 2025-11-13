@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -46,10 +45,10 @@ const Course = ({ course }) => {
           
           {/* Level Badge */}
           {course?.courseLevel && (
-            <div className="absolute top-4 right-4 z-10">
-              <Badge className="bg-[#F58120] text-white px-3 py-1.5 text-xs font-semibold shadow-xl border-0">
+            <div className="absolute top-4 right-4 z-10 pointer-events-none">
+              <div className="bg-[#F58120] text-white px-3 py-1.5 text-xs font-semibold shadow-xl border-0 rounded-md">
                 {course.courseLevel}
-              </Badge>
+              </div>
             </div>
           )}
 
