@@ -107,19 +107,19 @@ useEffect(() => {
 }, [registerIsSuccess, registerError, registerData, loginIsSuccess, loginError, loginData]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+    <div className="flex items-center justify-center min-h-screen bg-black px-4 py-12">
       <div className="w-full max-w-md">
-        <Tabs defaultValue="login" className="bg-white rounded-xl shadow-lg overflow-hidden pt-4 px-3">
-          <TabsList className="flex justify-center bg-gray-50 p-1 rounded-t-xl">
+        <Tabs defaultValue="login" className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden pt-4 px-3">
+          <TabsList className="flex justify-center bg-white/5 p-1 rounded-t-xl border-b border-white/10">
             <TabsTrigger
               value="signup"
-              className="flex-1 text-center py-3 px-4 font-medium rounded-lg data-[state=active]:bg-white data-[state=active]:text-black transition-all"
+              className="flex-1 text-center py-3 px-4 font-semibold rounded-lg text-white/70 data-[state=active]:bg-[#F58120] data-[state=active]:text-white transition-all hover:text-white"
             >
               Signup
             </TabsTrigger>
             <TabsTrigger
               value="login"
-              className="flex-1 text-center py-3 px-4 font-medium rounded-lg data-[state=active]:bg-white data-[state=active]:text-black transition-all"
+              className="flex-1 text-center py-3 px-4 font-semibold rounded-lg text-white/70 data-[state=active]:bg-[#F58120] data-[state=active]:text-white transition-all hover:text-white"
             >
               Login
             </TabsTrigger>
@@ -127,15 +127,15 @@ useEffect(() => {
 
           {/* Signup Tab */}
           <TabsContent value="signup" className="p-6">
-            <Card className="shadow-none border-0">
+            <Card className="shadow-none border-0 bg-transparent">
               <CardHeader className="mb-4 text-center">
-                <CardTitle className="text-2xl font-bold">Signup</CardTitle>
-                <CardDescription>Create a new account and click signup when you're done.</CardDescription>
+                <CardTitle className="text-2xl font-semibold text-white">Signup</CardTitle>
+                <CardDescription className="text-white/70">Create a new account and click signup when you're done.</CardDescription>
               </CardHeader>
 
               <CardContent className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="signup-name">Name</Label>
+                  <Label htmlFor="signup-name" className="text-white font-semibold">Name</Label>
                   <Input
                     onChange={(e) => changeInputHandler(e, "signup")}
                     value={signupInput.name}
@@ -143,11 +143,12 @@ useEffect(() => {
                     type="text"
                     placeholder="eg. Akshay"
                     required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#F58120] focus:ring-[#F58120]"
                   />
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email" className="text-white font-semibold">Email</Label>
                   <Input
                     onChange={(e) => changeInputHandler(e, "signup")}
                     value={signupInput.email}
@@ -155,11 +156,12 @@ useEffect(() => {
                     type="email"
                     placeholder="eg. akshay@lms.com"
                     required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#F58120] focus:ring-[#F58120]"
                   />
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="signup-school-code">School Code</Label>
+                  <Label htmlFor="signup-school-code" className="text-white font-semibold">School Code</Label>
                   <Input
                     id="signup-school-code"
                     onChange={(e) => changeInputHandler(e, "signup")}
@@ -167,45 +169,45 @@ useEffect(() => {
                     name="schoolCode"
                     type="text"
                     placeholder="eg. RW1234"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#F58120] focus:ring-[#F58120]"
                   />
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="signup-class">Student Class</Label>
+                  <Label htmlFor="signup-class" className="text-white font-semibold">Student Class</Label>
                   <Select 
                     value={signupInput.studentClass} 
                     onValueChange={(value) => setSignupInput({ ...signupInput, studentClass: value })}
-                    className="bg-white"
                   >
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Select your grade" />
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white focus:border-[#F58120] focus:ring-[#F58120]">
+                      <SelectValue placeholder="Select your grade" className="text-white" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="3-5">Grade 3 to 5</SelectItem>
-                      <SelectItem value="6-8">Grade 6 to 8</SelectItem>
-                      <SelectItem value="9-12">Grade 9 to 12</SelectItem>
+                    <SelectContent className="bg-gray-800 border-white/20 text-white">
+                      <SelectItem value="3-5" className="hover:bg-gray-700">Grade 3 to 5</SelectItem>
+                      <SelectItem value="6-8" className="hover:bg-gray-700">Grade 6 to 8</SelectItem>
+                      <SelectItem value="9-12" className="hover:bg-gray-700">Grade 9 to 12</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="signup-level">Level</Label>
+                  <Label htmlFor="signup-level" className="text-white font-semibold">Level</Label>
                   <Select 
                     value={signupInput.level} 
                     onValueChange={(value) => setSignupInput({ ...signupInput, level: value })}
                   >
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Select level" />
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white focus:border-[#F58120] focus:ring-[#F58120]">
+                      <SelectValue placeholder="Select level" className="text-white" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="Basic">Basic</SelectItem>
-                      <SelectItem value="Advance">Advance</SelectItem>
+                    <SelectContent className="bg-gray-800 border-white/20 text-white">
+                      <SelectItem value="Basic" className="hover:bg-gray-700">Basic</SelectItem>
+                      <SelectItem value="Advance" className="hover:bg-gray-700">Advance</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password" className="text-white font-semibold">Password</Label>
                   <Input
                     onChange={(e) => changeInputHandler(e, "signup")}
                     value={signupInput.password}
@@ -213,6 +215,7 @@ useEffect(() => {
                     type="password"
                     placeholder="eg. xyz"
                     required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#F58120] focus:ring-[#F58120]"
                   />
                 </div>
               </CardContent>
@@ -221,7 +224,7 @@ useEffect(() => {
                 <Button
                   disabled={registerIsLoading}
                   onClick={() => handleRegistration("signup")}
-                  className="w-full bg-black text-white hover:bg-gray-800 transition-colors"
+                  className="w-full bg-[#F58120] text-white hover:bg-[#F58120]/90 transition-colors font-semibold"
                 >
                   {registerIsLoading ? (
                     <>
@@ -237,15 +240,15 @@ useEffect(() => {
 
           {/* Login Tab */}
           <TabsContent value="login" className="p-6">
-            <Card className="shadow-none border-0">
+            <Card className="shadow-none border-0 bg-transparent">
               <CardHeader className="mb-4 text-center">
-                <CardTitle className="text-2xl font-bold">Login</CardTitle>
-                <CardDescription>Login with your email and password.</CardDescription>
+                <CardTitle className="text-2xl font-semibold text-white">Login</CardTitle>
+                <CardDescription className="text-white/70">Login with your email and password.</CardDescription>
               </CardHeader>
 
               <CardContent className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="login-email">Email</Label>
+                  <Label htmlFor="login-email" className="text-white font-semibold">Email</Label>
                   <Input
                     onChange={(e) => changeInputHandler(e, "login")}
                     value={loginInput.email}
@@ -253,15 +256,16 @@ useEffect(() => {
                     type="email"
                     placeholder="eg. akshay@lms.com"
                     required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#F58120] focus:ring-[#F58120]"
                   />
                 </div>
 
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="login-password">Password</Label>
+                    <Label htmlFor="login-password" className="text-white font-semibold">Password</Label>
                     <Link 
                       to="/forgot-password" 
-                      className="text-sm text-blue hover:text-black-200 hover:underline font-medium"
+                      className="text-sm text-[#F58120] hover:text-orange-400 hover:underline font-medium transition-colors"
                     >
                       Forgot Password?
                     </Link>
@@ -273,6 +277,7 @@ useEffect(() => {
                     type="password"
                     placeholder="eg. xyz"
                     required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#F58120] focus:ring-[#F58120]"
                   />
                 </div>
               </CardContent>
@@ -281,7 +286,7 @@ useEffect(() => {
                 <Button
                   disabled={loginIsLoading}
                   onClick={() => handleRegistration("login")}
-                  className="w-full bg-black text-white hover:bg-gray-800 transition-colors"
+                  className="w-full bg-[#F58120] text-white hover:bg-[#F58120]/90 transition-colors font-semibold"
                 >
                   {loginIsLoading ? (
                     <>
