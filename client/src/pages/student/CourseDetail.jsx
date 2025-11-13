@@ -112,7 +112,7 @@ const CourseDetail = () => {
   };
 
   return (
-    <div className="relative overflow-hidden w-full min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat">
+    <div className="relative overflow-hidden w-full min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-contain md:bg-top bg-no-repeat">
       {/* Hero Section */}
       <div className="relative text-white overflow-hidden pt-24 z-10">
         <div className="relative max-w-7xl mx-auto px-6 py-12 z-10">
