@@ -24,7 +24,7 @@ const Courses = () => {
 
   if (isError) {
     return (
-      <div className="bg-gray-50 py-16">
+      <div className="bg-black py-16">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="font-bold text-3xl text-center mb-10 text-red-600">
             Failed to load courses
@@ -35,17 +35,17 @@ const Courses = () => {
   }
 
   return (
-    <div id="courses-section" className="bg-gradient-to-b from-gray-50 to-white py-20">
+    <div id="courses-section" className="bg-black py-20">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-4">
-            <span className="text-sm font-semibold text-blue-700">🤖 Championship Courses</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-4 border border-white/20">
+            <span className="text-sm font-semibold text-white">🤖 Championship Courses</span>
           </div>
-          <h2 className="font-extrabold text-5xl mb-4 text-gray-900">
-            Master <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Robotics Skills</span>
+          <h2 className="font-extrabold text-5xl mb-4 text-white">
+            Master <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">Robotics Skills</span>
           </h2>
-          <p className="text-gray-600 text-xl max-w-2xl mx-auto">
+          <p className="text-white/80 text-xl max-w-2xl mx-auto">
             Learn robotics concepts, build amazing projects, and prepare for the championship challenge
           </p>
         </div>
@@ -61,9 +61,9 @@ const Courses = () => {
                 ))
               ) : (
                 <div className="col-span-full text-center py-16">
-                  <div className="inline-block p-8 bg-white rounded-xl shadow-sm">
-                    <p className="text-gray-500 text-lg mb-2">No live courses available yet</p>
-                    <p className="text-gray-400 text-sm">Check back soon for new courses!</p>
+                  <div className="inline-block p-8 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    <p className="text-white/80 text-lg mb-2">No live courses available yet</p>
+                    <p className="text-white/60 text-sm">Check back soon for new courses!</p>
                   </div>
                 </div>
               )}
@@ -78,19 +78,19 @@ export default Courses;
 // ✅ Updated Skeleton to match premium design
 const CourseSkeleton = () => {
   return (
-    <div className="bg-white border-2 border-gray-100 shadow-md rounded-2xl overflow-hidden animate-pulse">
-      <Skeleton className="h-52 w-full rounded-none" />
+    <div className="bg-white/10 backdrop-blur-sm border-2 border-white/20 shadow-md rounded-2xl overflow-hidden animate-pulse">
+      <div className="h-52 w-full rounded-none bg-white/20"></div>
       <div className="p-6 space-y-4">
         <div className="space-y-3">
-          <Skeleton className="h-6 w-full" />
-          <Skeleton className="h-4 w-4/5" />
-          <Skeleton className="h-3 w-full" />
+          <div className="h-6 w-full bg-white/20 rounded"></div>
+          <div className="h-4 w-4/5 bg-white/20 rounded"></div>
+          <div className="h-3 w-full bg-white/20 rounded"></div>
         </div>
-        <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-          <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="flex items-center gap-3 pt-4 border-t border-white/20">
+          <div className="h-10 w-10 rounded-full bg-white/20"></div>
           <div className="flex-1 space-y-2">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-4 w-28" />
+            <div className="h-3 w-20 bg-white/20 rounded"></div>
+            <div className="h-4 w-28 bg-white/20 rounded"></div>
           </div>
         </div>
       </div>

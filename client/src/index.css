@@ -29,6 +29,12 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-family: 'Oxanium', sans-serif;
+  }
+  
+  /* Oxanium font family */
+  * {
+    font-family: 'Oxanium', sans-serif;
   }
 
   /* Prevent image flickering and layout shifts */
