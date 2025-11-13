@@ -53,7 +53,7 @@ const HeroSection = () => {
         </div>
       )}
 
-      <div className="relative overflow-hidden w-full h-auto bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat min-h-[600px] md:h-auto">
+      <div className="relative overflow-hidden w-full h-auto bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1763026348/Robowunder_Banner_1_qxdhb7.jpg')] bg-cover bg-center md:bg-top bg-no-repeat min-h-[600px] md:h-auto">
         {/* Hero Content - Desktop: Keep original design, responsive only for mobile/tablet */}
         <div className="relative px-4 sm:px-6 md:pl-[6.125rem] md:pr-0 mx-auto pt-20 sm:pt-24 md:pt-32 lg:pt-40 pb-24 sm:pb-16 md:pb-24 lg:pb-32 z-10">
           <div className="grid lg:grid-cols-2 gap-8 md:gap-12 lg:items-stretch">
