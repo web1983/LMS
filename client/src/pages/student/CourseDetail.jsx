@@ -112,10 +112,10 @@ const CourseDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat">
+    <div className="relative overflow-hidden w-full min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat">
       {/* Hero Section */}
-      <div className="relative bg-black/80 backdrop-blur-sm text-white overflow-hidden pt-24">
-        <div className="relative max-w-7xl mx-auto px-6 py-12">
+      <div className="relative text-white overflow-hidden pt-24 z-10">
+        <div className="relative max-w-7xl mx-auto px-6 py-12 z-10">
           <Button
             variant="ghost"
             className="text-white hover:bg-white/10 mb-6 backdrop-blur-sm border border-white/20 bg-white/5"
@@ -314,7 +314,7 @@ const CourseDetail = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="relative max-w-7xl mx-auto px-6 py-16 z-10">
         <div className="grid lg:grid-cols-3 gap-10">
           {/* Left Column: Course Details */}
           <div className="lg:col-span-2 space-y-8">
