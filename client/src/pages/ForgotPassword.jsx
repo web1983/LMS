@@ -39,87 +39,89 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
-        <CardHeader className="space-y-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Mail className="h-8 w-8" />
-            <CardTitle className="text-2xl font-bold text-white">Forgot Password?</CardTitle>
-          </div>
-          <CardDescription className="text-blue-100">
-            No worries! Enter your email and we'll send you an OTP to reset your password.
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="pt-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-11"
-                disabled={isLoading}
-              />
+    <div className="relative flex items-start justify-center min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat px-4 pt-24 pb-12">
+      <div className="relative z-10 w-full max-w-md mt-4">
+        <Card className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+          <CardHeader className="space-y-1 pt-6 pb-4">
+            <div className="flex items-center gap-2 mb-2 justify-center">
+              <Mail className="h-8 w-8 text-white" />
+              <CardTitle className="text-2xl font-semibold text-white">Forgot Password?</CardTitle>
             </div>
-
-            <Button
-              type="submit"
-              className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sending OTP...
-                </>
-              ) : (
-                <>
-                  Send OTP
-                </>
-              )}
-            </Button>
-
-            <div className="pt-4 space-y-3">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">Or</span>
-                </div>
+            <CardDescription className="text-white/70 text-center">
+              No worries! Enter your email and we'll send you an OTP to reset your password.
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="pt-6 pb-6 px-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white font-semibold">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-[#F58120] focus:ring-[#F58120] h-11"
+                  disabled={isLoading}
+                />
               </div>
 
-              <Link to="/login">
-                <Button
-                  variant="outline"
-                  className="w-full h-11"
-                  type="button"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Login
-                </Button>
-              </Link>
-            </div>
-          </form>
+              <Button
+                type="submit"
+                className="w-full h-11 bg-[#F58120] hover:bg-[#F58120]/90 text-white font-semibold transition-colors"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending OTP...
+                  </>
+                ) : (
+                  <>
+                    Send OTP
+                  </>
+                )}
+              </Button>
 
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-gray-700">
-              <strong>📧 What happens next?</strong>
-            </p>
-            <ul className="mt-2 text-sm text-gray-600 space-y-1 list-disc list-inside">
-              <li>You'll receive a 6-digit OTP via email</li>
-              <li>The OTP is valid for 10 minutes</li>
-              <li>Use the OTP to create a new password</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="pt-4 space-y-3">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/20" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white/5 px-2 text-white/50">Or</span>
+                  </div>
+                </div>
+
+                <Link to="/login">
+                  <Button
+                    variant="outline"
+                    className="w-full h-11 border-white/20 text-white hover:bg-white/10 hover:text-white bg-transparent"
+                    type="button"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Login
+                  </Button>
+                </Link>
+              </div>
+            </form>
+
+            <div className="mt-6 p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/20">
+              <p className="text-sm text-white font-semibold">
+                📧 What happens next?
+              </p>
+              <ul className="mt-2 text-sm text-white/70 space-y-1 list-disc list-inside">
+                <li>You'll receive a 6-digit OTP via email</li>
+                <li>The OTP is valid for 10 minutes</li>
+                <li>Use the OTP to create a new password</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
