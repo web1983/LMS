@@ -1,12 +1,21 @@
 import { Loader2 } from 'lucide-react'
 import React from 'react'
-import Navbar from './Navbar'
 
 const LoadingSpinner = () => {
     return (
         <div className="relative overflow-hidden w-full min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1763026348/Robowunder_Banner_1_qxdhb7.jpg')] bg-cover bg-center md:bg-top bg-no-repeat">
-            {/* Header */}
-            <Navbar />
+            {/* Simple Header - Static logo without routing */}
+            <div className='h-16 md:h-20 bg-transparent absolute z-50 top-0 left-0 right-0'>
+                <div className="px-4 sm:px-6 md:px-[6.125rem] mx-auto flex items-center justify-center h-full">
+                    <div className="flex items-center justify-center">
+                        <img 
+                            src="https://res.cloudinary.com/dmlk8egiw/image/upload/v1762944292/Group_3645_vhtdrw.png"
+                            alt="Robowunder Logo"
+                            className="h-12 md:h-14 w-auto object-contain lg:h-16 xl:h-14 max-w-[280px]"
+                        />
+                    </div>
+                </div>
+            </div>
             
             {/* Loading Content */}
             <div className="relative flex items-center justify-center min-h-screen pt-24">
