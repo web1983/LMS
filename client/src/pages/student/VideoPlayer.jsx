@@ -94,26 +94,33 @@ const VideoPlayer = () => {
 
   if (!course || !course.videoUrl) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Video Not Available</h2>
-          <p className="text-gray-600 mb-4">This course doesn't have a video yet.</p>
-          <Button onClick={() => navigate(`/course/${courseId}`)}>
-            Back to Course
-          </Button>
+      <div className="min-h-screen flex items-center justify-center bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat pt-24">
+        <div className="relative z-10 max-w-md mx-4">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl p-12 text-center">
+            <div className="bg-red-500/20 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center border border-red-500/50">
+              <AlertCircle className="h-10 w-10 text-red-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3">Video Not Available</h2>
+            <p className="text-white/70 mb-6">This course doesn't have a video yet.</p>
+            <Button 
+              onClick={() => navigate(`/course/${courseId}`)}
+              className="bg-[#F58120] hover:bg-[#F58120]/90 text-white"
+            >
+              Back to Course
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat flex items-center justify-center pt-24 pb-12">
       {/* Start Dialog */}
       <Dialog open={showStartDialog} onOpenChange={setShowStartDialog}>
-        <DialogContent className="bg-white max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl max-w-md text-white [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-100 hover:[&>button]:opacity-100 [&>button]:hover:bg-white/10 [&>button]:rounded-full [&>button]:p-1">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center">
+            <DialogTitle className="text-2xl font-bold text-center text-white">
               📹 Course Video
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -121,37 +128,37 @@ const VideoPlayer = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="text-center space-y-4 pt-4">
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-blue-900 font-medium">
+            <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+              <p className="text-white font-semibold">
                 Watch the complete video to unlock the test!
               </p>
             </div>
             
-            <div className="space-y-2 text-left text-sm text-gray-700">
+            <div className="space-y-2 text-left text-sm text-white/80">
               <p className="flex items-start gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="h-5 w-5 text-[#F58120] flex-shrink-0 mt-0.5" />
                 <span>You must watch the full video</span>
               </p>
               <p className="flex items-start gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="h-5 w-5 text-[#F58120] flex-shrink-0 mt-0.5" />
                 <span>After completion, the test will be available</span>
               </p>
               <p className="flex items-start gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="h-5 w-5 text-[#F58120] flex-shrink-0 mt-0.5" />
                 <span>Complete the test to earn your certificate</span>
               </p>
             </div>
 
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-yellow-900 text-sm">
-                <strong>Note:</strong> Please pay attention to the video content as it will help you in the test!
+            <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+              <p className="text-white/90 text-sm">
+                <strong className="text-white">Note:</strong> Please pay attention to the video content as it will help you in the test!
               </p>
             </div>
           </div>
           <div className="flex justify-center pt-4">
             <Button
               onClick={handleStartVideo}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg"
+              className="bg-[#F58120] hover:bg-[#F58120]/90 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Start Watching Video
             </Button>
@@ -161,9 +168,9 @@ const VideoPlayer = () => {
 
       {/* Complete Dialog */}
       <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
-        <DialogContent className="bg-white max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl max-w-md text-white [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-100 hover:[&>button]:opacity-100 [&>button]:hover:bg-white/10 [&>button]:rounded-full [&>button]:p-1">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center text-green-600">
+            <DialogTitle className="text-2xl font-bold text-center text-white">
               🎉 Video Complete!
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -171,17 +178,17 @@ const VideoPlayer = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="text-center space-y-4 pt-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-900 font-medium">
+            <div className="p-4 bg-green-500/20 backdrop-blur-sm border border-green-500/50 rounded-lg">
+              <p className="text-white font-semibold">
                 Great job! You've completed the video.
               </p>
             </div>
             
-            <div className="space-y-2 text-gray-700">
-              <p>Now it's time to test your knowledge!</p>
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-left text-sm">
-                <p className="font-semibold text-blue-900 mb-2">Test Information:</p>
-                <ul className="space-y-1 text-blue-800">
+            <div className="space-y-2 text-white/80">
+              <p className="text-white font-medium">Now it's time to test your knowledge!</p>
+              <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-left text-sm">
+                <p className="font-semibold text-white mb-2">Test Information:</p>
+                <ul className="space-y-1 text-white/80">
                   <li>• {course.testQuestions?.length || 0} Questions</li>
                   <li>• {course.testTimeLimit || 20} Minutes Time Limit</li>
                   <li>• Passing Score: 60%</li>
@@ -190,16 +197,16 @@ const VideoPlayer = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-yellow-900 text-sm">
-                <strong>Important:</strong> Once you start the test, don't switch tabs or go back. The test will restart if you do!
+            <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+              <p className="text-white/90 text-sm">
+                <strong className="text-white">Important:</strong> Once you start the test, don't switch tabs or go back. The test will restart if you do!
               </p>
             </div>
           </div>
           <div className="flex justify-center pt-4">
             <Button
               onClick={handleProceedToTest}
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
+              className="bg-[#F58120] hover:bg-[#F58120]/90 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Start Test Now
             </Button>
@@ -209,8 +216,8 @@ const VideoPlayer = () => {
 
       {/* Video Player */}
       {!showStartDialog && (
-        <div className="w-full max-w-6xl aspect-video">
-          <div id="youtube-player" ref={playerRef} className="w-full h-full"></div>
+        <div className="relative z-10 w-full max-w-6xl aspect-video px-4">
+          <div id="youtube-player" ref={playerRef} className="w-full h-full rounded-lg overflow-hidden shadow-2xl"></div>
         </div>
       )}
     </div>

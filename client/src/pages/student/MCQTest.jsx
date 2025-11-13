@@ -212,53 +212,61 @@ const MCQTest = () => {
       : [];
     const hasReview = reviewData.length > 0;
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
-        <div className="max-w-3xl mx-auto px-6">
-          <Card className={`border-2 ${passed ? 'border-green-500' : 'border-orange-500'}`}>
+      <div className="min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat py-12 pt-24">
+        <div className="relative z-10 max-w-3xl mx-auto px-6">
+          <Card className={`bg-white/5 backdrop-blur-sm border-2 shadow-2xl ${passed ? 'border-green-500/50' : 'border-orange-500/50'}`}>
             <CardContent className="pt-8 text-center space-y-6">
               {passed ? (
-                <Award className="h-24 w-24 text-green-600 mx-auto" />
+                <div className="bg-green-500/20 p-6 rounded-full w-24 h-24 mx-auto flex items-center justify-center border border-green-500/50">
+                  <Award className="h-16 w-16 text-green-400" />
+                </div>
               ) : (
-                <XCircle className="h-24 w-24 text-orange-600 mx-auto" />
+                <div className="bg-orange-500/20 p-6 rounded-full w-24 h-24 mx-auto flex items-center justify-center border border-orange-500/50">
+                  <XCircle className="h-16 w-16 text-orange-400" />
+                </div>
               )}
               
               <div>
-                <h2 className={`text-3xl font-bold mb-2 ${passed ? 'text-green-600' : 'text-orange-600'}`}>
+                <h2 className={`text-3xl font-bold mb-2 ${passed ? 'text-green-400' : 'text-orange-400'}`}>
                   {passed ? '🎉 Congratulations!' : '😔 Test Failed'}
                 </h2>
-                <p className="text-gray-600 text-lg">
+                <p className="text-white/80 text-lg">
                   {passed ? 'You have passed the test!' : 'You scored below 60%. Review the video and retake the test.'}
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 py-6">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-blue-900 text-3xl font-bold">{safeScore}%</p>
-                  <p className="text-blue-700 text-sm">Your Score</p>
+                <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                  <p className="text-white text-3xl font-bold">{safeScore}%</p>
+                  <p className="text-white/70 text-sm">Your Score</p>
                 </div>
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <p className="text-green-900 text-3xl font-bold">{safeCorrectAnswers}</p>
-                  <p className="text-green-700 text-sm">Correct</p>
+                <div className="p-4 bg-green-500/20 backdrop-blur-sm rounded-lg border border-green-500/50">
+                  <p className="text-green-400 text-3xl font-bold">{safeCorrectAnswers}</p>
+                  <p className="text-green-400/70 text-sm">Correct</p>
                 </div>
-                <div className="p-4 bg-red-50 rounded-lg">
-                  <p className="text-red-900 text-3xl font-bold">
+                <div className="p-4 bg-red-500/20 backdrop-blur-sm rounded-lg border border-red-500/50">
+                  <p className="text-red-400 text-3xl font-bold">
                     {safeWrongAnswers}
                   </p>
-                  <p className="text-red-700 text-sm">Wrong</p>
+                  <p className="text-red-400/70 text-sm">Wrong</p>
                 </div>
               </div>
 
               {passed && (
-                <div className="p-6 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg">
-                  <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
-                  <p className="text-green-900 font-semibold text-xl mb-2">Course Completed!</p>
-                  <p className="text-green-800 text-sm">Congratulations on completing the course successfully!</p>
+                <div className="p-6 bg-gradient-to-r from-green-500/20 to-blue-500/20 backdrop-blur-sm border-2 border-green-500/50 rounded-lg">
+                  <div className="bg-green-500/20 p-3 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center border border-green-500/50">
+                    <CheckCircle className="h-8 w-8 text-green-400" />
+                  </div>
+                  <p className="text-white font-semibold text-xl mb-2">Course Completed!</p>
+                  <p className="text-white/80 text-sm">Congratulations on completing the course successfully!</p>
                   
                   {testResult?.allCoursesCompleted && testResult?.certificateGenerated && (
-                    <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-400 rounded-lg">
-                      <Award className="h-10 w-10 text-yellow-600 mx-auto mb-2" />
-                      <p className="text-yellow-900 font-bold text-lg">🎓 Certificate Earned!</p>
-                      <p className="text-yellow-800 text-sm mt-1">
+                    <div className="mt-4 p-4 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm border-2 border-yellow-500/50 rounded-lg">
+                      <div className="bg-yellow-500/20 p-2 rounded-full w-10 h-10 mx-auto mb-2 flex items-center justify-center border border-yellow-500/50">
+                        <Award className="h-6 w-6 text-yellow-400" />
+                      </div>
+                      <p className="text-yellow-400 font-bold text-lg">🎓 Certificate Earned!</p>
+                      <p className="text-yellow-400/80 text-sm mt-1">
                         You've completed ALL courses! Check your profile to download your certificate.
                       </p>
                     </div>
@@ -269,14 +277,14 @@ const MCQTest = () => {
               <div className="flex gap-4 justify-center pt-4 flex-wrap">
                 <Button
                   onClick={() => navigate(`/course/${courseId}`)}
-                  className="bg-blue-600 hover:bg-blue-700 px-8"
+                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/20 px-8 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Back to Course
                 </Button>
                 {hasReview && (
                   <Button
                     variant="outline"
-                    className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8"
+                    className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 px-8 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                     onClick={() => setReviewDialogOpen(true)}
                   >
                     Review Answers
@@ -286,7 +294,7 @@ const MCQTest = () => {
                   <>
                     <Button
                       onClick={() => navigate(`/course/${courseId}/video`)}
-                      className="bg-indigo-600 hover:bg-indigo-700 px-8"
+                      className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/20 px-8 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       Watch Video Again
                     </Button>
@@ -297,7 +305,7 @@ const MCQTest = () => {
                         setShowStartDialog(true);
                         refetch();
                       }}
-                      className="bg-orange-600 hover:bg-orange-700 px-8"
+                      className="bg-[#F58120] hover:bg-[#F58120]/90 text-white px-8 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       Retake Test
                     </Button>
@@ -306,28 +314,28 @@ const MCQTest = () => {
               </div>
               
               {!passed && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-800 text-sm text-center font-semibold">
+                <div className="p-4 bg-red-500/20 backdrop-blur-sm border border-red-500/50 rounded-lg">
+                  <p className="text-red-400 text-sm text-center font-semibold">
                     ❌ Test Failed - Score below 60%
                   </p>
-                  <p className="text-red-700 text-xs text-center mt-1">
+                  <p className="text-red-400/70 text-xs text-center mt-1">
                     You cannot view this result anymore as you need to retake the test.
                   </p>
                 </div>
               )}
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-white/50">
                 Attempt #{safeAttemptNumber}
               </p>
             </CardContent>
           </Card>
           <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-            <DialogContent className="bg-white max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogContent className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl max-w-3xl max-h-[85vh] overflow-y-auto text-white [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-100 hover:[&>button]:opacity-100 [&>button]:hover:bg-white/10 [&>button]:rounded-full [&>button]:p-1">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-gray-900">
+                <DialogTitle className="text-2xl font-bold text-white">
                   Test Review
                 </DialogTitle>
-                <DialogDescription className="text-gray-600">
+                <DialogDescription className="text-white/70">
                   Review your answers to understand where you can improve.
                 </DialogDescription>
               </DialogHeader>
@@ -343,12 +351,12 @@ const MCQTest = () => {
                     return (
                       <div
                         key={questionKey}
-                        className="border border-gray-200 rounded-lg p-5 text-left shadow-sm bg-white"
+                        className="border border-white/20 rounded-lg p-5 text-left shadow-sm bg-white/5 backdrop-blur-sm"
                       >
-                        <p className="text-sm font-semibold text-gray-500 mb-1">
+                        <p className="text-sm font-semibold text-white/50 mb-1">
                           Question {item.questionNumber}
                         </p>
-                        <p className="text-lg font-semibold text-gray-900">
+                        <p className="text-lg font-semibold text-white">
                           {item.question || "Untitled question"}
                         </p>
                         <div className="mt-4 space-y-3">
@@ -361,13 +369,13 @@ const MCQTest = () => {
                                 "border rounded-lg p-3 text-sm transition-colors";
                               if (isCorrect) {
                                 optionClasses +=
-                                  " border-green-500 bg-green-50 text-green-900";
+                                  " border-green-500/50 bg-green-500/20 backdrop-blur-sm text-green-400";
                               } else if (isSelected) {
                                 optionClasses +=
-                                  " border-red-500 bg-red-50 text-red-900";
+                                  " border-red-500/50 bg-red-500/20 backdrop-blur-sm text-red-400";
                               } else {
                                 optionClasses +=
-                                  " border-gray-200 bg-white text-gray-700";
+                                  " border-white/20 bg-white/5 backdrop-blur-sm text-white/70";
                               }
 
                               return (
@@ -377,16 +385,16 @@ const MCQTest = () => {
                                   </p>
                                   <div className="flex flex-wrap gap-2 mt-2 text-xs font-semibold">
                                     {isCorrect && (
-                                      <span className="px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                      <span className="px-2 py-1 rounded-full bg-green-500/30 text-green-400 border border-green-500/50">
                                         Correct Answer
                                       </span>
                                     )}
                                     {isSelected && (
                                       <span
-                                        className={`px-2 py-1 rounded-full ${
+                                        className={`px-2 py-1 rounded-full border ${
                                           isCorrect
-                                            ? "bg-green-200 text-green-800"
-                                            : "bg-red-100 text-red-600"
+                                            ? "bg-green-500/40 text-green-300 border-green-500/70"
+                                            : "bg-red-500/30 text-red-400 border-red-500/50"
                                         }`}
                                       >
                                         Your Choice
@@ -397,36 +405,36 @@ const MCQTest = () => {
                               );
                             })
                           ) : (
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-white/50">
                               Options not available.
                             </p>
                           )}
                         </div>
 
                         {item.selectedAnswer === -1 && (
-                          <p className="mt-4 text-sm text-orange-600 font-medium">
+                          <p className="mt-4 text-sm text-orange-400 font-medium">
                             You did not answer this question.
                           </p>
                         )}
 
                         {item.selectedAnswer !== -1 && !item.isCorrect && (
-                          <p className="mt-4 text-sm text-red-600 font-medium">
+                          <p className="mt-4 text-sm text-red-400 font-medium">
                             Your answer was incorrect. Correct answer:{" "}
-                            <span className="font-semibold text-red-700">
+                            <span className="font-semibold text-red-300">
                               {correctOptionText ?? "Not available"}
                             </span>
                           </p>
                         )}
 
                         {item.isCorrect && (
-                          <p className="mt-4 text-sm text-green-600 font-medium">
+                          <p className="mt-4 text-sm text-green-400 font-medium">
                             Great job! You answered this correctly.
                           </p>
                         )}
 
                         {item.explanation && (
-                          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                            <strong className="block text-blue-900 mb-1">
+                          <div className="mt-4 p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-sm text-white/80">
+                            <strong className="block text-white mb-1">
                               Explanation
                             </strong>
                             {item.explanation}
@@ -436,7 +444,7 @@ const MCQTest = () => {
                     );
                   })
                 ) : (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-white/50">
                     Review data is not available for this attempt.
                   </p>
                 )}
@@ -444,6 +452,7 @@ const MCQTest = () => {
               <DialogFooter className="pt-4">
                 <Button
                   variant="outline"
+                  className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 font-semibold"
                   onClick={() => setReviewDialogOpen(false)}
                 >
                   Close
@@ -459,43 +468,50 @@ const MCQTest = () => {
   // Check for no questions AFTER checking for results
   if (!questions || questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Test Not Available</h2>
-          <p className="text-gray-600 mb-4">Please watch the video first to unlock the test.</p>
-          <Button onClick={() => navigate(`/course/${courseId}/video`)}>
-            Watch Video
-          </Button>
+      <div className="min-h-screen flex items-center justify-center bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat pt-24">
+        <div className="relative z-10 max-w-md mx-4">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl p-12 text-center">
+            <div className="bg-yellow-500/20 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center border border-yellow-500/50">
+              <AlertTriangle className="h-10 w-10 text-yellow-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3">Test Not Available</h2>
+            <p className="text-white/70 mb-6">Please watch the video first to unlock the test.</p>
+            <Button 
+              onClick={() => navigate(`/course/${courseId}/video`)}
+              className="bg-[#F58120] hover:bg-[#F58120]/90 text-white"
+            >
+              Watch Video
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat py-12 pt-24">
       {/* Start Dialog - Show for new attempts and retakes */}
       <Dialog open={showStartDialog} onOpenChange={setShowStartDialog}>
-        <DialogContent className="bg-white max-w-md">
+            <DialogContent className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl max-w-md text-white [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-100 hover:[&>button]:opacity-100 [&>button]:hover:bg-white/10 [&>button]:rounded-full [&>button]:p-1">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center">
+            <DialogTitle className="text-2xl font-bold text-center text-white">
               {previousResult && !previousResult.passed ? '🔄 Retake Test?' : '📝 Ready for the Test?'}
             </DialogTitle>
             <DialogDescription className="text-center space-y-4 pt-4">
               {previousResult && !previousResult.passed && (
-                <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="text-orange-900 text-sm font-semibold mb-1">
+                <div className="p-4 bg-orange-500/20 backdrop-blur-sm border border-orange-500/50 rounded-lg">
+                  <p className="text-orange-400 text-sm font-semibold mb-1">
                     Previous Attempt: {previousResult.score}%
                   </p>
-                  <p className="text-orange-800 text-xs">
+                  <p className="text-orange-400/80 text-xs">
                     You need 60% or higher to pass. Let's try again!
                   </p>
                 </div>
               )}
 
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-left">
-                <p className="font-semibold text-blue-900 mb-2">Test Details:</p>
-                <ul className="space-y-1 text-blue-800 text-sm">
+              <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-left">
+                <p className="font-semibold text-white mb-2">Test Details:</p>
+                <ul className="space-y-1 text-white/80 text-sm">
                   <li>• {questions.length} Questions</li>
                   <li>• {timeLimit} Minutes</li>
                   <li>• Passing Score: 60%</li>
@@ -503,11 +519,11 @@ const MCQTest = () => {
                 </ul>
               </div>
 
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-900 text-sm font-semibold mb-2">
+              <div className="p-4 bg-red-500/20 backdrop-blur-sm border border-red-500/50 rounded-lg">
+                <p className="text-red-400 text-sm font-semibold mb-2">
                   ⚠️ Important Rules:
                 </p>
-                <ul className="space-y-1 text-red-800 text-sm text-left">
+                <ul className="space-y-1 text-red-400/80 text-sm text-left">
                   <li>• Don't switch tabs or minimize window</li>
                   <li>• Don't press back button</li>
                   <li>• Timer will count down</li>
@@ -515,7 +531,7 @@ const MCQTest = () => {
                 </ul>
               </div>
 
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-white/70">
                 {previousResult && !previousResult.passed 
                   ? 'Good luck on your retake! You can retake until you pass.' 
                   : 'Good luck! You need 60% to pass.'}
@@ -525,7 +541,7 @@ const MCQTest = () => {
           <div className="flex justify-center pt-4">
             <Button
               onClick={handleStartTest}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg"
+              className="bg-[#F58120] hover:bg-[#F58120]/90 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
               {previousResult && !previousResult.passed ? 'Retake Test Now' : 'Start Test Now'}
             </Button>
@@ -535,18 +551,18 @@ const MCQTest = () => {
 
       {/* Test Interface */}
       {testStarted && (
-        <div className="max-w-4xl mx-auto py-8 px-6">
+        <div className="relative z-10 max-w-4xl mx-auto py-8 px-6">
           {/* Header with Timer */}
-          <div className="sticky top-0 z-10 bg-white shadow-md rounded-lg p-4 mb-6">
+          <div className="sticky top-24 z-10 bg-white/5 backdrop-blur-sm border border-white/10 shadow-md rounded-lg p-4 mb-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">MCQ Test</h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-xl font-bold text-white">MCQ Test</h2>
+                <p className="text-sm text-white/70">
                   {Object.keys(selectedAnswers).length} of {questions.length} answered
                 </p>
               </div>
-              <div className={`flex items-center gap-2 px-6 py-3 rounded-lg ${
-                timeLeft < 300 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+              <div className={`flex items-center gap-2 px-6 py-3 rounded-lg border ${
+                timeLeft < 300 ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-blue-500/20 border-blue-500/50 text-blue-400'
               }`}>
                 <Clock className="h-5 w-5" />
                 <span className="text-2xl font-bold">{formatTime(timeLeft)}</span>
@@ -557,9 +573,9 @@ const MCQTest = () => {
           {/* Questions */}
           <div className="space-y-6">
             {questions.map((q, qIndex) => (
-              <Card key={qIndex} className="border-2 border-gray-200">
+              <Card key={qIndex} className="bg-white/5 backdrop-blur-sm border-2 border-white/10 shadow-lg">
                 <CardContent className="pt-6">
-                  <h3 className="font-semibold text-lg mb-4">
+                  <h3 className="font-semibold text-lg mb-4 text-white">
                     Question {q.questionNumber}: {q.question}
                   </h3>
                   <div className="space-y-3">
@@ -569,24 +585,24 @@ const MCQTest = () => {
                         onClick={() => handleAnswerSelect(qIndex, oIndex)}
                         className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                           selectedAnswers[qIndex] === oIndex
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-[#F58120] bg-[#F58120]/20 backdrop-blur-sm'
+                            : 'border-white/20 bg-white/5 backdrop-blur-sm hover:border-white/30'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                             selectedAnswers[qIndex] === oIndex
-                              ? 'border-blue-500 bg-blue-500'
-                              : 'border-gray-300'
+                              ? 'border-[#F58120] bg-[#F58120]'
+                              : 'border-white/30 bg-white/5'
                           }`}>
                             {selectedAnswers[qIndex] === oIndex && (
                               <CheckCircle className="h-4 w-4 text-white" />
                             )}
                           </div>
-                          <span className="font-medium text-gray-700">
+                          <span className="font-medium text-white/70">
                             {String.fromCharCode(65 + oIndex)}.
                           </span>
-                          <span>{option}</span>
+                          <span className={selectedAnswers[qIndex] === oIndex ? 'text-white font-medium' : 'text-white/80'}>{option}</span>
                         </div>
                       </button>
                     ))}
@@ -597,9 +613,9 @@ const MCQTest = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="sticky bottom-0 bg-white shadow-lg rounded-lg p-6 mt-6">
+          <div className="sticky bottom-6 bg-white/5 backdrop-blur-sm border border-white/10 shadow-lg rounded-lg p-6 mt-6">
             <div className="flex justify-between items-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-white/70">
                 {allQuestionsAnswered 
                   ? '✅ All questions answered' 
                   : `⚠️ ${questions.length - Object.keys(selectedAnswers).length} questions remaining`
@@ -608,7 +624,7 @@ const MCQTest = () => {
               <Button
                 onClick={handleSubmitTest}
                 disabled={submitting || !allQuestionsAnswered}
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
+                className="bg-[#F58120] hover:bg-[#F58120]/90 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
