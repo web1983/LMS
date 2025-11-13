@@ -107,8 +107,8 @@ useEffect(() => {
 }, [registerIsSuccess, registerError, registerData, loginIsSuccess, loginError, loginData]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="relative flex items-center justify-center min-h-screen bg-black bg-[url('https://res.cloudinary.com/dmlk8egiw/image/upload/v1762946281/Group_3646_ptqpn7.png')] bg-cover bg-center md:bg-top bg-no-repeat px-4 py-12">
+      <div className="relative z-10 w-full max-w-md">
         <Tabs defaultValue="login" className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-2xl overflow-hidden pt-4 px-3">
           <TabsList className="flex justify-center bg-white/5 p-1 rounded-t-xl border-b border-white/10">
             <TabsTrigger
