@@ -15,6 +15,7 @@ import { useCreateCourseMutation } from '@/features/api/CourseApi';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { glassCard, glassInput, glassSelectTrigger, glassSelectContent, accentButton, subtleButton, mutedText } from '../theme';
 
 const AddCourse = () => {
   const [courseTitle, setCourseTitle] = useState('');
@@ -49,40 +50,40 @@ const AddCourse = () => {
   }, [isSuccess, isError, data, error, navigate]);
 
   return (
-    <div className="flex-1 mx-10">
-      <div className="mb-4">
-        <h1 className="font-bold text-xl text-black">
-          Add a new course
-        </h1>
-        <p className="text-sm text-gray-700">Enter the course title and select a category.</p>
+    <div className="space-y-6 text-white">
+      <div>
+        <p className="text-xs uppercase tracking-[0.4em] text-white/50">Course Builder</p>
+        <h1 className="text-3xl font-semibold">Add a New Course</h1>
+        <p className={mutedText}>Enter the title and category to get started.</p>
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <Label>Title</Label>
+      <div className={`${glassCard} space-y-5 p-6`}>
+        <div className="space-y-2">
+          <Label className="text-white/80">Title</Label>
           <Input
             value={courseTitle}
             onChange={(e) => setCourseTitle(e.target.value)}
             type="text"
             placeholder="Your Course Name"
+            className={glassInput}
           />
         </div>
 
-        <div>
-          <Label>Category</Label>
+        <div className="space-y-2">
+          <Label className="text-white/80">Category</Label>
           <Select onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className={`${glassSelectTrigger} w-full md:w-64`}>
               <SelectValue placeholder="Select a Course" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className={glassSelectContent}>
               <SelectGroup>
-                <SelectLabel>Basic Level</SelectLabel>
+                <SelectLabel className="text-white/60">Basic Level</SelectLabel>
                 <SelectItem value="grade_3_5_basic">Grade 3-5 (Basic)</SelectItem>
                 <SelectItem value="grade_6_8_basic">Grade 6-8 (Basic)</SelectItem>
                 <SelectItem value="grade_9_12_basic">Grade 9-12 (Basic)</SelectItem>
               </SelectGroup>
               <SelectGroup>
-                <SelectLabel>Advance Level</SelectLabel>
+                <SelectLabel className="text-white/60">Advance Level</SelectLabel>
                 <SelectItem value="grade_3_5_advance">Grade 3-5 (Advance)</SelectItem>
                 <SelectItem value="grade_6_8_advance">Grade 6-8 (Advance)</SelectItem>
                 <SelectItem value="grade_9_12_advance">Grade 9-12 (Advance)</SelectItem>
@@ -91,18 +92,18 @@ const AddCourse = () => {
           </Select>
         </div>
 
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate("/admin/course")}>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button variant="outline" onClick={() => navigate("/admin/course")} className={subtleButton}>
             Back
           </Button>
 
-          <Button className="bg-black text-white shadow hover:bg-white hover:text-black" disabled={isLoading} onClick={createCourseHandler}>
+          <Button className={`${accentButton} flex-1 sm:flex-none`} disabled={isLoading} onClick={createCourseHandler}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please Wait
               </>
             ) : (
-              "Create"
+              "Create Course"
             )}
           </Button>
         </div>

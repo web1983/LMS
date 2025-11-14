@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { glassCard, glassInput, glassSelectTrigger, glassSelectContent, accentButton, subtleButton, mutedText, badgeAccent } from "../theme";
 
 const LiveCourses = () => {
   const { data, isLoading, refetch, isFetching } = useGetCreatorCourseQuery();
@@ -86,45 +87,45 @@ const LiveCourses = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Live Courses</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-xs uppercase tracking-[0.4em] text-white/50">Visibility</p>
+        <h1 className="text-3xl font-bold">Live Courses</h1>
+        <p className={mutedText}>
           Select which published courses should appear on the live courses list.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-center">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <div className={`${glassCard} grid grid-cols-1 gap-4 p-6 xl:grid-cols-4`}>
+        <div className="relative w-full xl:col-span-2">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
           <Input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search course by name..."
-            className="pl-9"
+            className={`${glassInput} pl-12`}
           />
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-gray-500" />
-          <span className="text-sm text-gray-600">Status:</span>
+        <div className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-wide text-white/60">Status</span>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[170px]">
+            <SelectTrigger className={glassSelectTrigger}>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={glassSelectContent}>
               <SelectItem value="all">All</SelectItem>
               <SelectItem value="live">Live Only</SelectItem>
               <SelectItem value="not_live">Not Live</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">Category:</span>
+        <div className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-wide text-white/60">Category</span>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className={glassSelectTrigger}>
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={glassSelectContent}>
               <SelectItem value="all">All Categories</SelectItem>
               {categoryOptions.map((category) => (
                 <SelectItem key={category} value={category}>
@@ -134,76 +135,81 @@ const LiveCourses = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => refetch()}
-          disabled={isFetching || isLoading}
-        >
-          {isFetching ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Refreshing
-            </>
-          ) : (
-            "Refresh"
-          )}
-        </Button>
+        <div className="flex items-end">
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isFetching || isLoading}
+            className="w-full"
+          >
+            {isFetching ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Refreshing
+              </>
+            ) : (
+              "Refresh"
+            )}
+          </Button>
+        </div>
       </div>
 
-      <div className="rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div className={`${glassCard} overflow-hidden`}>
         <Table>
-          <TableHeader className="bg-gray-50">
+          <TableHeader className="bg-white/5">
             <TableRow>
-              <TableHead>Course Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Published</TableHead>
-              <TableHead>Live Status</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead className="text-white/70">Course Name</TableHead>
+              <TableHead className="text-white/70">Category</TableHead>
+              <TableHead className="text-white/70">Published</TableHead>
+              <TableHead className="text-white/70">Live Status</TableHead>
+              <TableHead className="text-right text-white/70">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredCourses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-gray-500">
+                <TableCell colSpan={5} className={`py-10 text-center ${mutedText}`}>
                   No courses found for the selected filter.
                 </TableCell>
               </TableRow>
             ) : (
               filteredCourses.map((course) => (
-                <TableRow key={course._id} className="hover:bg-gray-50">
-                  <TableCell className="font-medium text-gray-900">
+                <TableRow key={course._id} className="border-white/10 hover:bg-white/5">
+                  <TableCell className="font-medium">
                     {course.courseTitle || "Untitled Course"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="capitalize">
+                    <Badge className={`${badgeAccent} capitalize`}>
                       {formatCategory(course.category)}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     {course.isPublished ? (
-                      <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200">
+                      <Badge className="border-none bg-emerald-500/20 text-emerald-300">
                         Published
                       </Badge>
                     ) : (
-                      <Badge className="bg-orange-100 text-orange-700 border border-orange-200">
+                      <Badge className="border-none bg-orange-500/20 text-orange-200">
                         Draft
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell>
                     {course.isLive ? (
-                      <Badge className="bg-blue-100 text-blue-700 border border-blue-200">
+                      <Badge className="border-none bg-blue-500/20 text-blue-200">
                         Live
                       </Badge>
                     ) : (
-                      <Badge variant="outline">Not Live</Badge>
+                      <Badge variant="outline" className="border-white/20 text-white/70">
+                        Not Live
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant={course.isLive ? "outline" : "default"}
                       size="sm"
-                      className={course.isLive ? "text-gray-700" : "bg-blue-600 hover:bg-blue-700"}
+                      className={course.isLive ? subtleButton : accentButton}
                       onClick={() => handleToggleLive(course)}
                       disabled={isToggling}
                     >

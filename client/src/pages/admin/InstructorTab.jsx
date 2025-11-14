@@ -34,6 +34,7 @@ import {
   useUpdateInstructorPasswordMutation,
   useDeleteInstructorMutation,
 } from "@/features/api/instructorApi";
+import { glassCard, glassInput, accentButton, subtleButton, mutedText, badgeAccent } from "./theme";
 
 const InstructorTab = () => {
   const { data, isLoading } = useGetAllInstructorsQuery();
@@ -122,71 +123,72 @@ const InstructorTab = () => {
   const instructors = data?.instructors || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-white/50">Team</p>
           <h2 className="text-3xl font-bold tracking-tight">Instructors</h2>
-          <p className="text-muted-foreground">
+          <p className={mutedText}>
             Manage instructor accounts
           </p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)}>
+        <Button onClick={() => setCreateDialogOpen(true)} className={accentButton}>
           <Plus className="mr-2 h-4 w-4" />
           Add Instructor
         </Button>
       </div>
 
       {/* Stats Card */}
-      <Card>
+      <Card className={glassCard}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
             Total Instructors
           </CardTitle>
-          <CardDescription>Total number of instructors in the system</CardDescription>
+          <CardDescription className={mutedText}>Total number of instructors in the system</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-4xl font-bold">{instructors.length}</div>
+          <div className="text-4xl font-bold text-[#F58120]">{instructors.length}</div>
         </CardContent>
       </Card>
 
       {/* Instructors Table */}
-      <Card>
+      <Card className={glassCard}>
         <CardHeader>
           <CardTitle>All Instructors</CardTitle>
-          <CardDescription>
+          <CardDescription className={mutedText}>
             View and manage all instructor accounts
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#F58120]" />
             </div>
           ) : instructors.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className={`py-8 text-center ${mutedText}`}>
               No instructors found. Create your first instructor!
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
+            <div className="rounded-md border border-white/10">
+              <Table className="text-white">
+                <TableHeader className="bg-white/5">
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-white/70">Name</TableHead>
+                    <TableHead className="text-white/70">Email</TableHead>
+                    <TableHead className="text-white/70">Status</TableHead>
+                    <TableHead className="text-white/70">Created At</TableHead>
+                    <TableHead className="text-right text-white/70">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {instructors.map((instructor) => (
-                    <TableRow key={instructor._id}>
+                    <TableRow key={instructor._id} className="border-white/10 hover:bg-white/5">
                       <TableCell className="font-medium">{instructor.name}</TableCell>
-                      <TableCell>{instructor.email}</TableCell>
+                      <TableCell className={mutedText}>{instructor.email}</TableCell>
                       <TableCell>
-                        <Badge variant={instructor.isActive ? "default" : "secondary"}>
+                        <Badge className={instructor.isActive ? badgeAccent : "border border-white/20 bg-white/10 text-white/70"}>
                           {instructor.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
@@ -234,10 +236,10 @@ const InstructorTab = () => {
 
       {/* Create Instructor Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent>
+        <DialogContent className={`${glassCard} max-w-lg`}>
           <DialogHeader>
             <DialogTitle>Create New Instructor</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className={mutedText}>
               Add a new instructor account to the system
             </DialogDescription>
           </DialogHeader>
@@ -252,6 +254,7 @@ const InstructorTab = () => {
                   onChange={(e) =>
                     setNewInstructor({ ...newInstructor, name: e.target.value })
                   }
+                  className={glassInput}
                 />
               </div>
               <div className="space-y-2">
@@ -264,6 +267,7 @@ const InstructorTab = () => {
                   onChange={(e) =>
                     setNewInstructor({ ...newInstructor, email: e.target.value })
                   }
+                  className={glassInput}
                 />
               </div>
               <div className="space-y-2">
@@ -276,6 +280,7 @@ const InstructorTab = () => {
                   onChange={(e) =>
                     setNewInstructor({ ...newInstructor, password: e.target.value })
                   }
+                  className={glassInput}
                 />
               </div>
             </div>
@@ -287,10 +292,11 @@ const InstructorTab = () => {
                   setCreateDialogOpen(false);
                   setNewInstructor({ name: "", email: "", password: "" });
                 }}
+                className={subtleButton}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isCreating}>
+              <Button type="submit" disabled={isCreating} className={accentButton}>
                 {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Create Instructor
               </Button>
@@ -301,10 +307,10 @@ const InstructorTab = () => {
 
       {/* Change Password Dialog */}
       <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-        <DialogContent>
+        <DialogContent className={`${glassCard} max-w-md`}>
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className={mutedText}>
               Update password for {selectedInstructor?.name}
             </DialogDescription>
           </DialogHeader>
@@ -318,6 +324,7 @@ const InstructorTab = () => {
                   placeholder="Enter new password (min. 6 characters)"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  className={glassInput}
                 />
               </div>
             </div>
@@ -330,10 +337,11 @@ const InstructorTab = () => {
                   setNewPassword("");
                   setSelectedInstructor(null);
                 }}
+                className={subtleButton}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isUpdatingPassword}>
+              <Button type="submit" disabled={isUpdatingPassword} className={accentButton}>
                 {isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Update Password
               </Button>
@@ -344,10 +352,10 @@ const InstructorTab = () => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className={`${glassCard} max-w-md`}>
           <DialogHeader>
             <DialogTitle>Delete Instructor</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className={mutedText}>
               Are you sure you want to delete {selectedInstructor?.name}? This action cannot
               be undone.
             </DialogDescription>
@@ -359,6 +367,7 @@ const InstructorTab = () => {
                 setDeleteDialogOpen(false);
                 setSelectedInstructor(null);
               }}
+              className={subtleButton}
             >
               Cancel
             </Button>
@@ -366,6 +375,7 @@ const InstructorTab = () => {
               variant="destructive"
               onClick={handleDeleteInstructor}
               disabled={isDeleting}
+              className="bg-red-500 text-white hover:bg-red-400"
             >
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete

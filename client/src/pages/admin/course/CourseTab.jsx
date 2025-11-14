@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEditCourseMutation, useGetCourseByIdQuery, useDeleteCourseMutation, useTogglePublishCourseMutation } from '@/features/api/CourseApi';
 import { toast } from 'sonner';
+import { glassCard, glassInput, glassSelectTrigger, glassSelectContent, accentButton, subtleButton, mutedText } from '../theme';
 
 const CourseTab = () => {
     const [input, setInput] = useState({
@@ -202,26 +203,27 @@ const CourseTab = () => {
     }, [publishSuccess, navigate]);
 
     if (courseLoading || !courseData?.course) {
-        return <div className="flex justify-center items-center h-screen">
-            <Loader2 className="h-8 w-8 animate-spin" />
+        return <div className="flex h-[60vh] items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-[#F58120]" />
         </div>
     }
 
     const isPublished = courseData?.course?.isPublished;
   return (
-    <Card>
-        <CardHeader className="flex flex-row justify-between">
+    <Card className={`${glassCard} text-white`}>
+        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
                 <CardTitle>Basic Course Information</CardTitle>
-                <CardDescription>
+                <CardDescription className={mutedText}>
                     Make changes to your courses here. Click save when you're done.
                 </CardDescription>
             </div>
-            <div className='space-x-2'>
+            <div className='flex flex-wrap gap-3'>
                 <Button 
                     variant='outline' 
                     onClick={togglePublishHandler}
                     disabled={publishLoading}
+                    className={subtleButton}
                 >
                     {publishLoading ? (
                         <>
@@ -234,6 +236,7 @@ const CourseTab = () => {
                     variant="destructive"
                     onClick={deleteCourseHandler}
                     disabled={deleteLoading}
+                    className="bg-red-500 text-white hover:bg-red-400"
                 >
                     {deleteLoading ? (
                         <>
@@ -245,76 +248,81 @@ const CourseTab = () => {
             </div>
         </CardHeader>
         <CardContent>
-            <div className='space-y-5 text-sm mt-5 text-black'>
-                <div className='space-y-1'>
-                    <Label>Title</Label>
+            <div className='mt-5 space-y-6 text-sm'>
+                <div className='space-y-2'>
+                    <Label className="text-white/80">Title</Label>
                     <Input
                     type="text"
                     name="courseTitle"
                     value={input.courseTitle}
                     onChange={changeEventHandler}
                     placeholder="Ex. Microbit Kits Tutorial"
+                    className={glassInput}
                     />
                 </div>
-                <div className='space-y-1'>
-                    <Label>Subtitle</Label>
+                <div className='space-y-2'>
+                    <Label className="text-white/80">Subtitle</Label>
                     <Input
                     type="text"
                     name="subTitle"
                       value={input.subTitle}
                     onChange={changeEventHandler}
                     placeholder="Ex. This Microbit Kit is designed to introduce young minds."
+                    className={glassInput}
                     />
                 </div>
-                <div className='space-y-1'>
-                    <Label>Description</Label>
-                    <RichTextEditor  input={input} setInput={setInput} />
+                <div className='space-y-2'>
+                    <Label className="text-white/80">Description</Label>
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                      <RichTextEditor  input={input} setInput={setInput} />
+                    </div>
                 </div>
 
-                {/* New Fields Section */}
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
-                    <div className='space-y-1'>
-                        <Label>Video Duration</Label>
+                <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+                    <div className='space-y-2'>
+                        <Label className="text-white/80">Video Duration</Label>
                         <Input
                             type="text"
                             name="videoDuration"
                             value={input.videoDuration}
                             onChange={changeEventHandler}
                             placeholder="Ex. 45 minutes"
+                            className={glassInput}
                         />
                     </div>
-                    <div className='space-y-1'>
-                        <Label>Project Name</Label>
+                    <div className='space-y-2'>
+                        <Label className="text-white/80">Project Name</Label>
                         <Input
                             type="text"
                             name="projectName"
                             value={input.projectName}
                             onChange={changeEventHandler}
                             placeholder="Ex. Smart Home Automation"
+                            className={glassInput}
                         />
                     </div>
                 </div>
 
-                    <div className='flex items-center gap-5'>
-                        <div className='space-y-1'>
-                    <Label>Category</Label>
+                    <div className='grid gap-4 md:grid-cols-3'>
+                        <div className='space-y-2'>
+                    <Label className="text-white/80">Category</Label>
                      <Select 
                                 onValueChange={selectCategory} 
                                 value={input.category || ""}
                                 key={`cat-${courseId}-${input.category || 'empty'}`}
                             >
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className={glassSelectTrigger}>
                                   <SelectValue placeholder="Select a Category" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-white">
+                                <SelectContent className={glassSelectContent}>
                                   <SelectGroup>
-                                    <SelectLabel>Basic Level</SelectLabel>
+                                    <SelectLabel className="text-white/60">Basic Level</SelectLabel>
                                     <SelectItem value="grade_3_5_basic">Grade 3-5 (Basic)</SelectItem>
                                     <SelectItem value="grade_6_8_basic">Grade 6-8 (Basic)</SelectItem>
                                     <SelectItem value="grade_9_12_basic">Grade 9-12 (Basic)</SelectItem>
                                   </SelectGroup>
                                   <SelectGroup>
-                                    <SelectLabel>Advance Level</SelectLabel>
+                                    <SelectLabel className="text-white/60">Advance Level</SelectLabel>
                                     <SelectItem value="grade_3_5_advance">Grade 3-5 (Advance)</SelectItem>
                                     <SelectItem value="grade_6_8_advance">Grade 6-8 (Advance)</SelectItem>
                                     <SelectItem value="grade_9_12_advance">Grade 9-12 (Advance)</SelectItem>
@@ -322,19 +330,19 @@ const CourseTab = () => {
                                 </SelectContent>
                               </Select>
                         </div>
-                        <div className='space-y-1'>
-                            <Label>Course Level</Label>
+                        <div className='space-y-2'>
+                            <Label className="text-white/80">Course Level</Label>
                              <Select 
                                         onValueChange={selectCourseLevel} 
                                         value={input.courseLevel || ""}
                                         key={`level-${courseId}-${input.courseLevel || 'empty'}`}
                                     >
-                                        <SelectTrigger className="w-[180px]">
+                                        <SelectTrigger className={glassSelectTrigger}>
                                           <SelectValue placeholder="Select a Level" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className={glassSelectContent}>
                                           <SelectGroup>
-                                            <SelectLabel>Level</SelectLabel>
+                                            <SelectLabel className="text-white/60">Level</SelectLabel>
                                             <SelectItem value="Beginner">Beginner</SelectItem>
                                             <SelectItem value="Medium">Medium</SelectItem>
                                             <SelectItem value="Advance">Advance</SelectItem>
@@ -342,19 +350,19 @@ const CourseTab = () => {
                                         </SelectContent>
                                       </Select>
                         </div>
-                        <div className='space-y-1'>
-                            <Label>Kit Type</Label>
+                        <div className='space-y-2'>
+                            <Label className="text-white/80">Kit Type</Label>
                              <Select 
                                         onValueChange={selectKit} 
                                         value={input.kit || ""}
                                         key={`kit-${courseId}-${input.kit || 'empty'}`}
                                     >
-                                        <SelectTrigger className="w-[180px]">
+                                        <SelectTrigger className={glassSelectTrigger}>
                                           <SelectValue placeholder="Select a Kit" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className={glassSelectContent}>
                                           <SelectGroup>
-                                            <SelectLabel>Kit</SelectLabel>
+                                            <SelectLabel className="text-white/60">Kit</SelectLabel>
                                             <SelectItem value="Starter Kits">Starter Kits</SelectItem>
                                             <SelectItem value="Intermediate Kit">Intermediate Kit</SelectItem>
                                             <SelectItem value="Advanced Kit">Advanced Kit</SelectItem>
@@ -364,40 +372,39 @@ const CourseTab = () => {
                         </div>
                     </div>
 
-                        <div className='space-y-1'>
-                            <Label>Course Thumbnail</Label>
+                        <div className='space-y-2'>
+                            <Label className="text-white/80">Course Thumbnail</Label>
                             <Input 
                             type="file"
                             onChange={selectThumbnail}
                             accept= "image/*"
-                            className="w-fit cursor-pointer"
+                            className={`${glassInput} w-fit cursor-pointer`}
                             />
                             {
                                 previewThumbnail && (
-                                    <img src={previewThumbnail} className='h-64 my-2' alt="Course Thumbnail"/>
+                                    <img src={previewThumbnail} className='my-2 h-64 rounded-2xl border border-white/10 object-cover' alt="Course Thumbnail"/>
                                 )
                             }
                         </div>
 
-                        {/* Learning Outcomes */}
-                        <div className='space-y-1'>
-                            <Label>What You'll Learn (Learning Outcomes)</Label>
-                            <div className="space-y-2 mt-2">
+                        <div className='space-y-2'>
+                            <Label className="text-white/80">What You'll Learn (Learning Outcomes)</Label>
+                            <div className="mt-2 space-y-3">
                                 {learningOutcomes.map((outcome, index) => (
-                                    <div key={index} className="flex gap-2">
+                                    <div key={index} className="flex flex-col gap-2 sm:flex-row">
                                         <Input
                                             type="text"
                                             value={outcome}
                                             onChange={(e) => handleLearningOutcomeChange(index, e.target.value)}
                                             placeholder={`Learning outcome ${index + 1}`}
-                                            className="flex-1"
+                                            className={glassInput}
                                         />
                                         {learningOutcomes.length > 1 && (
                                             <Button
                                                 type="button"
                                                 variant="outline"
                                                 onClick={() => removeLearningOutcome(index)}
-                                                className="px-3"
+                                                className={subtleButton}
                                             >
                                                 Remove
                                             </Button>
@@ -408,28 +415,27 @@ const CourseTab = () => {
                                     type="button"
                                     variant="outline"
                                     onClick={addLearningOutcome}
-                                    className="mt-2"
+                                    className={subtleButton}
                                 >
                                     + Add Learning Outcome
                                 </Button>
                             </div>
                         </div>
 
-                        {/* Video Status */}
-                        <div className='space-y-1'>
-                            <Label>Video Status</Label>
+                        <div className='space-y-2'>
+                            <Label className="text-white/80">Video Status</Label>
                             <textarea
                                 name="videoStatus"
                                 value={input.videoStatus}
                                 onChange={changeEventHandler}
                                 placeholder="Describe the video content or current status..."
-                                className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className={`${glassInput} min-h-[120px]`}
                             />
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <Button onClick={() => navigate("/admin/course")} variant="outline">Cancel</Button>
-                            <Button className="bg-black text-white hover:bg-white hover:text-black" disabled={isLoading}  onClick={updateCourseHandler} >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <Button onClick={() => navigate("/admin/course")} variant="outline" className={subtleButton}>Cancel</Button>
+                            <Button className={`${accentButton} flex-1 sm:flex-none`} disabled={isLoading}  onClick={updateCourseHandler} >
                                 {
                                     isLoading ? (
                                         <>
@@ -437,7 +443,7 @@ const CourseTab = () => {
                                         Please Wait
                                         </>
                                     ): (
-                                        "save"
+                                        "Save Changes"
                                     )
                                 }
                             </Button>

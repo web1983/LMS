@@ -65,4 +65,55 @@
   .animate-pulse-slow {
     animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+
+  .admin-theme .text-gray-900,
+  .admin-theme .text-gray-800 {
+    color: #ffffff !important;
+  }
+
+  .admin-theme .text-gray-700,
+  .admin-theme .text-gray-600,
+  .admin-theme .text-gray-500,
+  .admin-theme .text-muted-foreground {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .admin-theme .bg-white,
+  .admin-theme .bg-gray-50 {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(18px);
+  }
+
+  .admin-theme .border-gray-200,
+  .admin-theme .border-gray-300 {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .admin-theme input,
+  .admin-theme textarea,
+  .admin-theme select {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+  }
+
+  .admin-theme input::placeholder,
+  .admin-theme textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .admin-theme table {
+    color: #ffffff;
+  }
+
+  .admin-theme thead {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .admin-theme .bg-blue-50,
+  .admin-theme .bg-green-50,
+  .admin-theme .bg-yellow-50,
+  .admin-theme .bg-orange-50 {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+  }
 }
