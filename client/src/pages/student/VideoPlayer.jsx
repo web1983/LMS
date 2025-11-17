@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetCourseByIdQuery } from '@/features/api/CourseApi';
 import { useMarkVideoWatchedMutation } from '@/features/api/enrollmentApi';
@@ -15,6 +15,8 @@ const VideoPlayer = () => {
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [player, setPlayer] = useState(null);
+  const progressCheckIntervalRef = useRef(null);
+  const lastProgressRef = useRef(0);
 
   const { data: courseData, isLoading } = useGetCourseByIdQuery(courseId);
   const [markVideoWatched] = useMarkVideoWatchedMutation();
@@ -30,6 +32,135 @@ const VideoPlayer = () => {
   };
 
   const videoId = course?.videoUrl ? extractYouTubeId(course.videoUrl) : null;
+
+  const handleVideoEnd = useCallback(async () => {
+    // Prevent multiple calls
+    if (videoEnded) return;
+    
+    setVideoEnded(true);
+    
+    // Exit fullscreen if in fullscreen mode (helps dialog appear on mobile)
+    try {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else if (document.webkitFullscreenElement) {
+        document.webkitExitFullscreen();
+      } else if (document.mozFullScreenElement) {
+        document.mozCancelFullScreen();
+      } else if (document.msFullscreenElement) {
+        document.msExitFullscreen();
+      }
+    } catch (error) {
+      console.debug('Fullscreen exit error:', error);
+    }
+    
+    // Small delay to ensure fullscreen exit completes before showing dialog
+    setTimeout(() => {
+      setShowCompleteDialog(true);
+    }, 300);
+    
+    // Mark video as watched
+    try {
+      await markVideoWatched(courseId);
+    } catch (error) {
+      console.error('Failed to mark video as watched:', error);
+    }
+  }, [videoEnded, courseId, markVideoWatched]);
+
+  const checkVideoCompletion = useCallback(() => {
+    if (player && !videoEnded) {
+      try {
+        const playerState = player.getPlayerState();
+        const currentTime = player.getCurrentTime();
+        const duration = player.getDuration();
+        
+        // YT.PlayerState.ENDED = 0
+        if (playerState === 0 || (duration && currentTime >= duration - 0.5)) {
+          handleVideoEnd();
+        }
+      } catch (error) {
+        console.debug('Completion check error:', error);
+      }
+    }
+  }, [player, videoEnded, handleVideoEnd]);
+
+  const handleFullscreenChange = useCallback(() => {
+    // When exiting fullscreen, check if video ended
+    if (!document.fullscreenElement && 
+        !document.webkitFullscreenElement && 
+        !document.mozFullScreenElement && 
+        !document.msFullscreenElement) {
+      if (player && !videoEnded) {
+        checkVideoCompletion();
+      }
+    }
+  }, [player, videoEnded, checkVideoCompletion]);
+
+  const startProgressTracking = useCallback((playerInstance) => {
+    // Clear any existing interval
+    if (progressCheckIntervalRef.current) {
+      clearInterval(progressCheckIntervalRef.current);
+    }
+
+    // Check video progress every 2 seconds
+    // This helps detect completion even when events don't fire in fullscreen
+    progressCheckIntervalRef.current = setInterval(() => {
+      if (playerInstance && !videoEnded) {
+        try {
+          const currentTime = playerInstance.getCurrentTime();
+          const duration = playerInstance.getDuration();
+          
+          // If video is at or near the end (within 1 second)
+          if (duration && currentTime >= duration - 1) {
+            // Double check the player state
+            const playerState = playerInstance.getPlayerState();
+            if (playerState === 0 || currentTime >= duration - 0.5) {
+              handleVideoEnd();
+              if (progressCheckIntervalRef.current) {
+                clearInterval(progressCheckIntervalRef.current);
+                progressCheckIntervalRef.current = null;
+              }
+            }
+          }
+          
+          // Detect if video is stuck (progress hasn't changed but should have)
+          if (currentTime === lastProgressRef.current && playerInstance.getPlayerState() === 1) {
+            // Video is playing but time isn't advancing - might be an issue
+            // Reset last progress
+            lastProgressRef.current = currentTime;
+          } else {
+            lastProgressRef.current = currentTime;
+          }
+        } catch (error) {
+          // Player might not be ready, ignore errors
+          console.debug('Progress check error:', error);
+        }
+      }
+    }, 2000);
+  }, [videoEnded, handleVideoEnd]);
+
+  const onPlayerReady = useCallback((event) => {
+    // Start progress tracking for mobile fullscreen compatibility
+    startProgressTracking(event.target);
+    
+    // Listen for fullscreen changes
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+  }, [startProgressTracking, handleFullscreenChange]);
+
+  const onPlayerStateChange = useCallback((event) => {
+    // YT.PlayerState.ENDED = 0
+    if (event.data === 0) {
+      handleVideoEnd();
+      // Clear progress tracking when video ends
+      if (progressCheckIntervalRef.current) {
+        clearInterval(progressCheckIntervalRef.current);
+        progressCheckIntervalRef.current = null;
+      }
+    }
+  }, [handleVideoEnd]);
 
   // Load YouTube iframe API
   useEffect(() => {
@@ -52,33 +183,30 @@ const VideoPlayer = () => {
           modestbranding: 1,
           rel: 0,
           showinfo: 0,
+          playsinline: 1, // Important for mobile fullscreen handling
         },
         events: {
           onStateChange: onPlayerStateChange,
+          onReady: onPlayerReady,
         },
       });
       setPlayer(newPlayer);
     }
-  }, [videoId, showStartDialog]);
 
-  const onPlayerStateChange = (event) => {
-    // YT.PlayerState.ENDED = 0
-    if (event.data === 0) {
-      handleVideoEnd();
-    }
-  };
+    // Cleanup on unmount
+    return () => {
+      if (progressCheckIntervalRef.current) {
+        clearInterval(progressCheckIntervalRef.current);
+        progressCheckIntervalRef.current = null;
+      }
+      // Remove fullscreen event listeners
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, [videoId, showStartDialog, onPlayerStateChange, onPlayerReady, handleFullscreenChange]);
 
-  const handleVideoEnd = async () => {
-    setVideoEnded(true);
-    setShowCompleteDialog(true);
-    
-    // Mark video as watched
-    try {
-      await markVideoWatched(courseId);
-    } catch (error) {
-      console.error('Failed to mark video as watched:', error);
-    }
-  };
 
   const handleStartVideo = () => {
     setShowStartDialog(false);
@@ -168,7 +296,7 @@ const VideoPlayer = () => {
 
       {/* Complete Dialog */}
       <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
-        <DialogContent className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl max-w-md text-white [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-100 hover:[&>button]:opacity-100 [&>button]:hover:bg-white/10 [&>button]:rounded-full [&>button]:p-1">
+        <DialogContent className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl max-w-md text-white z-[9999] [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-100 hover:[&>button]:opacity-100 [&>button]:hover:bg-white/10 [&>button]:rounded-full [&>button]:p-1">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-center text-white">
               🎉 Video Complete!
