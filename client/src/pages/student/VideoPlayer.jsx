@@ -629,13 +629,13 @@ const VideoPlayer = () => {
 
       {/* Video Player */}
       {!showStartDialog && (
-        <div className="relative z-10 w-full max-w-6xl mx-auto px-4">
-          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-4 py-8">
+          <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-2xl" style={{ paddingBottom: '56.25%', minHeight: '400px' }}>
             <div 
               id="youtube-player" 
               ref={playerRef} 
-              className="absolute top-0 left-0 w-full h-full rounded-lg overflow-hidden shadow-2xl"
-              style={{ minHeight: '400px' }}
+              className="absolute top-0 left-0 w-full h-full"
+              style={{ width: '100%', height: '100%', minHeight: '360px' }}
             ></div>
           </div>
         </div>
