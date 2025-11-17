@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetCourseByIdQuery } from '@/features/api/CourseApi';
 import { useMarkVideoWatchedMutation } from '@/features/api/enrollmentApi';
@@ -20,6 +20,7 @@ const VideoPlayer = () => {
   const dialogTimeoutRef = useRef(null);
   const fallbackTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
+  const playerInstanceRef = useRef(null);
 
   const { data: courseData, isLoading } = useGetCourseByIdQuery(courseId);
   const [markVideoWatched] = useMarkVideoWatchedMutation();
@@ -40,8 +41,10 @@ const VideoPlayer = () => {
     // Prevent multiple calls
     if (videoEnded || !isMountedRef.current) return;
     
-    // Set state immediately to prevent multiple calls
-    setVideoEnded(true);
+    // Use startTransition for state updates to prevent rendering errors
+    startTransition(() => {
+      setVideoEnded(true);
+    });
     
     // Check if we're in fullscreen mode
     const isFullscreen = !!(
@@ -85,29 +88,32 @@ const VideoPlayer = () => {
     // Show dialog - use longer delay if we were in fullscreen, shorter if not
     const delay = isFullscreen ? 500 : 100;
     
+    // Helper function to safely set dialog state
+    const showDialogSafely = () => {
+      if (isMountedRef.current) {
+        startTransition(() => {
+          setShowCompleteDialog(true);
+        });
+      }
+    };
+    
     // Fallback: Show dialog immediately if not in fullscreen
     if (!isFullscreen) {
-      if (isMountedRef.current) {
-        setShowCompleteDialog(true);
-      }
+      showDialogSafely();
     } else {
       // In fullscreen, wait for exit to complete
       dialogTimeoutRef.current = setTimeout(() => {
-        if (isMountedRef.current) {
-          setShowCompleteDialog(true);
-          // Clear fallback if dialog shows early
-          if (fallbackTimeoutRef.current) {
-            clearTimeout(fallbackTimeoutRef.current);
-            fallbackTimeoutRef.current = null;
-          }
+        showDialogSafely();
+        // Clear fallback if dialog shows early
+        if (fallbackTimeoutRef.current) {
+          clearTimeout(fallbackTimeoutRef.current);
+          fallbackTimeoutRef.current = null;
         }
       }, delay);
       
       // Fallback: Show dialog after max 1 second even if fullscreen exit fails
       fallbackTimeoutRef.current = setTimeout(() => {
-        if (isMountedRef.current) {
-          setShowCompleteDialog(true);
-        }
+        showDialogSafely();
       }, 1000);
     }
     
@@ -123,16 +129,27 @@ const VideoPlayer = () => {
   const checkVideoCompletion = useCallback(() => {
     if (player && !videoEnded && isMountedRef.current) {
       try {
+        // Check if player is ready and attached to DOM
+        if (!player.getDuration || typeof player.getDuration !== 'function') {
+          return; // Player not ready yet
+        }
+        
         const playerState = player.getPlayerState();
         const currentTime = player.getCurrentTime();
         const duration = player.getDuration();
+        
+        // Validate values
+        if (isNaN(currentTime) || isNaN(duration) || duration <= 0) {
+          return; // Invalid values, player might not be ready
+        }
         
         // YT.PlayerState.ENDED = 0
         if (playerState === 0 || (duration && currentTime >= duration - 0.5)) {
           handleVideoEnd();
         }
       } catch (error) {
-        if (isMountedRef.current) {
+        // Ignore errors about player not attached - it's normal during cleanup
+        if (isMountedRef.current && !error.message?.includes('not attached')) {
           console.debug('Completion check error:', error);
         }
       }
@@ -162,33 +179,64 @@ const VideoPlayer = () => {
     progressCheckIntervalRef.current = setInterval(() => {
       if (playerInstance && !videoEnded && isMountedRef.current) {
         try {
+          // Check if player is ready and attached to DOM
+          if (!playerInstance.getDuration || typeof playerInstance.getDuration !== 'function') {
+            return; // Player not ready yet
+          }
+          
           const currentTime = playerInstance.getCurrentTime();
           const duration = playerInstance.getDuration();
+          
+          // Validate values
+          if (isNaN(currentTime) || isNaN(duration) || duration <= 0) {
+            return; // Invalid values, player might not be ready
+          }
           
           // If video is at or near the end (within 1 second)
           if (duration && currentTime >= duration - 1) {
             // Double check the player state
-            const playerState = playerInstance.getPlayerState();
-            if (playerState === 0 || currentTime >= duration - 0.5) {
-              handleVideoEnd();
+            try {
+              const playerState = playerInstance.getPlayerState();
+              if (playerState === 0 || currentTime >= duration - 0.5) {
+                handleVideoEnd();
+                if (progressCheckIntervalRef.current) {
+                  clearInterval(progressCheckIntervalRef.current);
+                  progressCheckIntervalRef.current = null;
+                }
+                return;
+              }
+            } catch (err) {
+              // Player might be destroyed, just clear interval
               if (progressCheckIntervalRef.current) {
                 clearInterval(progressCheckIntervalRef.current);
                 progressCheckIntervalRef.current = null;
               }
+              return;
             }
           }
           
           // Detect if video is stuck (progress hasn't changed but should have)
-          if (currentTime === lastProgressRef.current && playerInstance.getPlayerState() === 1) {
-            // Video is playing but time isn't advancing - might be an issue
-            // Reset last progress
-            lastProgressRef.current = currentTime;
-          } else {
-            lastProgressRef.current = currentTime;
+          try {
+            const playerState = playerInstance.getPlayerState();
+            if (currentTime === lastProgressRef.current && playerState === 1) {
+              // Video is playing but time isn't advancing - might be an issue
+              // Reset last progress
+              lastProgressRef.current = currentTime;
+            } else {
+              lastProgressRef.current = currentTime;
+            }
+          } catch (err) {
+            // Player might be destroyed, ignore
+            return;
           }
         } catch (error) {
-          // Player might not be ready, ignore errors if component unmounted
-          if (isMountedRef.current) {
+          // Player might not be ready or destroyed, clear interval and stop tracking
+          if (progressCheckIntervalRef.current) {
+            clearInterval(progressCheckIntervalRef.current);
+            progressCheckIntervalRef.current = null;
+          }
+          // Don't log if component unmounted
+          if (isMountedRef.current && !error.message?.includes('not attached')) {
             console.debug('Progress check error:', error);
           }
         }
@@ -220,27 +268,23 @@ const VideoPlayer = () => {
   }, [handleVideoEnd]);
 
   // Suppress harmless warnings (postMessage origin warnings and permissions policy warnings)
+  // Note: We're suppressing at the source level, not overriding console to avoid interfering with React
   useEffect(() => {
-    // Only suppress warnings in production, not errors that React needs
-    if (process.env.NODE_ENV === 'production') {
-      const originalConsoleWarn = console.warn;
-      console.warn = (...args) => {
-        const message = args[0]?.toString() || '';
-        // Suppress YouTube postMessage warnings
-        if (message.includes('postMessage') && message.includes('target origin') && message.includes('youtube')) {
-          return;
-        }
-        // Suppress permissions policy warnings
-        if (message.includes('Permissions policy violation') || message.includes('compute-pressure')) {
-          return;
-        }
-        originalConsoleWarn.apply(console, args);
-      };
-      
-      return () => {
-        console.warn = originalConsoleWarn;
-      };
-    }
+    // Suppress warnings by listening to errors and preventing default behavior
+    const handleError = (event) => {
+      const message = event.message || '';
+      if (message.includes('postMessage') && message.includes('target origin')) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+    };
+    
+    window.addEventListener('error', handleError, true);
+    
+    return () => {
+      window.removeEventListener('error', handleError, true);
+    };
   }, []);
 
   // Load YouTube iframe API
@@ -283,6 +327,7 @@ const VideoPlayer = () => {
         });
         if (isMountedRef.current) {
           setPlayer(newPlayer);
+          playerInstanceRef.current = newPlayer;
         }
       } catch (error) {
         console.error('Error initializing YouTube player:', error);
@@ -305,6 +350,17 @@ const VideoPlayer = () => {
       if (fallbackTimeoutRef.current) {
         clearTimeout(fallbackTimeoutRef.current);
         fallbackTimeoutRef.current = null;
+      }
+      
+      // Destroy YouTube player if it exists (use ref to avoid stale closure)
+      if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
+        try {
+          playerInstanceRef.current.destroy();
+          playerInstanceRef.current = null;
+        } catch (error) {
+          // Ignore errors during cleanup
+          playerInstanceRef.current = null;
+        }
       }
       
       // Remove fullscreen event listeners

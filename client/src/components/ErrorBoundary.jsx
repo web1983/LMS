@@ -10,10 +10,32 @@ class ErrorBoundaryClass extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
+    // Don't catch postMessage errors or YouTube API errors - these are harmless
+    const errorMessage = error?.message || error?.toString() || '';
+    if (
+      errorMessage.includes('postMessage') ||
+      errorMessage.includes('YouTube player') ||
+      errorMessage.includes('not attached')
+    ) {
+      // These are harmless warnings, don't trigger error boundary
+      return null;
+    }
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
+    // Check if this is a harmless error we should ignore
+    const errorMessage = error?.message || error?.toString() || '';
+    if (
+      errorMessage.includes('postMessage') ||
+      errorMessage.includes('YouTube player') ||
+      errorMessage.includes('not attached')
+    ) {
+      // These are harmless warnings, don't show error boundary
+      console.debug('Ignoring harmless error:', errorMessage);
+      return;
+    }
+    
     // Log error to console for debugging
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({
