@@ -32,16 +32,44 @@ export const creatorCourse = async (req, res) => {
   }
 };
 
-// 🟢 GET CREATOR COURSES
+// 🟢 GET CREATOR COURSES (Returns all courses for instructors in admin dashboard)
 export const getCreatorCourses = async (req, res) => {
   try {
     const userId = req.id;
+    
+    // Check if user is an instructor
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        courses: [],
+        message: "User not found.",
+      });
+    }
+
+    // For instructors, return ALL courses (not just ones they created)
+    // This allows all instructors to see and manage all courses in the admin dashboard
+    if (user.role === 'instructor') {
+      const courses = await Course.find({}).populate({ path: 'creator', select: 'name email photoUrl' }).sort({ createdAt: -1 });
+
+      // Return empty array if no courses found, but don't treat it as an error
+      if (courses.length === 0) {
+        return res.status(200).json({
+          courses: [],
+          message: "No courses found.",
+        });
+      }
+
+      return res.status(200).json({ courses });
+    }
+
+    // For students (if they somehow access this endpoint), return only their enrolled courses
+    // This shouldn't happen as the route is protected for instructors, but just in case
     const courses = await Course.find({ creator: userId });
 
     if (courses.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         courses: [],
-        message: "No courses found for this creator.",
+        message: "No courses found.",
       });
     }
 
