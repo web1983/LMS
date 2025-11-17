@@ -314,34 +314,46 @@ const VideoPlayer = () => {
     // 1. Video ID exists
     // 2. Start dialog is closed (video div is rendered)
     // 3. YouTube API is loaded
-    // 4. Player container exists in DOM
     if (videoId && !showStartDialog && window.YT && window.YT.Player) {
-      // Check if player container exists
-      const playerContainer = document.getElementById('youtube-player');
-      if (!playerContainer) {
-        // Container doesn't exist yet, wait a bit
-        initTimeout = setTimeout(() => {
-          if (isMountedRef.current && !player && document.getElementById('youtube-player')) {
-            initializePlayer();
-          }
-        }, 100);
-      } else {
-        // If player already exists, destroy it first
-        if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
-          try {
-            playerInstanceRef.current.destroy();
-            playerInstanceRef.current = null;
-            setPlayer(null);
-          } catch (error) {
-            // Ignore errors during cleanup
-            playerInstanceRef.current = null;
-            setPlayer(null);
-          }
-        }
+      // Function to wait for div to exist and then initialize
+      const waitForDivAndInit = (attempts = 0) => {
+        const playerContainer = document.getElementById('youtube-player');
         
-        // Initialize new player
-        initializePlayer();
-      }
+        if (playerContainer && playerContainer.offsetParent !== null) {
+          // Div exists and is visible, initialize player
+          // If player already exists, destroy it first
+          if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
+            try {
+              playerInstanceRef.current.destroy();
+              playerInstanceRef.current = null;
+              setPlayer(null);
+            } catch (error) {
+              // Ignore errors during cleanup
+              playerInstanceRef.current = null;
+              setPlayer(null);
+            }
+          }
+          
+          // Small delay to ensure DOM is fully updated
+          initTimeout = setTimeout(() => {
+            if (isMountedRef.current && document.getElementById('youtube-player')) {
+              initializePlayer();
+            }
+          }, 50);
+        } else if (attempts < 20) {
+          // Div doesn't exist yet, wait and retry (up to 20 times = 1 second)
+          initTimeout = setTimeout(() => {
+            if (isMountedRef.current) {
+              waitForDivAndInit(attempts + 1);
+            }
+          }, 50);
+        } else {
+          console.error('YouTube player container not found after multiple attempts');
+        }
+      };
+      
+      // Start waiting for div
+      waitForDivAndInit();
     }
 
     function initializePlayer() {
@@ -583,8 +595,15 @@ const VideoPlayer = () => {
 
       {/* Video Player */}
       {!showStartDialog && (
-        <div className="relative z-10 w-full max-w-6xl aspect-video px-4">
-          <div id="youtube-player" ref={playerRef} className="w-full h-full rounded-lg overflow-hidden shadow-2xl"></div>
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-4">
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+            <div 
+              id="youtube-player" 
+              ref={playerRef} 
+              className="absolute top-0 left-0 w-full h-full rounded-lg overflow-hidden shadow-2xl"
+              style={{ minHeight: '400px' }}
+            ></div>
+          </div>
         </div>
       )}
     </div>
