@@ -15,11 +15,15 @@ import { useGetCreatorCourseQuery } from '@/features/api/CourseApi'
 import { Edit, Search } from 'lucide-react'
 import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { glassCard, glassInput, glassSelectTrigger, glassSelectContent, accentButton, subtleButton, mutedText, badgeAccent } from '../theme'
 
 const CourseTable = () => {
-const {data, isLoading, isError, error} = useGetCreatorCourseQuery();
+  const { isAuthenticated, isLoading: authLoading } = useSelector((store) => store.auth);
+  const {data, isLoading, isError, error} = useGetCreatorCourseQuery(undefined, {
+    skip: !isAuthenticated || authLoading
+  });
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');

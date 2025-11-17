@@ -15,6 +15,7 @@ import {
 } from "@/features/api/CourseApi";
 import { toast } from "sonner";
 import { Loader2, Power, PowerOff, Filter, Search } from "lucide-react";
+import { useSelector } from "react-redux";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   Select,
@@ -27,7 +28,10 @@ import { Input } from "@/components/ui/input";
 import { glassCard, glassInput, glassSelectTrigger, glassSelectContent, accentButton, subtleButton, mutedText, badgeAccent } from "../theme";
 
 const LiveCourses = () => {
-  const { data, isLoading, isError, error, refetch, isFetching } = useGetCreatorCourseQuery();
+  const { isAuthenticated, isLoading: authLoading } = useSelector((store) => store.auth);
+  const { data, isLoading, isError, error, refetch, isFetching } = useGetCreatorCourseQuery(undefined, {
+    skip: !isAuthenticated || authLoading
+  });
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
