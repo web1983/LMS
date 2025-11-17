@@ -245,6 +245,7 @@ const VideoPlayer = () => {
   }, [videoEnded, handleVideoEnd]);
 
   const onPlayerReady = useCallback((event) => {
+    console.log('YouTube player ready:', event);
     // Start progress tracking for mobile fullscreen compatibility
     startProgressTracking(event.target);
     
@@ -304,7 +305,7 @@ const VideoPlayer = () => {
     }
   }, []);
 
-  // Initialize YouTube player
+  // Initialize YouTube player when dialog is closed
   useEffect(() => {
     isMountedRef.current = true;
     let initTimeout = null;
@@ -315,12 +316,28 @@ const VideoPlayer = () => {
     // 2. Start dialog is closed (video div is rendered)
     // 3. YouTube API is loaded
     if (videoId && !showStartDialog && window.YT && window.YT.Player) {
+      console.log('Conditions met for player initialization:', {
+        videoId,
+        showStartDialog,
+        hasYT: !!window.YT,
+        hasPlayer: !!window.YT.Player
+      });
+      
       // Function to wait for div to exist and then initialize
       const waitForDivAndInit = (attempts = 0) => {
         const playerContainer = document.getElementById('youtube-player');
         
+        console.log(`Attempt ${attempts}: Player container check:`, {
+          exists: !!playerContainer,
+          offsetParent: playerContainer?.offsetParent,
+          clientWidth: playerContainer?.clientWidth,
+          clientHeight: playerContainer?.clientHeight
+        });
+        
         if (playerContainer && playerContainer.offsetParent !== null) {
           // Div exists and is visible, initialize player
+          console.log('Player container found, initializing...');
+          
           // If player already exists, destroy it first
           if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
             try {
@@ -328,7 +345,7 @@ const VideoPlayer = () => {
               playerInstanceRef.current = null;
               setPlayer(null);
             } catch (error) {
-              // Ignore errors during cleanup
+              console.error('Error destroying existing player:', error);
               playerInstanceRef.current = null;
               setPlayer(null);
             }
@@ -339,9 +356,9 @@ const VideoPlayer = () => {
             if (isMountedRef.current && document.getElementById('youtube-player')) {
               initializePlayer();
             }
-          }, 50);
-        } else if (attempts < 20) {
-          // Div doesn't exist yet, wait and retry (up to 20 times = 1 second)
+          }, 100);
+        } else if (attempts < 40) {
+          // Div doesn't exist yet, wait and retry (up to 40 times = 2 seconds)
           initTimeout = setTimeout(() => {
             if (isMountedRef.current) {
               waitForDivAndInit(attempts + 1);
@@ -354,10 +371,24 @@ const VideoPlayer = () => {
       
       // Start waiting for div
       waitForDivAndInit();
+    } else {
+      console.log('Player initialization skipped:', {
+        videoId: !!videoId,
+        showStartDialog,
+        hasYT: !!window.YT,
+        hasPlayer: !!(window.YT && window.YT.Player)
+      });
     }
 
     function initializePlayer() {
+      const playerContainer = document.getElementById('youtube-player');
+      if (!playerContainer) {
+        console.error('Player container not found when trying to initialize');
+        return;
+      }
+      
       try {
+        console.log('Creating YouTube player with videoId:', videoId);
         const newPlayer = new window.YT.Player('youtube-player', {
           videoId: videoId,
           playerVars: {
@@ -373,6 +404,7 @@ const VideoPlayer = () => {
             onReady: onPlayerReady,
           },
         });
+        console.log('YouTube player created successfully');
         if (isMountedRef.current) {
           setPlayer(newPlayer);
           playerInstanceRef.current = newPlayer;
@@ -384,6 +416,7 @@ const VideoPlayer = () => {
           retryTimeout = setTimeout(() => {
             if (isMountedRef.current && document.getElementById('youtube-player')) {
               try {
+                console.log('Retrying player initialization...');
                 const newPlayer = new window.YT.Player('youtube-player', {
                   videoId: videoId,
                   playerVars: {
@@ -399,6 +432,7 @@ const VideoPlayer = () => {
                     onReady: onPlayerReady,
                   },
                 });
+                console.log('YouTube player created successfully on retry');
                 if (isMountedRef.current) {
                   setPlayer(newPlayer);
                   playerInstanceRef.current = newPlayer;
