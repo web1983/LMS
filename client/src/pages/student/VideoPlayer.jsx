@@ -315,16 +315,24 @@ const VideoPlayer = () => {
     // 1. Video ID exists
     // 2. Start dialog is closed (video div is rendered)
     // 3. YouTube API is loaded
-    if (videoId && !showStartDialog && window.YT && window.YT.Player) {
+    // 4. Player doesn't already exist
+    if (videoId && !showStartDialog && window.YT && window.YT.Player && !playerInstanceRef.current) {
       console.log('Conditions met for player initialization:', {
         videoId,
         showStartDialog,
         hasYT: !!window.YT,
-        hasPlayer: !!window.YT.Player
+        hasPlayer: !!window.YT.Player,
+        existingPlayer: !!playerInstanceRef.current
       });
       
       // Function to wait for div to exist and then initialize
       const waitForDivAndInit = (attempts = 0) => {
+        // Check if player already exists (prevent re-initialization)
+        if (playerInstanceRef.current) {
+          console.log('Player already exists, skipping initialization');
+          return;
+        }
+        
         const playerContainer = document.getElementById('youtube-player');
         
         console.log(`Attempt ${attempts}: Player container check:`, {
@@ -338,29 +346,23 @@ const VideoPlayer = () => {
           // Div exists and is visible, initialize player
           console.log('Player container found, initializing...');
           
-          // If player already exists, destroy it first
-          if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
-            try {
-              playerInstanceRef.current.destroy();
-              playerInstanceRef.current = null;
-              setPlayer(null);
-            } catch (error) {
-              console.error('Error destroying existing player:', error);
-              playerInstanceRef.current = null;
-              setPlayer(null);
-            }
+          // Double-check player doesn't exist
+          if (playerInstanceRef.current) {
+            console.log('Player already exists, skipping initialization');
+            return;
           }
           
           // Small delay to ensure DOM is fully updated
           initTimeout = setTimeout(() => {
-            if (isMountedRef.current && document.getElementById('youtube-player')) {
+            // Triple-check player doesn't exist before initializing
+            if (isMountedRef.current && !playerInstanceRef.current && document.getElementById('youtube-player')) {
               initializePlayer();
             }
           }, 100);
         } else if (attempts < 40) {
           // Div doesn't exist yet, wait and retry (up to 40 times = 2 seconds)
           initTimeout = setTimeout(() => {
-            if (isMountedRef.current) {
+            if (isMountedRef.current && !playerInstanceRef.current) {
               waitForDivAndInit(attempts + 1);
             }
           }, 50);
@@ -372,19 +374,48 @@ const VideoPlayer = () => {
       // Start waiting for div
       waitForDivAndInit();
     } else {
-      console.log('Player initialization skipped:', {
-        videoId: !!videoId,
-        showStartDialog,
-        hasYT: !!window.YT,
-        hasPlayer: !!(window.YT && window.YT.Player)
-      });
+      if (playerInstanceRef.current) {
+        console.log('Player initialization skipped - player already exists');
+      } else {
+        console.log('Player initialization skipped:', {
+          videoId: !!videoId,
+          showStartDialog,
+          hasYT: !!window.YT,
+          hasPlayer: !!(window.YT && window.YT.Player),
+          existingPlayer: !!playerInstanceRef.current
+        });
+      }
     }
 
     function initializePlayer() {
+      // Prevent multiple initializations
+      if (playerInstanceRef.current) {
+        console.log('Player already exists, aborting initialization');
+        return;
+      }
+      
       const playerContainer = document.getElementById('youtube-player');
       if (!playerContainer) {
         console.error('Player container not found when trying to initialize');
         return;
+      }
+      
+      // Check if container already has a YouTube iframe (might have been created by previous attempt)
+      const existingIframe = playerContainer.querySelector('iframe');
+      if (existingIframe) {
+        console.log('Container already has an iframe, destroying it first');
+        try {
+          if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
+            playerInstanceRef.current.destroy();
+          } else {
+            // Manually remove iframe if player instance doesn't exist
+            playerContainer.innerHTML = '';
+          }
+        } catch (error) {
+          console.error('Error cleaning up existing player:', error);
+          playerContainer.innerHTML = '';
+        }
+        playerInstanceRef.current = null;
       }
       
       try {
@@ -405,16 +436,16 @@ const VideoPlayer = () => {
           },
         });
         console.log('YouTube player created successfully');
-        if (isMountedRef.current) {
+        if (isMountedRef.current && !playerInstanceRef.current) {
           setPlayer(newPlayer);
           playerInstanceRef.current = newPlayer;
         }
       } catch (error) {
         console.error('Error initializing YouTube player:', error);
         // Retry after a short delay if initialization fails
-        if (isMountedRef.current) {
+        if (isMountedRef.current && !playerInstanceRef.current) {
           retryTimeout = setTimeout(() => {
-            if (isMountedRef.current && document.getElementById('youtube-player')) {
+            if (isMountedRef.current && !playerInstanceRef.current && document.getElementById('youtube-player')) {
               try {
                 console.log('Retrying player initialization...');
                 const newPlayer = new window.YT.Player('youtube-player', {
@@ -433,7 +464,7 @@ const VideoPlayer = () => {
                   },
                 });
                 console.log('YouTube player created successfully on retry');
-                if (isMountedRef.current) {
+                if (isMountedRef.current && !playerInstanceRef.current) {
                   setPlayer(newPlayer);
                   playerInstanceRef.current = newPlayer;
                 }
@@ -446,10 +477,8 @@ const VideoPlayer = () => {
       }
     }
 
-    // Cleanup on unmount
+    // Cleanup function
     return () => {
-      isMountedRef.current = false;
-      
       // Clear initialization timeouts
       if (initTimeout) {
         clearTimeout(initTimeout);
@@ -457,40 +486,11 @@ const VideoPlayer = () => {
       if (retryTimeout) {
         clearTimeout(retryTimeout);
       }
-      
-      // Clear all timeouts and intervals
-      if (progressCheckIntervalRef.current) {
-        clearInterval(progressCheckIntervalRef.current);
-        progressCheckIntervalRef.current = null;
-      }
-      if (dialogTimeoutRef.current) {
-        clearTimeout(dialogTimeoutRef.current);
-        dialogTimeoutRef.current = null;
-      }
-      if (fallbackTimeoutRef.current) {
-        clearTimeout(fallbackTimeoutRef.current);
-        fallbackTimeoutRef.current = null;
-      }
-      
-      // Destroy YouTube player if it exists (use ref to avoid stale closure)
-      if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
-        try {
-          playerInstanceRef.current.destroy();
-          playerInstanceRef.current = null;
-        } catch (error) {
-          // Ignore errors during cleanup
-          playerInstanceRef.current = null;
-        }
-      }
-      
-      // Remove fullscreen event listeners
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
+    // Only depend on videoId and showStartDialog to prevent infinite loops
+    // The callbacks are stable via useCallback, but we don't want to re-initialize if they change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId, showStartDialog, onPlayerStateChange, onPlayerReady, handleFullscreenChange]);
+  }, [videoId, showStartDialog]);
 
 
   const handleStartVideo = () => {
