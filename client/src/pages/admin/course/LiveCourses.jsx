@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { glassCard, glassInput, glassSelectTrigger, glassSelectContent, accentButton, subtleButton, mutedText, badgeAccent } from "../theme";
 
 const LiveCourses = () => {
-  const { data, isLoading, refetch, isFetching } = useGetCreatorCourseQuery();
+  const { data, isLoading, isError, error, refetch, isFetching } = useGetCreatorCourseQuery();
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,6 +84,26 @@ const LiveCourses = () => {
 
   if (isLoading) {
     return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6 text-white">
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-white/50">Visibility</p>
+          <h1 className="text-3xl font-bold">Live Courses</h1>
+          <p className={mutedText}>
+            Select which published courses should appear on the live courses list.
+          </p>
+        </div>
+        <div className={`${glassCard} p-8 text-center`}>
+          <p className="text-red-400 text-lg font-semibold mb-2">Failed to load courses</p>
+          <p className={`${mutedText} text-sm`}>
+            {error?.data?.message || error?.message || 'An error occurred while fetching courses. Please try again.'}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -175,15 +195,15 @@ const LiveCourses = () => {
             ) : (
               filteredCourses.map((course) => (
                 <TableRow key={course._id} className="border-white/10 hover:bg-white/5">
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-white">
                     {course.courseTitle || "Untitled Course"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-white">
                     <Badge className={`${badgeAccent} capitalize`}>
                       {formatCategory(course.category)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-white">
                     {course.isPublished ? (
                       <Badge className="border-none bg-emerald-500/20 text-emerald-300">
                         Published
@@ -194,7 +214,7 @@ const LiveCourses = () => {
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-white">
                     {course.isLive ? (
                       <Badge className="border-none bg-blue-500/20 text-blue-200">
                         Live
@@ -205,7 +225,7 @@ const LiveCourses = () => {
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right text-white">
                     <Button
                       variant={course.isLive ? "outline" : "default"}
                       size="sm"

@@ -19,7 +19,7 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { glassCard, glassInput, glassSelectTrigger, glassSelectContent, accentButton, subtleButton, mutedText, badgeAccent } from '../theme'
 
 const CourseTable = () => {
-const {data, isLoading} = useGetCreatorCourseQuery();
+const {data, isLoading, isError, error} = useGetCreatorCourseQuery();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -65,6 +65,29 @@ const {data, isLoading} = useGetCreatorCourseQuery();
       <LoadingSpinner />
     </div>
   )
+
+  if(isError) {
+    return (
+      <div className="space-y-6 text-white">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.4em] text-white/50">Courses</p>
+            <h1 className="text-3xl font-semibold">Course Library</h1>
+            <p className={mutedText}>Search, filter, and manage every course in the catalog.</p>
+          </div>
+          <Button className={`${accentButton} w-full sm:w-auto`} onClick={()=> navigate(`create`)}>
+            Create new course
+          </Button>
+        </div>
+        <div className={`${glassCard} p-8 text-center`}>
+          <p className="text-red-400 text-lg font-semibold mb-2">Failed to load courses</p>
+          <p className={`${mutedText} text-sm`}>
+            {error?.data?.message || error?.message || 'An error occurred while fetching courses. Please try again.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 text-white">
@@ -154,14 +177,14 @@ const {data, isLoading} = useGetCreatorCourseQuery();
             {filteredCourses.length > 0 ? (
               filteredCourses.map((course) => (
                 <TableRow key={course._id} className="border-white/5 hover:bg-white/5">
-                  <TableCell>
+                  <TableCell className="text-white">
                     <Badge className={course.isPublished ? badgeAccent : 'border border-white/20 bg-white/10 text-white'}>
                       {course.isPublished ? "Published" : "Draft"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-medium">{course.courseTitle}</TableCell>
-                  <TableCell>{getCategoryLabel(course.category) || "N/A"}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="font-medium text-white">{course.courseTitle}</TableCell>
+                  <TableCell className="text-white">{getCategoryLabel(course.category) || "N/A"}</TableCell>
+                  <TableCell className="text-right text-white">
                     <Button size="sm" className="text-white hover:text-[#F58120]" variant="ghost" onClick={() => navigate(`${course._id}`)}><Edit/></Button>
                   </TableCell>
                 </TableRow>
