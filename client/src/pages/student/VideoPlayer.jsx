@@ -307,8 +307,44 @@ const VideoPlayer = () => {
   // Initialize YouTube player
   useEffect(() => {
     isMountedRef.current = true;
+    let initTimeout = null;
+    let retryTimeout = null;
     
+    // Only initialize player when:
+    // 1. Video ID exists
+    // 2. Start dialog is closed (video div is rendered)
+    // 3. YouTube API is loaded
+    // 4. Player container exists in DOM
     if (videoId && !showStartDialog && window.YT && window.YT.Player) {
+      // Check if player container exists
+      const playerContainer = document.getElementById('youtube-player');
+      if (!playerContainer) {
+        // Container doesn't exist yet, wait a bit
+        initTimeout = setTimeout(() => {
+          if (isMountedRef.current && !player && document.getElementById('youtube-player')) {
+            initializePlayer();
+          }
+        }, 100);
+      } else {
+        // If player already exists, destroy it first
+        if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
+          try {
+            playerInstanceRef.current.destroy();
+            playerInstanceRef.current = null;
+            setPlayer(null);
+          } catch (error) {
+            // Ignore errors during cleanup
+            playerInstanceRef.current = null;
+            setPlayer(null);
+          }
+        }
+        
+        // Initialize new player
+        initializePlayer();
+      }
+    }
+
+    function initializePlayer() {
       try {
         const newPlayer = new window.YT.Player('youtube-player', {
           videoId: videoId,
@@ -331,12 +367,50 @@ const VideoPlayer = () => {
         }
       } catch (error) {
         console.error('Error initializing YouTube player:', error);
+        // Retry after a short delay if initialization fails
+        if (isMountedRef.current) {
+          retryTimeout = setTimeout(() => {
+            if (isMountedRef.current && document.getElementById('youtube-player')) {
+              try {
+                const newPlayer = new window.YT.Player('youtube-player', {
+                  videoId: videoId,
+                  playerVars: {
+                    autoplay: 1,
+                    controls: 1,
+                    modestbranding: 1,
+                    rel: 0,
+                    showinfo: 0,
+                    playsinline: 1,
+                  },
+                  events: {
+                    onStateChange: onPlayerStateChange,
+                    onReady: onPlayerReady,
+                  },
+                });
+                if (isMountedRef.current) {
+                  setPlayer(newPlayer);
+                  playerInstanceRef.current = newPlayer;
+                }
+              } catch (retryError) {
+                console.error('Retry failed to initialize YouTube player:', retryError);
+              }
+            }
+          }, 500);
+        }
       }
     }
 
     // Cleanup on unmount
     return () => {
       isMountedRef.current = false;
+      
+      // Clear initialization timeouts
+      if (initTimeout) {
+        clearTimeout(initTimeout);
+      }
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
       
       // Clear all timeouts and intervals
       if (progressCheckIntervalRef.current) {
@@ -369,6 +443,7 @@ const VideoPlayer = () => {
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
       document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, showStartDialog, onPlayerStateChange, onPlayerReady, handleFullscreenChange]);
 
 
