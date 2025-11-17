@@ -29,6 +29,7 @@ import GenerateCertificate from './pages/admin/certificate/GenerateCertificate'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
 import SEOHead from './components/SEOHead'
+import ErrorBoundary from './components/ErrorBoundary'
 
 const appRouter = createBrowserRouter([
   {
@@ -70,7 +71,11 @@ const appRouter = createBrowserRouter([
       },
       {
         path:"course/:courseId/video",
-        element:<VideoPlayer/>
+        element: (
+          <ErrorBoundary>
+            <VideoPlayer/>
+          </ErrorBoundary>
+        )
       },
       {
         path:"course/:courseId/test",

@@ -17,6 +17,8 @@ const VideoPlayer = () => {
   const [player, setPlayer] = useState(null);
   const progressCheckIntervalRef = useRef(null);
   const lastProgressRef = useRef(0);
+  const dialogTimeoutRef = useRef(null);
+  const isMountedRef = useRef(true);
 
   const { data: courseData, isLoading } = useGetCourseByIdQuery(courseId);
   const [markVideoWatched] = useMarkVideoWatchedMutation();
@@ -35,35 +37,45 @@ const VideoPlayer = () => {
 
   const handleVideoEnd = useCallback(async () => {
     // Prevent multiple calls
-    if (videoEnded) return;
+    if (videoEnded || !isMountedRef.current) return;
     
     setVideoEnded(true);
     
     // Exit fullscreen if in fullscreen mode (helps dialog appear on mobile)
     try {
       if (document.fullscreenElement) {
-        document.exitFullscreen();
+        await document.exitFullscreen();
       } else if (document.webkitFullscreenElement) {
-        document.webkitExitFullscreen();
+        await document.webkitExitFullscreen();
       } else if (document.mozFullScreenElement) {
-        document.mozCancelFullScreen();
+        await document.mozCancelFullScreen();
       } else if (document.msFullscreenElement) {
-        document.msExitFullscreen();
+        await document.msExitFullscreen();
       }
     } catch (error) {
       console.debug('Fullscreen exit error:', error);
     }
     
+    // Clear any existing timeout
+    if (dialogTimeoutRef.current) {
+      clearTimeout(dialogTimeoutRef.current);
+    }
+    
     // Small delay to ensure fullscreen exit completes before showing dialog
-    setTimeout(() => {
-      setShowCompleteDialog(true);
+    dialogTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setShowCompleteDialog(true);
+      }
     }, 300);
     
     // Mark video as watched
     try {
       await markVideoWatched(courseId);
     } catch (error) {
-      console.error('Failed to mark video as watched:', error);
+      // Only log if component is still mounted
+      if (isMountedRef.current) {
+        console.error('Failed to mark video as watched:', error);
+      }
     }
   }, [videoEnded, courseId, markVideoWatched]);
 
@@ -105,7 +117,7 @@ const VideoPlayer = () => {
     // Check video progress every 2 seconds
     // This helps detect completion even when events don't fire in fullscreen
     progressCheckIntervalRef.current = setInterval(() => {
-      if (playerInstance && !videoEnded) {
+      if (playerInstance && !videoEnded && isMountedRef.current) {
         try {
           const currentTime = playerInstance.getCurrentTime();
           const duration = playerInstance.getDuration();
@@ -132,8 +144,10 @@ const VideoPlayer = () => {
             lastProgressRef.current = currentTime;
           }
         } catch (error) {
-          // Player might not be ready, ignore errors
-          console.debug('Progress check error:', error);
+          // Player might not be ready, ignore errors if component unmounted
+          if (isMountedRef.current) {
+            console.debug('Progress check error:', error);
+          }
         }
       }
     }, 2000);
@@ -163,34 +177,37 @@ const VideoPlayer = () => {
   }, [handleVideoEnd]);
 
   // Suppress postMessage origin warnings (these are harmless YouTube iframe API warnings)
+  // Using a more targeted approach that doesn't interfere with React's error handling
   useEffect(() => {
-    const originalConsoleError = console.error;
-    const originalConsoleWarn = console.warn;
-    
-    // Suppress postMessage origin mismatch warnings
-    console.error = (...args) => {
-      const message = args[0]?.toString() || '';
-      if (message.includes('postMessage') && message.includes('target origin')) {
-        // Suppress this specific warning - it's harmless
-        return;
+    const handleMessage = (event) => {
+      // Suppress postMessage warnings from YouTube iframe
+      if (event.source && event.data && typeof event.data === 'string') {
+        if (event.data.includes('postMessage') && event.origin.includes('youtube.com')) {
+          event.stopPropagation();
+        }
       }
-      originalConsoleError.apply(console, args);
     };
     
-    console.warn = (...args) => {
-      const message = args[0]?.toString() || '';
-      if (message.includes('postMessage') && message.includes('target origin')) {
-        // Suppress this specific warning - it's harmless
-        return;
-      }
-      originalConsoleWarn.apply(console, args);
-    };
-    
-    // Cleanup
-    return () => {
-      console.error = originalConsoleError;
-      console.warn = originalConsoleWarn;
-    };
+    // Only suppress warnings in production, not errors that React needs
+    if (process.env.NODE_ENV === 'production') {
+      const originalConsoleWarn = console.warn;
+      console.warn = (...args) => {
+        const message = args[0]?.toString() || '';
+        // Only suppress YouTube postMessage warnings, not React errors
+        if (message.includes('postMessage') && message.includes('target origin') && message.includes('youtube')) {
+          // Suppress this specific warning - it's harmless
+          return;
+        }
+        originalConsoleWarn.apply(console, args);
+      };
+      
+      window.addEventListener('message', handleMessage, true);
+      
+      return () => {
+        console.warn = originalConsoleWarn;
+        window.removeEventListener('message', handleMessage, true);
+      };
+    }
   }, []);
 
   // Load YouTube iframe API
@@ -212,31 +229,47 @@ const VideoPlayer = () => {
 
   // Initialize YouTube player
   useEffect(() => {
+    isMountedRef.current = true;
+    
     if (videoId && !showStartDialog && window.YT && window.YT.Player) {
-      const newPlayer = new window.YT.Player('youtube-player', {
-        videoId: videoId,
-        playerVars: {
-          autoplay: 1,
-          controls: 1,
-          modestbranding: 1,
-          rel: 0,
-          showinfo: 0,
-          playsinline: 1, // Important for mobile fullscreen handling
-        },
-        events: {
-          onStateChange: onPlayerStateChange,
-          onReady: onPlayerReady,
-        },
-      });
-      setPlayer(newPlayer);
+      try {
+        const newPlayer = new window.YT.Player('youtube-player', {
+          videoId: videoId,
+          playerVars: {
+            autoplay: 1,
+            controls: 1,
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+            playsinline: 1, // Important for mobile fullscreen handling
+          },
+          events: {
+            onStateChange: onPlayerStateChange,
+            onReady: onPlayerReady,
+          },
+        });
+        if (isMountedRef.current) {
+          setPlayer(newPlayer);
+        }
+      } catch (error) {
+        console.error('Error initializing YouTube player:', error);
+      }
     }
 
     // Cleanup on unmount
     return () => {
+      isMountedRef.current = false;
+      
+      // Clear all timeouts and intervals
       if (progressCheckIntervalRef.current) {
         clearInterval(progressCheckIntervalRef.current);
         progressCheckIntervalRef.current = null;
       }
+      if (dialogTimeoutRef.current) {
+        clearTimeout(dialogTimeoutRef.current);
+        dialogTimeoutRef.current = null;
+      }
+      
       // Remove fullscreen event listeners
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
