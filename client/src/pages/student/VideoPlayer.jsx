@@ -18,6 +18,7 @@ const VideoPlayer = () => {
   const progressCheckIntervalRef = useRef(null);
   const lastProgressRef = useRef(0);
   const dialogTimeoutRef = useRef(null);
+  const fallbackTimeoutRef = useRef(null);
   const isMountedRef = useRef(true);
 
   const { data: courseData, isLoading } = useGetCourseByIdQuery(courseId);
@@ -39,48 +40,88 @@ const VideoPlayer = () => {
     // Prevent multiple calls
     if (videoEnded || !isMountedRef.current) return;
     
+    // Set state immediately to prevent multiple calls
     setVideoEnded(true);
     
+    // Check if we're in fullscreen mode
+    const isFullscreen = !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement
+    );
+    
     // Exit fullscreen if in fullscreen mode (helps dialog appear on mobile)
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      } else if (document.webkitFullscreenElement) {
-        await document.webkitExitFullscreen();
-      } else if (document.mozFullScreenElement) {
-        await document.mozCancelFullScreen();
-      } else if (document.msFullscreenElement) {
-        await document.msExitFullscreen();
+    let fullscreenExited = !isFullscreen;
+    if (isFullscreen) {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen().catch(() => {});
+        } else if (document.webkitFullscreenElement) {
+          await document.webkitExitFullscreen().catch(() => {});
+        } else if (document.mozFullScreenElement) {
+          await document.mozCancelFullScreen().catch(() => {});
+        } else if (document.msFullscreenElement) {
+          await document.msExitFullscreen().catch(() => {});
+        }
+        fullscreenExited = true;
+      } catch (error) {
+        console.debug('Fullscreen exit error:', error);
+        // Continue anyway - show dialog even if fullscreen exit fails
+        fullscreenExited = true;
       }
-    } catch (error) {
-      console.debug('Fullscreen exit error:', error);
     }
     
-    // Clear any existing timeout
+    // Clear any existing timeouts
     if (dialogTimeoutRef.current) {
       clearTimeout(dialogTimeoutRef.current);
+      dialogTimeoutRef.current = null;
+    }
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current);
+      fallbackTimeoutRef.current = null;
     }
     
-    // Small delay to ensure fullscreen exit completes before showing dialog
-    dialogTimeoutRef.current = setTimeout(() => {
+    // Show dialog - use longer delay if we were in fullscreen, shorter if not
+    const delay = isFullscreen ? 500 : 100;
+    
+    // Fallback: Show dialog immediately if not in fullscreen
+    if (!isFullscreen) {
       if (isMountedRef.current) {
         setShowCompleteDialog(true);
       }
-    }, 300);
+    } else {
+      // In fullscreen, wait for exit to complete
+      dialogTimeoutRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          setShowCompleteDialog(true);
+          // Clear fallback if dialog shows early
+          if (fallbackTimeoutRef.current) {
+            clearTimeout(fallbackTimeoutRef.current);
+            fallbackTimeoutRef.current = null;
+          }
+        }
+      }, delay);
+      
+      // Fallback: Show dialog after max 1 second even if fullscreen exit fails
+      fallbackTimeoutRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          setShowCompleteDialog(true);
+        }
+      }, 1000);
+    }
     
-    // Mark video as watched
-    try {
-      await markVideoWatched(courseId);
-    } catch (error) {
+    // Mark video as watched (don't wait for this to show dialog)
+    markVideoWatched(courseId).catch((error) => {
       // Only log if component is still mounted
       if (isMountedRef.current) {
         console.error('Failed to mark video as watched:', error);
       }
-    }
+    });
   }, [videoEnded, courseId, markVideoWatched]);
 
   const checkVideoCompletion = useCallback(() => {
-    if (player && !videoEnded) {
+    if (player && !videoEnded && isMountedRef.current) {
       try {
         const playerState = player.getPlayerState();
         const currentTime = player.getCurrentTime();
@@ -91,7 +132,9 @@ const VideoPlayer = () => {
           handleVideoEnd();
         }
       } catch (error) {
-        console.debug('Completion check error:', error);
+        if (isMountedRef.current) {
+          console.debug('Completion check error:', error);
+        }
       }
     }
   }, [player, videoEnded, handleVideoEnd]);
@@ -176,36 +219,26 @@ const VideoPlayer = () => {
     }
   }, [handleVideoEnd]);
 
-  // Suppress postMessage origin warnings (these are harmless YouTube iframe API warnings)
-  // Using a more targeted approach that doesn't interfere with React's error handling
+  // Suppress harmless warnings (postMessage origin warnings and permissions policy warnings)
   useEffect(() => {
-    const handleMessage = (event) => {
-      // Suppress postMessage warnings from YouTube iframe
-      if (event.source && event.data && typeof event.data === 'string') {
-        if (event.data.includes('postMessage') && event.origin.includes('youtube.com')) {
-          event.stopPropagation();
-        }
-      }
-    };
-    
     // Only suppress warnings in production, not errors that React needs
     if (process.env.NODE_ENV === 'production') {
       const originalConsoleWarn = console.warn;
       console.warn = (...args) => {
         const message = args[0]?.toString() || '';
-        // Only suppress YouTube postMessage warnings, not React errors
+        // Suppress YouTube postMessage warnings
         if (message.includes('postMessage') && message.includes('target origin') && message.includes('youtube')) {
-          // Suppress this specific warning - it's harmless
+          return;
+        }
+        // Suppress permissions policy warnings
+        if (message.includes('Permissions policy violation') || message.includes('compute-pressure')) {
           return;
         }
         originalConsoleWarn.apply(console, args);
       };
       
-      window.addEventListener('message', handleMessage, true);
-      
       return () => {
         console.warn = originalConsoleWarn;
-        window.removeEventListener('message', handleMessage, true);
       };
     }
   }, []);
@@ -268,6 +301,10 @@ const VideoPlayer = () => {
       if (dialogTimeoutRef.current) {
         clearTimeout(dialogTimeoutRef.current);
         dialogTimeoutRef.current = null;
+      }
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current);
+        fallbackTimeoutRef.current = null;
       }
       
       // Remove fullscreen event listeners
