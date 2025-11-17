@@ -162,11 +162,49 @@ const VideoPlayer = () => {
     }
   }, [handleVideoEnd]);
 
+  // Suppress postMessage origin warnings (these are harmless YouTube iframe API warnings)
+  useEffect(() => {
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+    
+    // Suppress postMessage origin mismatch warnings
+    console.error = (...args) => {
+      const message = args[0]?.toString() || '';
+      if (message.includes('postMessage') && message.includes('target origin')) {
+        // Suppress this specific warning - it's harmless
+        return;
+      }
+      originalConsoleError.apply(console, args);
+    };
+    
+    console.warn = (...args) => {
+      const message = args[0]?.toString() || '';
+      if (message.includes('postMessage') && message.includes('target origin')) {
+        // Suppress this specific warning - it's harmless
+        return;
+      }
+      originalConsoleWarn.apply(console, args);
+    };
+    
+    // Cleanup
+    return () => {
+      console.error = originalConsoleError;
+      console.warn = originalConsoleWarn;
+    };
+  }, []);
+
   // Load YouTube iframe API
   useEffect(() => {
     if (!window.YT) {
+      // Ensure we wait for the API to load before initializing
+      window.onYouTubeIframeAPIReady = () => {
+        // This callback is called when the YouTube iframe API is ready
+        // Player initialization happens in the other useEffect
+      };
+      
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
+      tag.async = true;
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     }
