@@ -201,7 +201,8 @@ useEffect(() => {
                     </SelectTrigger>
                     <SelectContent className="!bg-gray-800 !border-white/20 !text-white">
                       <SelectItem value="Basic" className="!text-white hover:!bg-gray-700 focus:!bg-gray-700 focus:!text-white [&>span]:!text-white">Basic</SelectItem>
-                      <SelectItem value="Advance" className="!text-white hover:!bg-gray-700 focus:!bg-gray-700 focus:!text-white [&>span]:!text-white">Advance</SelectItem>
+                      {/* TODO: Uncomment below line to show Advance option in the future */}
+                      {/* <SelectItem value="Advance" className="!text-white hover:!bg-gray-700 focus:!bg-gray-700 focus:!text-white [&>span]:!text-white">Advance</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </div>
