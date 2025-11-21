@@ -281,7 +281,8 @@ const MCQTest = () => {
                 >
                   Back to Course
                 </Button>
-                {hasReview && (
+                {/* Only show Review Answers button if user passed the test (score >= 60%) */}
+                {hasReview && passed && (
                   <Button
                     variant="outline"
                     className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 px-8 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
