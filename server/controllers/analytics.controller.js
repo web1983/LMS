@@ -252,6 +252,24 @@ export const getAllStudentsMarks = async (req, res) => {
 
         console.log(`📝 Total enrollments: ${enrollments.length}`);
 
+        // Get course with test questions for answer sheets
+        const courseDetailsMap = new Map();
+        const courseIds = enrollments
+          .filter((e) => e.courseId?.isPublished && e.courseId?.category === student.category)
+          .map((e) => e.courseId._id.toString());
+
+        if (courseIds.length > 0) {
+          const coursesWithTests = await Course.find({
+            _id: { $in: courseIds },
+          })
+            .select("_id courseTitle testQuestions")
+            .lean();
+
+          coursesWithTests.forEach((course) => {
+            courseDetailsMap.set(course._id.toString(), course);
+          });
+        }
+
         // Filter only published courses in student's category and calculate marks
         const courseMarks = enrollments
           .filter(
@@ -260,15 +278,47 @@ export const getAllStudentsMarks = async (req, res) => {
               enrollment.courseId?.category === student.category
           )
           .map((enrollment) => {
+            // Get all test attempts with details
+            const allAttempts = (enrollment.testAttempts || []).map((attempt) => {
+              const score = attempt.score || 0;
+              const correctAnswers = attempt.correctAnswers || 0;
+              const totalQuestions = attempt.totalQuestions || 0;
+              const wrongAnswers = attempt.wrongAnswers !== undefined 
+                ? attempt.wrongAnswers 
+                : (totalQuestions - correctAnswers);
+              const passed = attempt.passed !== undefined 
+                ? attempt.passed 
+                : (score >= 60);
+              
+              return {
+                attemptNumber: attempt.attemptNumber || 0,
+                score,
+                correctAnswers,
+                wrongAnswers,
+                totalQuestions,
+                passed,
+                answers: attempt.answers || [],
+                completedAt: attempt.completedAt || attempt.createdAt || enrollment.updatedAt,
+              };
+            });
+
             // Get the latest test attempt
             const latestAttempt =
-              enrollment.testAttempts && enrollment.testAttempts.length > 0
-                ? enrollment.testAttempts[enrollment.testAttempts.length - 1]
-                : null;
+              allAttempts.length > 0 ? allAttempts[allAttempts.length - 1] : null;
 
             const isPassed = latestAttempt?.score >= 60;
             const isVideoWatched = enrollment.videoWatched || false;
             const isCompleted = isPassed && isVideoWatched;
+
+            // Get course test questions for answer sheets
+            const courseDetails = courseDetailsMap.get(enrollment.courseId._id.toString());
+            const testQuestions = courseDetails?.testQuestions || [];
+
+            // Calculate test statistics
+            const totalTests = allAttempts.length;
+            const passedTests = allAttempts.filter((a) => a.passed || a.score >= 60).length;
+            const failedTests = allAttempts.filter((a) => !a.passed && a.score < 60).length;
+            const notAttended = enrollment.videoWatched && totalTests === 0 ? 1 : 0;
 
             return {
               courseId: enrollment.courseId._id,
@@ -279,28 +329,50 @@ export const getAllStudentsMarks = async (req, res) => {
               totalQuestions: latestAttempt?.totalQuestions || 0,
               passed: isPassed,
               videoWatched: isVideoWatched,
-              testTaken: enrollment.testAttempts?.length > 0,
-              completedAt: latestAttempt?.attemptedAt || null,
+              testTaken: totalTests > 0,
+              completedAt: latestAttempt?.completedAt || null,
               isCompleted,
+              testStatistics: {
+                totalTests,
+                passedTests,
+                failedTests,
+                notAttended,
+              },
+              testAttempts: allAttempts,
+              testQuestions, // Include test questions for answer sheets
             };
           });
 
         console.log(`📖 Courses in category: ${courseMarks.length}`);
 
-        // Calculate total marks (average of all course scores)
+        // Calculate total marks (average of all course scores where test was taken)
+        const coursesWithTests = courseMarks.filter((c) => c.testTaken);
         const totalCourses = courseMarks.length;
         const totalScore =
-          totalCourses > 0
+          coursesWithTests.length > 0
             ? Math.round(
-                courseMarks.reduce((sum, course) => sum + course.score, 0) /
-                  totalCourses
+                coursesWithTests.reduce((sum, course) => sum + course.score, 0) /
+                  coursesWithTests.length
               )
             : 0;
 
         // Count completed courses (video watched AND test passed >= 60%)
         const completedCourses = courseMarks.filter((c) => c.isCompleted).length;
 
+        // Calculate overall test statistics
+        const overallTestStats = courseMarks.reduce(
+          (acc, course) => {
+            acc.totalTests += course.testStatistics.totalTests;
+            acc.passedTests += course.testStatistics.passedTests;
+            acc.failedTests += course.testStatistics.failedTests;
+            acc.notAttended += course.testStatistics.notAttended;
+            return acc;
+          },
+          { totalTests: 0, passedTests: 0, failedTests: 0, notAttended: 0 }
+        );
+
         console.log(`✅ Completed courses: ${completedCourses} / ${totalCoursesInCategory}`);
+        console.log(`📊 Test stats: ${overallTestStats.totalTests} tests (${overallTestStats.passedTests} passed, ${overallTestStats.failedTests} failed, ${overallTestStats.notAttended} not attended)`);
 
         // Check if student completed ALL courses in their category
         const hasCompletedAllCoursesInCategory =
@@ -321,20 +393,17 @@ export const getAllStudentsMarks = async (req, res) => {
           completedCourses,
           courseMarks,
           hasCompletedAllCourses: hasCompletedAllCoursesInCategory,
+          overallTestStatistics: overallTestStats,
         };
       })
     );
 
-    // Filter to only show students who completed ALL courses in their category
-    const completedStudents = enrichedStudents.filter(
-      (student) => student.hasCompletedAllCourses
-    );
-
-    console.log(`\n🎯 Students who completed all courses: ${completedStudents.length}`);
+    // Return ALL students (not just those who completed all courses)
+    console.log(`\n🎯 Total students returned: ${enrichedStudents.length}`);
 
     return res.status(200).json({
       success: true,
-      students: completedStudents,
+      students: enrichedStudents,
     });
   } catch (error) {
     console.error("Error fetching students marks:", error);

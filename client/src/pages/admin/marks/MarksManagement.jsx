@@ -19,7 +19,11 @@ import {
   Eye,
   GraduationCap,
   School,
-  Filter
+  Filter,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -31,6 +35,8 @@ const MarksManagement = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [schoolFilter, setSchoolFilter] = useState('all');
   const [marksFilter, setMarksFilter] = useState('all');
+  const [expandedCourses, setExpandedCourses] = useState(new Set());
+  const [expandedAttempts, setExpandedAttempts] = useState(new Set());
 
   // Get unique categories and schools for filters
   const { categories, schools } = useMemo(() => {
@@ -98,6 +104,33 @@ const MarksManagement = () => {
   const handleViewDetails = (student) => {
     setSelectedStudent(student);
     setShowDetailModal(true);
+    setExpandedCourses(new Set());
+    setExpandedAttempts(new Set());
+  };
+
+  const toggleCourseExpanded = (courseId) => {
+    setExpandedCourses(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(courseId)) {
+        newSet.delete(courseId);
+      } else {
+        newSet.add(courseId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleAttemptExpanded = (courseId, attemptNumber) => {
+    const key = `${courseId}-${attemptNumber}`;
+    setExpandedAttempts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
   };
 
   const getMarksColor = (marks) => {
@@ -442,6 +475,58 @@ const MarksManagement = () => {
                 </Card>
               </div>
 
+              {/* Test Statistics */}
+              {selectedStudent.overallTestStatistics && (
+                <div>
+                  <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    Test Statistics
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">Total Tests</p>
+                          <p className="text-3xl font-bold text-gray-900">
+                            {selectedStudent.overallTestStatistics.totalTests || 0}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">Passed</p>
+                          <p className="text-3xl font-bold text-green-600">
+                            {selectedStudent.overallTestStatistics.passedTests || 0}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">Failed</p>
+                          <p className="text-3xl font-bold text-red-600">
+                            {selectedStudent.overallTestStatistics.failedTests || 0}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">Not Attended</p>
+                          <p className="text-3xl font-bold text-orange-600">
+                            {selectedStudent.overallTestStatistics.notAttended || 0}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              )}
+
               {/* Course-wise Marks */}
               <div>
                 <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
@@ -450,52 +535,224 @@ const MarksManagement = () => {
                 </h4>
                 <div className="space-y-3">
                   {selectedStudent.courseMarks.length > 0 ? (
-                    selectedStudent.courseMarks.map((course, index) => (
-                      <Card key={index} className={course.passed ? 'border-green-200' : 'border-gray-200'}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h5 className="font-semibold text-gray-900">{course.courseTitle}</h5>
-                                {course.passed ? (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <XCircle className="h-4 w-4 text-red-600" />
-                                )}
+                    selectedStudent.courseMarks.map((course, index) => {
+                      const isExpanded = expandedCourses.has(course.courseId);
+                      const courseTestStats = course.testStatistics || { totalTests: 0, passedTests: 0, failedTests: 0, notAttended: 0 };
+                      
+                      return (
+                        <Card key={index} className={course.passed ? 'border-green-200' : 'border-gray-200'}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h5 className="font-semibold text-gray-900">{course.courseTitle}</h5>
+                                  {course.passed ? (
+                                    <CheckCircle className="h-4 w-4 text-green-600" />
+                                  ) : (
+                                    <XCircle className="h-4 w-4 text-red-600" />
+                                  )}
+                                </div>
+                                <div className="flex gap-4 text-sm text-gray-600 flex-wrap">
+                                  <span>Category: {course.courseCategory}</span>
+                                  {course.testTaken && (
+                                    <>
+                                      <span>•</span>
+                                      <span>
+                                        {course.correctAnswers}/{course.totalQuestions} correct
+                                      </span>
+                                    </>
+                                  )}
+                                  <span>•</span>
+                                  <span className={course.videoWatched ? 'text-green-600' : 'text-gray-400'}>
+                                    {course.videoWatched ? '✓ Video watched' : '○ Video pending'}
+                                  </span>
+                                  {courseTestStats.totalTests > 0 && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="text-blue-600">
+                                        {courseTestStats.totalTests} test{courseTestStats.totalTests !== 1 ? 's' : ''} ({courseTestStats.passedTests} passed, {courseTestStats.failedTests} failed)
+                                      </span>
+                                    </>
+                                  )}
+                                  {courseTestStats.notAttended > 0 && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="text-orange-600">Not attended</span>
+                                    </>
+                                  )}
+                                </div>
                               </div>
-                              <div className="flex gap-4 text-sm text-gray-600">
-                                <span>Category: {course.courseCategory}</span>
-                                <span>•</span>
-                                <span>
-                                  {course.correctAnswers}/{course.totalQuestions} correct
-                                </span>
-                                {course.testTaken ? (
-                                  <>
-                                    <span>•</span>
-                                    <span className={course.videoWatched ? 'text-green-600' : 'text-gray-400'}>
-                                      {course.videoWatched ? '✓ Video watched' : '○ Video pending'}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>•</span>
-                                    <span className="text-orange-600">Test not attempted</span>
-                                  </>
+                              <div className="text-right ml-4 flex items-center gap-2">
+                                {course.testTaken && (
+                                  <Badge className={`${getMarksColor(course.score)} border-0 font-bold text-lg px-4 py-2`}>
+                                    {course.score}%
+                                  </Badge>
                                 )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleCourseExpanded(course.courseId)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  {isExpanded ? (
+                                    <ChevronUp className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronDown className="h-4 w-4" />
+                                  )}
+                                </Button>
                               </div>
                             </div>
-                            <div className="text-right ml-4">
-                              <Badge className={`${getMarksColor(course.score)} border-0 font-bold text-lg px-4 py-2`}>
-                                {course.score}%
-                              </Badge>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {course.passed ? 'Passed' : 'Failed'}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
+
+                            {/* Test Attempts Details */}
+                            {isExpanded && course.testAttempts && course.testAttempts.length > 0 && (
+                              <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                                <h6 className="font-semibold text-sm text-gray-700 mb-3">Test Attempts:</h6>
+                                {course.testAttempts.map((attempt, attemptIndex) => {
+                                  const attemptNumber = attempt.attemptNumber || (attemptIndex + 1);
+                                  const attemptKey = `${course.courseId}-${attemptNumber}`;
+                                  const isAttemptExpanded = expandedAttempts.has(attemptKey);
+                                  
+                                  return (
+                                    <Card key={attemptIndex} className="border border-gray-200 bg-gray-50">
+                                      <CardContent className="p-4">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <span className="font-semibold text-gray-900">
+                                                Attempt #{attemptNumber}
+                                              </span>
+                                              {attempt.passed ? (
+                                                <Badge className="bg-green-100 text-green-700 border-0">
+                                                  Passed
+                                                </Badge>
+                                              ) : (
+                                                <Badge className="bg-red-100 text-red-700 border-0">
+                                                  Failed
+                                                </Badge>
+                                              )}
+                                            </div>
+                                            <div className="flex gap-4 text-sm text-gray-600">
+                                              <span>Score: <strong>{attempt.score}%</strong></span>
+                                              <span>•</span>
+                                              <span>Correct: <strong>{attempt.correctAnswers}/{attempt.totalQuestions}</strong></span>
+                                              <span>•</span>
+                                              <span>Wrong: <strong>{attempt.wrongAnswers || (attempt.totalQuestions - attempt.correctAnswers)}</strong></span>
+                                              {attempt.completedAt && (
+                                                <>
+                                                  <span>•</span>
+                                                  <span className="flex items-center gap-1">
+                                                    <Clock className="h-3 w-3" />
+                                                    {new Date(attempt.completedAt).toLocaleDateString()}
+                                                  </span>
+                                                </>
+                                              )}
+                                            </div>
+                                          </div>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => toggleAttemptExpanded(course.courseId, attemptNumber)}
+                                            className="h-8 px-3"
+                                          >
+                                            {isAttemptExpanded ? (
+                                              <>
+                                                <ChevronUp className="h-4 w-4 mr-1" />
+                                                Hide Answers
+                                              </>
+                                            ) : (
+                                              <>
+                                                <ChevronDown className="h-4 w-4 mr-1" />
+                                                View Answers
+                                              </>
+                                            )}
+                                          </Button>
+                                        </div>
+
+                                        {/* Answer Sheet */}
+                                        {isAttemptExpanded && course.testQuestions && course.testQuestions.length > 0 && (
+                                          <div className="mt-4 pt-4 border-t border-gray-300">
+                                            <h6 className="font-semibold text-sm text-gray-700 mb-3">Answer Sheet:</h6>
+                                            <div className="space-y-3 max-h-96 overflow-y-auto">
+                                              {course.testQuestions.map((question, qIndex) => {
+                                                const attemptAnswer = attempt.answers?.find(a => a.questionIndex === qIndex);
+                                                const selectedAnswer = attemptAnswer?.selectedAnswer ?? -1;
+                                                const isCorrect = attemptAnswer?.isCorrect ?? false;
+                                                const correctAnswerIndex = question.correctAnswer;
+
+                                                return (
+                                                  <Card key={qIndex} className={`border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                                                    <CardContent className="p-3">
+                                                      <div className="flex items-start gap-2 mb-2">
+                                                        <span className="font-semibold text-sm text-gray-700">
+                                                          Q{qIndex + 1}:
+                                                        </span>
+                                                        <span className="text-sm text-gray-900 flex-1">{question.question}</span>
+                                                        {isCorrect ? (
+                                                          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                                        ) : (
+                                                          <XCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                                                        )}
+                                                      </div>
+                                                      <div className="space-y-1 ml-6">
+                                                        {question.options?.map((option, optIndex) => {
+                                                          const isSelected = selectedAnswer === optIndex;
+                                                          const isCorrectOption = correctAnswerIndex === optIndex;
+                                                          
+                                                          return (
+                                                            <div
+                                                              key={optIndex}
+                                                              className={`text-sm p-2 rounded ${
+                                                                isCorrectOption
+                                                                  ? 'bg-green-200 font-semibold text-green-900'
+                                                                  : isSelected && !isCorrectOption
+                                                                  ? 'bg-red-200 text-red-900'
+                                                                  : 'bg-gray-100 text-gray-700'
+                                                              }`}
+                                                            >
+                                                              {String.fromCharCode(65 + optIndex)}. {option}
+                                                              {isSelected && (
+                                                                <span className="ml-2 text-xs font-semibold">(Your Answer)</span>
+                                                              )}
+                                                              {isCorrectOption && !isSelected && (
+                                                                <span className="ml-2 text-xs font-semibold text-green-700">(Correct Answer)</span>
+                                                              )}
+                                                            </div>
+                                                          );
+                                                        })}
+                                                      </div>
+                                                      {selectedAnswer === -1 && (
+                                                        <p className="text-xs text-orange-600 mt-2 ml-6 font-semibold">
+                                                          Not answered
+                                                        </p>
+                                                      )}
+                                                    </CardContent>
+                                                  </Card>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </CardContent>
+                                    </Card>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {/* No Test Attempts */}
+                            {isExpanded && (!course.testAttempts || course.testAttempts.length === 0) && (
+                              <div className="mt-4 pt-4 border-t border-gray-200">
+                                <p className="text-sm text-gray-500 text-center py-4">
+                                  {course.videoWatched 
+                                    ? 'No test attempts yet. Test can be taken after watching the video.'
+                                    : 'Video not watched yet. Test will be available after watching the video.'}
+                                </p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })
                   ) : (
                     <p className="text-center text-gray-500 py-8">No courses enrolled yet</p>
                   )}
