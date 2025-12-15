@@ -235,6 +235,94 @@ export const updateProfile = async (req, res) => {
   }
 }
 
+// Update drive link
+export const updateDriveLink = async (req, res) => {
+  try {
+    const userId = req.id;
+    const { driveLink } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+        success: false
+      });
+    }
+
+    // Validate that user is a student
+    if (user.role !== 'student') {
+      return res.status(403).json({
+        message: "Only students can update drive links.",
+        success: false
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { driveLink: driveLink || "" }, 
+      { new: true }
+    ).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      user: updatedUser,
+      message: "Drive link updated successfully."
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update drive link.",
+    });
+  }
+}
+
+// Get all students with drive links (for admin, with filtering)
+export const getStudentsWithVideos = async (req, res) => {
+  try {
+    const { school, category, search } = req.query;
+
+    // Build query
+    let query = { role: "student" };
+
+    // Filter by school
+    if (school && school !== 'all') {
+      query.school = { $regex: school, $options: 'i' };
+    }
+
+    // Filter by category (grade)
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+
+    // Search by name or email
+    if (search && search.trim() !== '') {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const students = await User.find(query)
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      students,
+      count: students.length
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch students with videos.",
+    });
+  }
+}
+
 // Create student user by admin
 export const createStudentUser = async (req, res) => {
   try {

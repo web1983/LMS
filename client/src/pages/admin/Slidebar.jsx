@@ -10,6 +10,7 @@ import {
   Radio,
   KeyRound,
   Award,
+  Video,
 } from 'lucide-react'
 import React from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -22,6 +23,7 @@ const navLinks = [
   { to: 'marks', label: 'Marks', icon: Trophy },
   { to: 'users', label: 'Create User', icon: UserPlus },
   { to: 'manage-users', label: 'Manage Users', icon: UserCog },
+  { to: 'student-videos', label: 'Student Videos', icon: Video },
   { to: 'instructors', label: 'Instructors', icon: Users },
   { to: 'school-codes', label: 'School Codes', icon: KeyRound },
   { to: 'generate-certificate', label: 'Certificates', icon: Award },

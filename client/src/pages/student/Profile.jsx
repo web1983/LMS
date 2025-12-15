@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Award, User, Mail, Shield, GraduationCap, Edit2, Camera } from 'lucide-react';
+import { Loader2, Award, User, Mail, Shield, GraduationCap, Edit2, Camera, Video } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLoadUserQuery, useUpdateUserMutation } from '@/features/api/authApi.js';
 import { useGetCertificateStatusQuery } from '@/features/api/enrollmentApi';
 import RobowunderCertificate from '@/components/RobowunderCertificate';
@@ -164,13 +165,14 @@ useEffect(() => {
                   )}
 
                   {/* Edit Profile Button */}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="w-full md:w-auto bg-[#F58120] hover:bg-[#F58120]/90 text-white font-semibold py-6 px-8 shadow-lg hover:shadow-xl transition-all duration-300 mt-4">
-                        <Edit2 className="h-4 w-4 mr-2" />
-                        Edit Profile
-                      </Button>
-                    </DialogTrigger>
+                  <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full md:w-auto bg-[#F58120] hover:bg-[#F58120]/90 text-white font-semibold py-6 px-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                          <Edit2 className="h-4 w-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                      </DialogTrigger>
                     <DialogContent className="bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl text-white [&>button]:text-white [&>button]:hover:text-white [&>button]:opacity-100 hover:[&>button]:opacity-100 [&>button]:hover:bg-white/10 [&>button]:rounded-full [&>button]:p-1">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-white">Edit Profile</DialogTitle>
@@ -217,6 +219,13 @@ useEffect(() => {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
+                    <Link to="/upload-video">
+                      <Button className="w-full md:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold py-6 px-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <Video className="h-4 w-4 mr-2" />
+                        Upload Project Videos
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

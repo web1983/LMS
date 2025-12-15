@@ -136,6 +136,37 @@ export const authApi = createApi({
       }),
     }),
 
+    updateDriveLink: builder.mutation({
+      query: (driveLink) => ({
+        url: "profile/drive-link",
+        method: "PUT",
+        body: { driveLink },
+      }),
+      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(userLoggedIn({ user: data.user }));
+        } catch (error) {
+          console.log(error);
+        }
+      },
+    }),
+
+    getStudentsWithVideos: builder.query({
+      query: (params = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.school) queryParams.append('school', params.school);
+        if (params.category) queryParams.append('category', params.category);
+        if (params.search) queryParams.append('search', params.search);
+        const queryString = queryParams.toString();
+        return {
+          url: `student-videos${queryString ? `?${queryString}` : ''}`,
+          method: "GET",
+        };
+      },
+      providesTags: ['User']
+    }),
+
   }),
 });
 
@@ -150,5 +181,7 @@ export const {
   useUpdateStudentByAdminMutation,
   useDeleteStudentByAdminMutation,
   useForgotPasswordMutation,
-  useResetPasswordMutation
+  useResetPasswordMutation,
+  useUpdateDriveLinkMutation,
+  useGetStudentsWithVideosQuery
 } = authApi;

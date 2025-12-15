@@ -9,6 +9,7 @@ import MainLayout from './layout/MainLayout'
 import Courses from './pages/student/Courses'
 import MyLearning from './pages/student/MyLearning'
 import Profile from './pages/student/Profile'
+import UploadVideo from './pages/student/UploadVideo'
 import CourseDetail from './pages/student/CourseDetail'
 import VideoPlayer from './pages/student/VideoPlayer'
 import MCQTest from './pages/student/MCQTest'
@@ -26,6 +27,7 @@ import LiveCourses from './pages/admin/course/LiveCourses'
 import SchoolCodes from './pages/admin/SchoolCodes'
 import Settings from './pages/admin/settings/Settings'
 import GenerateCertificate from './pages/admin/certificate/GenerateCertificate'
+import StudentVideos from './pages/admin/StudentVideos'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
 import SEOHead from './components/SEOHead'
@@ -64,6 +66,10 @@ const appRouter = createBrowserRouter([
       {
         path:"profile",
         element:<Profile/>
+      },
+      {
+        path:"upload-video",
+        element:<UploadVideo/>
       },
       {
         path:"course/:courseId",
@@ -143,6 +149,10 @@ const appRouter = createBrowserRouter([
           {
             path:"settings",
             element:<Settings/>
+          },
+          {
+            path:"student-videos",
+            element:<StudentVideos/>
           },
         ]
       },

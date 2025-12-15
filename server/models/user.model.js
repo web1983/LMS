@@ -65,6 +65,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    driveLink: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   { timestamps: true }
 );
