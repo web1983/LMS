@@ -14,6 +14,7 @@ const StudentVideos = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [schoolFilter, setSchoolFilter] = useState('all');
+  const [submissionFilter, setSubmissionFilter] = useState('all');
 
   // Build query params
   const queryParams = useMemo(() => {
@@ -25,7 +26,19 @@ const StudentVideos = () => {
   }, [categoryFilter, schoolFilter, searchQuery]);
 
   const { data, isLoading, error, isError } = useGetStudentsWithVideosQuery(queryParams);
-  const students = data?.students || [];
+  const allStudents = data?.students || [];
+
+  // Filter students based on submission status (client-side filtering)
+  const students = useMemo(() => {
+    if (submissionFilter === 'all') return allStudents;
+    if (submissionFilter === 'submitted') {
+      return allStudents.filter(s => s.driveLink && s.driveLink.trim() !== '');
+    }
+    if (submissionFilter === 'not_submitted') {
+      return allStudents.filter(s => !s.driveLink || s.driveLink.trim() === '');
+    }
+    return allStudents;
+  }, [allStudents, submissionFilter]);
 
   const getCategoryLabel = (category) => {
     const categoryMap = {
@@ -206,14 +219,31 @@ const StudentVideos = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="w-full md:w-[220px]">
+                <Select onValueChange={setSubmissionFilter} value={submissionFilter}>
+                  <SelectTrigger className={glassSelectTrigger}>
+                    <Video className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Filter by submission" />
+                  </SelectTrigger>
+                  <SelectContent className={glassSelectContent}>
+                    <SelectGroup>
+                      <SelectLabel className="text-white/70">Submission Status</SelectLabel>
+                      <SelectItem value="all" className="text-white hover:bg-white/10">All Students</SelectItem>
+                      <SelectItem value="submitted" className="text-white hover:bg-white/10">Submitted Videos</SelectItem>
+                      <SelectItem value="not_submitted" className="text-white hover:bg-white/10">Not Submitted</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            {(searchQuery || categoryFilter !== 'all' || schoolFilter !== 'all') && (
+            {(searchQuery || categoryFilter !== 'all' || schoolFilter !== 'all' || submissionFilter !== 'all') && (
               <Button
                 variant="outline"
                 onClick={() => {
                   setSearchQuery('');
                   setCategoryFilter('all');
                   setSchoolFilter('all');
+                  setSubmissionFilter('all');
                 }}
                 className="bg-white/10 text-white border-white/20 hover:bg-white/20"
               >
@@ -286,7 +316,7 @@ const StudentVideos = () => {
             <div className="text-center py-12 rounded-lg bg-white/5 border border-white/10">
               <Video className="h-12 w-12 mx-auto mb-3 text-white/40" />
               <p className="text-white/70">
-                {searchQuery || categoryFilter !== 'all' || schoolFilter !== 'all'
+                {searchQuery || categoryFilter !== 'all' || schoolFilter !== 'all' || submissionFilter !== 'all'
                   ? 'No students found matching your criteria'
                   : 'No students found'}
               </p>
