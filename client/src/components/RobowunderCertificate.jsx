@@ -48,16 +48,35 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
         });
       }
 
-      // Wait a bit for all styles to render
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Scroll the certificate element into view to ensure it's fully rendered
+      certificateRef.current.scrollIntoView({ behavior: 'auto', block: 'center' });
       
-      // Get the element's computed style dimensions
-      const rect = certificateRef.current.getBoundingClientRect();
+      // Wait a bit for all styles and images to render
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const element = certificateRef.current;
+      
+      // Save original styles
+      const originalMaxHeight = element.style.maxHeight;
+      const originalMaxWidth = element.style.maxWidth;
+      
+      // Temporarily remove maxHeight/maxWidth constraints to ensure full A4 size is rendered
+      element.style.maxHeight = 'none';
+      element.style.maxWidth = 'none';
+      
+      // Force reflow to apply style changes
+      void element.offsetHeight;
+      
+      // Wait for layout to update
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Get the element's actual dimensions (should be full A4 size now)
+      const rect = element.getBoundingClientRect();
       const elementWidth = rect.width;
       const elementHeight = rect.height;
       
       // Create canvas from the certificate with higher quality settings
-      const canvas = await html2canvas(certificateRef.current, {
+      const canvas = await html2canvas(element, {
         scale: 4, // Higher scale for better quality (4x for crisp text and borders)
         useCORS: true,
         allowTaint: false,
@@ -67,32 +86,28 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
         height: elementHeight,
         windowWidth: elementWidth,
         windowHeight: elementHeight,
+        scrollX: -window.scrollX,
+        scrollY: -window.scrollY,
         removeContainer: false,
-        imageTimeout: 15000,
+        imageTimeout: 20000,
       });
+      
+      // Restore original styles
+      element.style.maxHeight = originalMaxHeight;
+      element.style.maxWidth = originalMaxWidth;
 
       // A4 portrait dimensions in mm (210mm x 297mm)
       const pdfWidth = 210; // A4 width in mm (portrait)
       const pdfHeight = 297; // A4 height in mm (portrait)
 
-      // Calculate the scale to fit canvas to A4
+      // Calculate dimensions maintaining aspect ratio, always fit to height to preserve footer
       const canvasAspectRatio = canvas.width / canvas.height;
-      const pdfAspectRatio = pdfWidth / pdfHeight;
-
-      let imgWidth = pdfWidth;
-      let imgHeight = pdfHeight;
-      let xPos = 0;
-      let yPos = 0;
-
-      if (canvasAspectRatio > pdfAspectRatio) {
-        // Canvas is wider than A4, fit to width
-        imgHeight = pdfWidth / canvasAspectRatio;
-        yPos = (pdfHeight - imgHeight) / 2;
-      } else {
-        // Canvas is taller than A4, fit to height
-        imgWidth = pdfHeight * canvasAspectRatio;
-        xPos = (pdfWidth - imgWidth) / 2;
-      }
+      
+      // Always fit to height to ensure footer is included
+      const imgHeight = pdfHeight;
+      const imgWidth = pdfHeight * canvasAspectRatio;
+      const xPos = (pdfWidth - imgWidth) / 2; // Center horizontally if needed
+      const yPos = 0; // Align to top
 
       const imgData = canvas.toDataURL('image/png', 1.0); // Highest quality
       const pdf = new jsPDF({
@@ -102,7 +117,7 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
         compress: true,
       });
 
-      // Add certificate image centered on A4 page
+      // Add certificate image - fit to height to ensure footer is preserved
       pdf.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight, undefined, 'FAST');
       pdf.save(`${userName.replace(/\s+/g, '_')}_Robowunder_Certificate_${year}.pdf`);
       
