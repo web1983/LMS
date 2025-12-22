@@ -12,6 +12,7 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
   
   const settings = settingsData?.settings;
   const logoUrl = settings?.logoUrl || '';
+  const signatureUrl = 'https://res.cloudinary.com/dmlk8egiw/image/upload/v1766400837/Untitled_design_49_suxtjh.png';
   const year = new Date(completionDate).getFullYear();
   const formattedDate = new Date(completionDate).toLocaleDateString('en-US', { 
     year: 'numeric', 
@@ -33,6 +34,17 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
           img.onload = resolve;
           img.onerror = resolve; // Continue even if image fails
           img.src = logoUrl;
+        });
+      }
+
+      // Wait for signature image to load
+      if (signatureUrl) {
+        await new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = resolve;
+          img.onerror = resolve; // Continue even if image fails
+          img.src = signatureUrl;
         });
       }
 
@@ -321,7 +333,20 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
 
               {/* Signature */}
               <div className="text-center">
-                <div className="w-32 h-0.5 mb-2" style={{ backgroundColor: '#1f2937' }}></div>
+                <div className="mb-2 flex justify-center">
+                  <img 
+                    src={signatureUrl} 
+                    alt="Authorized Signature" 
+                    style={{
+                      height: '60px',
+                      width: 'auto',
+                      objectFit: 'contain',
+                      display: 'block'
+                    }}
+                    crossOrigin="anonymous"
+                  />
+                </div>
+                <div className="w-32 h-0.5 mb-2 mx-auto" style={{ backgroundColor: '#1f2937' }}></div>
                 <p className="text-xs md:text-sm" style={{ color: '#4b5563' }}>Authorized Signature</p>
                 <p className="text-xs md:text-sm font-semibold" style={{ color: '#1f2937' }}>Robowunder Team</p>
               </div>
