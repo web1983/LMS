@@ -134,7 +134,14 @@ const RobowunderCertificate = forwardRef(({ userName, completionDate, isPreview 
     <div className="flex flex-col items-center gap-4" style={{ width: '100%' }}>
       {/* Certificate Preview */}
       <div 
-        ref={certificateRef}
+        ref={(node) => {
+          certificateRef.current = node;
+          if (typeof ref === 'function') {
+            ref(node);
+          } else if (ref) {
+            ref.current = node;
+          }
+        }}
         className="shadow-2xl"
         style={{ 
           width: '210mm',

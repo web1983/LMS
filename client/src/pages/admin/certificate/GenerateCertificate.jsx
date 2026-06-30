@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,12 +11,172 @@ import { toast } from 'sonner';
 import { useGetAllStudentsQuery } from '@/features/api/authApi';
 import RobowunderCertificate from '@/components/RobowunderCertificate';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import JSZip from 'jszip';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { useGetSettingsQuery } from '@/features/api/settingsApi';
 
 const GenerateCertificate = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [schoolFilter, setSchoolFilter] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [bulkCompletionDate, setBulkCompletionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [bulkMode, setBulkMode] = useState(null); // 'school1' | 'school2' | null
+  const [bulkCurrentName, setBulkCurrentName] = useState('');
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const bulkCertificateElementRef = useRef(null);
+
+  const { data: settingsData } = useGetSettingsQuery();
+  const settings = settingsData?.settings;
+  const logoUrl = settings?.logoUrl || '';
+  const signatureUrl =
+    'https://res.cloudinary.com/dmlk8egiw/image/upload/v1766400837/Untitled_design_49_suxtjh.png';
+
+  const SCHOOL_1_NAMES = useMemo(
+    () => ['Sauban Mudassar', 'Muhammad Yousuf Ali Khan', 'Hafsa Zafar', 'Aisha Ayub', 'Eeshal Obaidullah'],
+    []
+  );
+  const SCHOOL_2_NAMES = useMemo(
+    () => [
+      'Ruhaan Nisar Khan',
+      'Anand Sham Janorkar',
+      'Aaradhya Shyam Janorkar',
+      'Ishwari Amit Deshmukh',
+      'Suchita manvar Bhagat',
+      'mushfiq  Khan',
+      'Manvi Umesh Pawar',
+      'jignesh Gajanan Shinde',
+      'Pranav Ganesh Thakre',
+      'Shri Raj Janorkar',
+      'abubakar Shaikh',
+      'Mohammed Riyaz Mohammed Lakhani',
+      'yadenesh meghnath Pawar',
+      'Swaraj  Datta kakade',
+      'razin Shaikh',
+      'Mohammed abuzar',
+      'umme Amara mukbeer',
+      'aarush Prashant mundhre',
+      'Kanhaiya  mohan bahakar',
+      'Ayush digambar bahakar',
+      'Tanvi Umesh Rathod',
+      'Atharva satish ghumse',
+      'Shaurya Nitin Bahadare',
+      'Mohammed Arsh',
+      'Soham Sunil kale',
+      'Aryan Prashant nanote',
+      'astha purushotam bahadare',
+      'Kshitij Nilesh Bhagat',
+      'Parth Anil sewalkar',
+      'syed Aifaz  Abrar',
+      'Arnav Raju aage',
+      'Soham Nilesh sontakke',
+      'Atif Atik Sheikh',
+      'Hasnain mateen Mirza',
+      'Ahmed Raza Khan',
+      'Anandi Datta kakade',
+      'Umesh banchare',
+      'ishant Sachin Baburle',
+      'Rabia bano Mohammad Riyaz Lakhani',
+      'Radhika gunvant Chauhan',
+      'Rajeshwari  Janorakar',
+      'Arnav Raju aage',
+      'Kanhaiya  khandare',
+      'Virat Chandrakant kaddate',
+      'Aditya bahakar',
+      'Jayesh Rathod',
+      'Soham Anantha Salunke',
+    ],
+    []
+  );
+
+  const normalizeName = (name) => name.replace(/\s+/g, ' ').trim();
+
+  const waitForImage = (src) =>
+    new Promise((resolve) => {
+      if (!src) return resolve();
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = src;
+    });
+
+  const downloadBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const generatePdfBlobFromElement = async ({ element, studentName, completionDateISO }) => {
+    if (!element) throw new Error('Certificate element not found');
+
+    // Ensure images are cached/loaded
+    await Promise.all([waitForImage(logoUrl), waitForImage(signatureUrl)]);
+
+    // Scroll into view so layout/styles settle (even though it's offscreen)
+    element.scrollIntoView({ behavior: 'auto', block: 'center' });
+    await new Promise((r) => setTimeout(r, 400));
+
+    const originalMaxHeight = element.style.maxHeight;
+    const originalMaxWidth = element.style.maxWidth;
+    element.style.maxHeight = 'none';
+    element.style.maxWidth = 'none';
+    void element.offsetHeight;
+    await new Promise((r) => setTimeout(r, 200));
+
+    const rect = element.getBoundingClientRect();
+    const elementWidth = rect.width;
+    const elementHeight = rect.height;
+
+    const canvas = await html2canvas(element, {
+      scale: 4,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#fffbeb',
+      logging: false,
+      width: elementWidth,
+      height: elementHeight,
+      windowWidth: elementWidth,
+      windowHeight: elementHeight,
+      scrollX: -window.scrollX,
+      scrollY: -window.scrollY,
+      removeContainer: false,
+      imageTimeout: 20000,
+    });
+
+    element.style.maxHeight = originalMaxHeight;
+    element.style.maxWidth = originalMaxWidth;
+
+    const pdfWidth = 210;
+    const pdfHeight = 297;
+    const canvasAspectRatio = canvas.width / canvas.height;
+    const imgHeight = pdfHeight;
+    const imgWidth = pdfHeight * canvasAspectRatio;
+    const xPos = (pdfWidth - imgWidth) / 2;
+    const yPos = 0;
+
+    const imgData = canvas.toDataURL('image/png', 1.0);
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true,
+    });
+    pdf.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight, undefined, 'FAST');
+
+    const year = new Date(completionDateISO).getFullYear();
+    const safeName = normalizeName(studentName).replace(/\s+/g, '_');
+    const filename = `${safeName}_Robowunder_Certificate_${year}.pdf`;
+    const blob = pdf.output('blob');
+    return { blob, filename };
+  };
   const [certificateData, setCertificateData] = useState({
     userName: '',
     completionDate: new Date().toISOString().split('T')[0],
@@ -129,6 +289,84 @@ const GenerateCertificate = () => {
     setSchoolFilter('all');
   };
 
+  useEffect(() => {
+    // Keep bulk date in sync with the single certificate date unless user changes it later
+    setBulkCompletionDate((prev) => prev || certificateData.completionDate);
+  }, [certificateData.completionDate]);
+
+  const runBulkZipDownload = async ({ schoolLabel, names }) => {
+    if (bulkBusy) return;
+
+    if (!bulkCompletionDate) {
+      toast.error('Please select a completion date for bulk certificates');
+      return;
+    }
+
+    const dateObj = new Date(bulkCompletionDate + 'T00:00:00');
+    if (isNaN(dateObj.getTime())) {
+      toast.error('Invalid date. Please select a valid date.');
+      return;
+    }
+
+    const cleaned = names.map(normalizeName).filter(Boolean);
+    if (cleaned.length === 0) {
+      toast.error('No student names found for bulk download');
+      return;
+    }
+
+    const completionDateISO = new Date(bulkCompletionDate + 'T00:00:00').toISOString();
+
+    try {
+      setBulkBusy(true);
+      toast.loading(`Preparing ${schoolLabel} ZIP...`);
+
+      const zip = new JSZip();
+      const seen = new Map();
+      setBulkProgress({ current: 0, total: cleaned.length });
+
+      for (let i = 0; i < cleaned.length; i++) {
+        const name = cleaned[i];
+        setBulkCurrentName(name);
+        setBulkProgress({ current: i + 1, total: cleaned.length });
+
+        // Render this student's certificate in the hidden renderer
+        setBulkMode(schoolLabel);
+        // Wait for React to commit the new name before capturing
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+        const { blob, filename } = await generatePdfBlobFromElement({
+          element: bulkCertificateElementRef.current,
+          studentName: name,
+          completionDateISO,
+        });
+
+        const base = filename;
+        const count = (seen.get(base) || 0) + 1;
+        seen.set(base, count);
+        const finalName = count === 1 ? base : base.replace(/\.pdf$/i, `_${count}.pdf`);
+        zip.file(finalName, blob);
+
+        // Small breather so the UI stays responsive
+        await new Promise((r) => setTimeout(r, 150));
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      downloadBlob(zipBlob, `${schoolLabel.replace(/\s+/g, '_')}_Certificates.zip`);
+
+      toast.dismiss();
+      toast.success(`${schoolLabel} ZIP downloaded`);
+    } catch (e) {
+      console.error(e);
+      toast.dismiss();
+      toast.error('Bulk download failed. Try again (or reduce batch size).');
+    } finally {
+      setBulkBusy(false);
+      setBulkCurrentName('');
+      setBulkProgress({ current: 0, total: 0 });
+      setBulkMode(null);
+    }
+  };
+
   if (loadingStudents) {
     return <LoadingSpinner />;
   }
@@ -146,6 +384,59 @@ const GenerateCertificate = () => {
           </p>
         </div>
       </div>
+
+      {/* Bulk ZIP Download */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Bulk Download (ZIP)</CardTitle>
+          <CardDescription>
+            Download certificates for predefined School 1 / School 2 student lists as one ZIP file.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="md:col-span-1">
+              <Label htmlFor="bulkCompletionDate">Completion Date *</Label>
+              <div className="relative mt-1">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  id="bulkCompletionDate"
+                  type="date"
+                  value={bulkCompletionDate}
+                  onChange={(e) => setBulkCompletionDate(e.target.value)}
+                  className="pl-10"
+                  disabled={bulkBusy}
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={() => runBulkZipDownload({ schoolLabel: 'School 1', names: SCHOOL_1_NAMES })}
+              className="bg-blue-600 hover:bg-blue-700"
+              disabled={bulkBusy}
+            >
+              <Download className="h-5 w-5 mr-2" />
+              School 1 Bulk ZIP ({SCHOOL_1_NAMES.length})
+            </Button>
+
+            <Button
+              onClick={() => runBulkZipDownload({ schoolLabel: 'School 2', names: SCHOOL_2_NAMES })}
+              className="bg-emerald-600 hover:bg-emerald-700"
+              disabled={bulkBusy}
+            >
+              <Download className="h-5 w-5 mr-2" />
+              School 2 Bulk ZIP ({SCHOOL_2_NAMES.length})
+            </Button>
+          </div>
+
+          {bulkBusy && (
+            <div className="text-sm text-gray-700">
+              Generating: <span className="font-semibold">{bulkCurrentName || '...'}</span> —{' '}
+              {bulkProgress.current}/{bulkProgress.total}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* User Selection Section */}
@@ -361,6 +652,29 @@ const GenerateCertificate = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Hidden renderer used for bulk PDF generation */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          left: '-10000px',
+          top: 0,
+          width: '210mm',
+          height: '297mm',
+          overflow: 'hidden',
+          pointerEvents: 'none',
+          opacity: 0,
+        }}
+      >
+        <RobowunderCertificate
+          ref={bulkCertificateElementRef}
+          key={`${bulkCurrentName}-${bulkCompletionDate}-${bulkMode}`}
+          userName={bulkCurrentName || ' '}
+          completionDate={new Date((bulkCompletionDate || new Date().toISOString().split('T')[0]) + 'T00:00:00').toISOString()}
+          isPreview={true}
+        />
+      </div>
     </div>
   );
 };

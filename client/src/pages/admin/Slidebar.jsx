@@ -11,6 +11,7 @@ import {
   KeyRound,
   Award,
   Video,
+  Presentation,
 } from 'lucide-react'
 import React from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -20,6 +21,7 @@ const navLinks = [
   { to: 'course', label: 'Courses', icon: SquareLibrary },
   { to: 'live-courses', label: 'Live Courses', icon: Radio },
   { to: 'test', label: 'Course Test', icon: ClipboardList },
+  { to: 'ppt-links', label: 'PPT Links', icon: Presentation },
   { to: 'marks', label: 'Marks', icon: Trophy },
   { to: 'users', label: 'Create User', icon: UserPlus },
   { to: 'manage-users', label: 'Manage Users', icon: UserCog },

@@ -100,6 +100,7 @@ export const editCourse = async (req, res) => {
       learningOutcomes,
       videoStatus,
       videoUrl,
+      pptDriveLink,
       testQuestions,
       testTimeLimit
     } = req.body;
@@ -144,6 +145,7 @@ export const editCourse = async (req, res) => {
     if (kit) updateData.kit = kit;
     if (videoStatus) updateData.videoStatus = videoStatus;
     if (videoUrl) updateData.videoUrl = videoUrl;
+    if (pptDriveLink !== undefined) updateData.pptDriveLink = pptDriveLink;
     
     // Handle learningOutcomes array
     if (learningOutcomes) {

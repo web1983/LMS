@@ -28,6 +28,7 @@ import SchoolCodes from './pages/admin/SchoolCodes'
 import Settings from './pages/admin/settings/Settings'
 import GenerateCertificate from './pages/admin/certificate/GenerateCertificate'
 import StudentVideos from './pages/admin/StudentVideos'
+import PptLinks from './pages/admin/PptLinks'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
 import SEOHead from './components/SEOHead'
@@ -121,6 +122,10 @@ const appRouter = createBrowserRouter([
           {
             path:"test",
             element:<CourseTest/>
+          },
+          {
+            path:"ppt-links",
+            element:<PptLinks/>
           },
           {
             path:"marks",

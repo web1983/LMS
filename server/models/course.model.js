@@ -44,6 +44,11 @@ const courseSchema = new mongoose.Schema({
     videoUrl:{
         type:String,
     },
+    pptDriveLink:{
+        type:String,
+        default:"",
+        trim:true,
+    },
     testQuestions:[{
         question: String,
         options: [String],

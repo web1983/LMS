@@ -22,17 +22,33 @@ app.use(cookieParser());
 // CORS configuration for both development and production
 const allowedOrigins = [
     "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
     "https://lms.robowunder.in",
     "https://lms.robowunder.com",
     "https://lms-amber-nine.vercel.app",
     process.env.FRONTEND_URL
 ].filter(Boolean); // Remove undefined values
 
+const isLocalhostOrigin = (origin) => {
+    try {
+        const url = new URL(origin);
+        return url.hostname === "localhost" || url.hostname === "127.0.0.1";
+    } catch {
+        return false;
+    }
+};
+
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
         
+        // In development, allow any localhost port (Vite may switch ports)
+        if (process.env.NODE_ENV !== "production" && isLocalhostOrigin(origin)) {
+            return callback(null, true);
+        }
+
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {

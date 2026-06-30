@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, BookOpen, Clock, Users, Award, CheckCircle, Video, FileText, Trophy, AlertTriangle, Play, Star, XCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, Users, Award, CheckCircle, Video, FileText, Trophy, AlertTriangle, Play, Star, XCircle, Presentation, ExternalLink } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from 'sonner';
 
@@ -309,6 +309,18 @@ const CourseDetail = () => {
                 )}
                 </Button>
               )}
+
+            {course.pptDriveLink?.trim() && (
+              <Button
+                size="lg"
+                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/20 font-bold px-8 py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                onClick={() => window.open(course.pptDriveLink.trim(), '_blank', 'noopener,noreferrer')}
+              >
+                <Presentation className="mr-2 h-5 w-5" />
+                View PPT
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
