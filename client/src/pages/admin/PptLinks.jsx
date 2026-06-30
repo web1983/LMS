@@ -4,6 +4,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,8 +28,11 @@ import {
   accentButton,
   glassCard,
   glassInput,
+  glassSelectTrigger,
+  glassSelectContent,
   mutedText,
   badgeAccent,
+  subtleButton,
 } from './theme';
 
 const getCategoryLabel = (category) => {
@@ -37,6 +49,7 @@ const getCategoryLabel = (category) => {
 
 const PptLinks = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [pptLinks, setPptLinks] = useState({});
   const [savingCourseId, setSavingCourseId] = useState(null);
 
@@ -55,14 +68,17 @@ const PptLinks = () => {
 
   const filteredCourses = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return courses;
 
     return courses.filter((course) => {
+      const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
+
+      if (!query) return matchesCategory;
+
       const titleMatch = course.courseTitle?.toLowerCase().includes(query);
       const categoryMatch = getCategoryLabel(course.category)?.toLowerCase().includes(query);
-      return titleMatch || categoryMatch;
+      return matchesCategory && (titleMatch || categoryMatch);
     });
-  }, [courses, searchQuery]);
+  }, [courses, searchQuery, categoryFilter]);
 
   const handleLinkChange = (courseId, value) => {
     setPptLinks((prev) => ({ ...prev, [courseId]: value }));
@@ -138,15 +154,62 @@ const PptLinks = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-            <Input
-              type="text"
-              placeholder="Search by course title or category..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`pl-10 ${glassInput}`}
-            />
+          <div className="flex flex-col gap-4 md:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
+              <Input
+                type="text"
+                placeholder="Search by course title or category..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`pl-10 ${glassInput}`}
+              />
+            </div>
+
+            <div className="w-full md:w-64">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className={glassSelectTrigger}>
+                  <SelectValue placeholder="Filter by Category" />
+                </SelectTrigger>
+                <SelectContent className={glassSelectContent}>
+                  <SelectGroup>
+                    <SelectLabel className="text-white/60">All Categories</SelectLabel>
+                    <SelectItem value="all">All Categories</SelectItem>
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-white/60">Basic Level</SelectLabel>
+                    <SelectItem value="grade_3_5_basic">Grade 3-5 (Basic)</SelectItem>
+                    <SelectItem value="grade_6_8_basic">Grade 6-8 (Basic)</SelectItem>
+                    <SelectItem value="grade_9_12_basic">Grade 9-12 (Basic)</SelectItem>
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-white/60">Advance Level</SelectLabel>
+                    <SelectItem value="grade_3_5_advance">Grade 3-5 (Advance)</SelectItem>
+                    <SelectItem value="grade_6_8_advance">Grade 6-8 (Advance)</SelectItem>
+                    <SelectItem value="grade_9_12_advance">Grade 9-12 (Advance)</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/70">
+            <p>
+              Showing {filteredCourses.length} of {courses.length} courses
+            </p>
+            {(searchQuery || categoryFilter !== 'all') && (
+              <Button
+                variant="outline"
+                size="sm"
+                className={subtleButton}
+                onClick={() => {
+                  setSearchQuery('');
+                  setCategoryFilter('all');
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-white/10">
@@ -216,7 +279,7 @@ const PptLinks = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={4} className="py-10 text-center text-white/60">
-                      No courses found matching your search.
+                      No courses found matching your filters.
                     </TableCell>
                   </TableRow>
                 )}
